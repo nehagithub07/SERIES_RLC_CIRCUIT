@@ -1,0 +1,288 @@
+{
+  "experimentName": "Basic Electrical Science Lab",
+  "defaultLocale": "en",
+  "locales": [
+    "en"
+  ],
+  "audio": {
+    "autoplay": true
+  },
+  "steps": [
+    {
+      "id": 1,
+      "target": "#experiment-title-board-walkthrough-target",
+      "title": {
+        "en": "Aim"
+      },
+      "description": {
+        "en": "The aim of the experiment is to study and measure the Voltage, Current, Power and Power Factor in a series RLC circuit."
+      },
+      "audio": "aim.wav",
+      "placement": "bottom"
+    },
+    {
+      "id": 2,
+      "target": "#instruction-button-walkthrough-target",
+      "title": {
+        "en": "Instructions Button"
+      },
+      "description": {
+        "en": "The Instructions provide step-by-step guidance on how to perform the simulation."
+      },
+      "audio": "Instructions Button.wav",
+      "placement": "right"
+    },
+    {
+      "id": 3,
+      "target": "#ai-guide-button-walkthrough-target",
+      "title": {
+        "en": "AI Guide Button"
+      },
+      "description": {
+        "en": "To use this feature, click on the “AI Guide” button. The AI guide will assist you in performing the simulation accurately at each step."
+      },
+      "audio": "AI Guide Button.wav",
+      "placement": "right"
+    },
+    {
+      "id": 4,
+      "target": "#check-button-walkthrough-target",
+      "title": {
+        "en": "Check Button"
+      },
+      "description": {
+        "en": "The CHECK button verifies all the connections to ensure that they are correct. Note: If a wire is connected incorrectly, click the corresponding label number to remove the connection."
+      },
+      "audio": "Check Button.wav",
+      "placement": "right"
+    },
+    {
+      "id": 5,
+      "target": "#auto-connect-button-walkthrough-target",
+      "title": {
+        "en": "Auto Connect Button"
+      },
+      "description": {
+        "en": "The AUTO CONNECT button makes all the connections automatically."
+      },
+      "audio": "Auto Connect Button.wav",
+      "placement": "right"
+    },
+    {
+      "id": 6,
+      "target": "#add-button-walkthrough-target",
+      "title": {
+        "en": "Add Button"
+      },
+      "description": {
+        "en": "The ADD button adds the readings to the observation table."
+      },
+      "audio": "Add Button.wav",
+      "placement": "right"
+    },
+    {
+      "id": 7,
+      "target": "#reset-button-walkthrough-target",
+      "title": {
+        "en": "Reset Button"
+      },
+      "description": {
+        "en": "The RESET button refresh the simulation to its initial state for a fresh start. "
+      },
+      "audio": "Reset Button-.wav",
+      "placement": "right"
+    },
+    {
+      "id": 8,
+      "target": "#print-button-walkthrough-target",
+      "title": {
+        "en": "Print Button"
+      },
+      "description": {
+        "en": "The PRINT button allows you to print the simulation."
+      },
+      "audio": "Print Button.wav",
+      "placement": "right"
+    },
+    {
+      "id": 9,
+      "target": "#equation-button-walkthrough-target",
+      "title": {
+        "en": "Equation Button"
+      },
+      "description": {
+        "en": "The Equation button beside Generate Report opens the circuit equations and percentage-error equation."
+      },
+      "audio": "Mathematical Expressions.wav",
+      "placement": "right"
+    },
+    {
+      "id": 10,
+      "target": "#mcb-supply",
+      "title": {
+        "en": "MCB "
+      },
+      "description": {
+        "en": "The MCB acts as the main power switch for the experiment. It also protects the circuit by automatically disconnecting the power supply in case of an overload or short circuit. When turned ON, it supplies electrical power to the circuit. Rating: 6A, SP, 240V AC  Input Supply: 230 V AC, 50 Hz  "
+      },
+      "audio": "MCB.wav",
+      "placement": "right"
+    },
+    {
+      "id": 11,
+      "target": "#autotransformer-panel-walkthrough-target",
+      "title": {
+        "en": "Autotransformer"
+      },
+      "description": {
+        "en": "After the autotransformer is turned ON, click its Variac knob to set the selected RLC circuit supply to 30 V. Max. kVA: 4.05, Max. Load: 15 A. Input Voltage: 240 V, 50 Hz; Output Voltage: 0-240 V AC."
+      },
+      "audio": "Autotransformer.wav",
+      "placement": "right"
+    },
+    {
+      "id": 12,
+      "target": "#resistor-main",
+      "title": {
+        "en": "Resistor"
+      },
+      "description": {
+        "en": "The resistor acts as the resistive element of the series RLC circuit and consumes active power. It limits the circuit current and is used to study the effect of resistance on current, voltage drop, power dissipation, and power factor. "
+      },
+      "audio": "resistor.wav",
+      "placement": "top"
+    },
+    {
+      "id": 13,
+      "target": "#inductor-main",
+      "title": {
+        "en": "Inductor"
+      },
+      "description": {
+        "en": "The inductor provides the inductive element of the series RLC circuit and stores energy in its magnetic field. It introduces inductive reactance, opposes changes in current, affects the phase relationship between voltage and current, and influences the circuit impedance and power factor."
+      },
+      "audio": "inductor.wav",
+      "placement": "top"
+    },
+    {
+      "id": 14,
+      "target": "#capacitor-panel-walkthrough-target",
+      "title": {
+        "en": "Capacitor"
+      },
+      "description": {
+        "en": " The capacitor acts as the capacitive element of the series RLC circuit and stores energy in its electric field. It introduces capacitive reactance, affects the phase angle between voltage and current, and is used to study the effects of capacitance on impedance, circuit current, and power factor. "
+      },
+      "audio": "capacitor.wav",
+      "placement": "top"
+    },
+    {
+      "id": 15,
+      "target": "#voltmeter-v1-walkthrough-target",
+      "title": {
+        "en": "AC Voltmeter 1"
+      },
+      "description": {
+        "en": "This voltmeter measures the voltage applied to the series RLC circuit. It shows the 30 V output received from the autotransformer. Rating: 0-50 V AC."
+      },
+      "audio": "AC Voltmeter 1.wav",
+      "placement": "bottom"
+    },
+    {
+      "id": 16,
+      "target": "#ammeter-main",
+      "title": {
+        "en": "AC Ammeter"
+      },
+      "description": {
+        "en": "This ammeter is used to measure the total current flowing through the series RLC circuit. Since all the components are connected in series, the same current flows through the resistor, inductor, and capacitor.Rating: 0-2A AC"
+      },
+      "audio": "ac ammeter.wav",
+      "placement": "bottom"
+    },
+    {
+      "id": 17,
+      "target": "#wattmeter-w1",
+      "title": {
+        "en": "AC Wattmeter"
+      },
+      "description": {
+        "en": "The wattmeter is used to measure the active power consumed by the series RLC circuit. The measured power (P) helps in analyzing the power dissipated by the resistor and studying its effect on the overall circuit behaviour and power factor.Rating: 0-50W AC, 5A, M.F. - 1 "
+      },
+      "audio": "ac wattmeter.wav",
+      "placement": "bottom"
+    },
+    {
+      "id": 18,
+      "target": "#voltmeter-v2-walkthrough-target",
+      "title": {
+        "en": "AC Voltmeter V2"
+      },
+      "description": {
+        "en": "This voltmeter is used to measure the voltage drop across the resistor in the series RLC circuit. The measured resistive voltage (VR) helps in calculating the resistance present in the circuit and is further used in determining the circuit power factor using the provided formulas. Rating: 0-50V AC"
+      },
+      "audio": "ac voltmeter2.wav",
+      "placement": "left"
+    },
+    {
+      "id": 19,
+      "target": "#voltmeter-v3-walkthrough-target",
+      "title": {
+        "en": "AC Voltmeter V3"
+      },
+      "description": {
+        "en": "This voltmeter is used to measure the voltage drop across the inductor in the series RLC circuit. The measured inductive voltage (VL) will be used to calculate the inductive reactance and inductance of the circuit using the given formulas.Rating: 0-50V AC"
+      },
+      "audio": "AC Voltmeter3.wav",
+      "placement": "left"
+    },
+    {
+      "id": 20,
+      "target": "#voltmeter-v4-walkthrough-target",
+      "title": {
+        "en": "AC Voltmeter V4"
+      },
+      "description": {
+        "en": "This voltmeter is used to measure the voltage drop across the capacitor in the series RLC circuit. The measured capacitive voltage (VC) will be used to calculate the capacitive reactance and capacitance of the circuit using the given formulas.Rating: 0-50V AC"
+      },
+      "audio": "AC Voltmeter4.wav",
+      "placement": "left"
+    },
+    {
+      "id": 21,
+      "target": "#observation-table-panel",
+      "title": {
+        "en": "Observation Table"
+      },
+      "description": {
+        "en": "This table records the measured readings of voltage, supply current, resistive voltage (VR), inductive voltage (VL), capacitive voltage (VC) and power during the experiment. These observations will be used to calculate and analyze the parameters of the series RLC circuit. "
+      },
+      "audio": "Observation Table.wav",
+      "placement": "right"
+    },
+    {
+      "id": 22,
+      "target": "#theoretical-calculations-panel",
+      "title": {
+        "en": "Reading Verification"
+      },
+      "description": {
+        "en": "This section unlocks after five readings. Select a reading and enter the matching observation-table values; current I (mA) is prefilled."
+      },
+      "audio": "Theoretical Calculations.wav",
+      "placement": "top"
+    },
+    {
+      "id": 23,
+      "target": "#generate-report-button",
+      "title": {
+        "en": "Generate Report"
+      },
+      "description": {
+        "en": "The Report button generates a summarised report after two observation-table readings have been verified successfully."
+      },
+      "audio": "Generate Report.wav",
+      "placement": "top"
+    }
+  ]
+}

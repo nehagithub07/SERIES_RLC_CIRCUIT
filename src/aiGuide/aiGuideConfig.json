@@ -1,0 +1,217 @@
+{
+  "guideName": "AI Guide",
+  "defaultLocale": "en",
+  "locales": ["en"],
+  "steps": [
+    {
+      "id": 1,
+      "text": "Hello! I am your AI Guide. I will guide you through each step of the experiment. Please follow the instructions carefully and perform the actions as directed. Before we begin, let us familiarize ourselves with the simulation interface. To start, click on the start walkthrough",
+      "audio": "AI Guide click.wav"
+    },
+    {
+      "id": 2,
+      "text": "The interface walkthrough is now complete. You are now ready to perform the experiment. You may either click the Auto Connect button to make the circuit connections automatically or connect the circuit manually by following the highlighted terminals. Let's begin with the first connection.",
+      "audio": "The interface walkthrough is now complete.wav"
+    },
+    {
+      "id": 3,
+      "text": "Click and drag the wire from terminal 1 and drop it on terminal 23.",
+      "audio": "Correct Connections.wav"
+    },
+    {
+      "id": 4,
+      "text": "Let's move on to the next connection. Connect terminal 2 to terminal 24.",
+      "audio": "Connect terminal 2 to terminal 24.wav"
+    },
+    {
+      "id": 5,
+      "text": "Connect terminal 3 to terminal 25.",
+      "audio": "Connect terminal 3 to terminal 25.wav"
+    },
+    {
+      "id": 6,
+      "text": "Connect terminal 4 to terminal 26.",
+      "audio": "Connect terminal 4 to terminal 26.wav"
+    },
+    {
+      "id": 7,
+      "text": "Connect terminal 5 to terminal 25.",
+      "audio": "Connect terminal 5 to terminal 25.wav"
+    },
+    {
+      "id": 8,
+      "text": "Connect terminal 6 to terminal 9.",
+      "audio": "Connect terminal 6 to terminal 9.wav"
+    },
+    {
+      "id": 9,
+      "text": "Connect terminal 9 to terminal 10.",
+      "audio": "Connect terminal 9 to terminal 10.wav"
+    },
+    {
+      "id": 10,
+      "text": "Connect terminal 7 to terminal 18.",
+      "audio": "Connect terminal 7 to terminal 18.wav"
+    },
+    {
+      "id": 11,
+      "text": "Connect terminal 7 to terminal 26.",
+      "audio": "Connect terminal 7 to terminal 26.wav"
+    },
+    {
+      "id": 12,
+      "text": "Connect terminal 8 to terminal 17.",
+      "audio": "Connect terminal 8 to terminal 17.wav"
+    },
+    {
+      "id": 13,
+      "text": "Connect terminal 11 to terminal 17.",
+      "audio": "Connect terminal 11 to terminal 17.wav"
+    },
+    {
+      "id": 14,
+      "text": "Connect terminal 12 to terminal 18.",
+      "audio": "Connect terminal 12 to terminal 18.wav"
+    },
+    {
+      "id": 15,
+      "text": "Connect terminal 13 to terminal 19.",
+      "audio": "Connect terminal 13 to terminal 19.wav"
+    },
+    {
+      "id": 16,
+      "text": "Connect terminal 14 to terminal 20.",
+      "audio": "Connect terminal 14 to terminal 20.wav"
+    },
+    {
+      "id": 17,
+      "text": "Connect terminal 15 to terminal 21.",
+      "audio": "Connect terminal 15 to terminal 21.wav"
+    },
+    {
+      "id": 18,
+      "text": "Connect terminal 16 to terminal 22.",
+      "audio": "Connect terminal 16 to terminal 22.wav"
+    },
+    {
+      "id": 19,
+      "text": "Connect terminal 18 to terminal 19.",
+      "audio": "Connect terminal 18 to terminal 19.wav"
+    },
+    {
+      "id": 20,
+      "text": "Connect terminal 20 to terminal 21.",
+      "audio": "Connect terminal 20 to terminal 21.wav"
+    },
+    {
+      "id": 21,
+      "text": "Connect terminal 22 to terminal 26.",
+      "audio": "Connect terminal 22 to terminal 26.wav"
+    },
+    {
+      "id": 22,
+      "text": "All connections are completed. Click on the Check button to verify the connections.",
+      "audio": "Guide all complete conn.wav"
+    },
+    {
+      "id": 23,
+      "text": "This connection is wrong.",
+      "audio": "Wrong connection.wav"
+    },
+    {
+      "id": 24,
+      "text": "Some connections are wrong.",
+      "audio": "Multiple wrong connections.wav"
+    },
+    {
+      "id": 25,
+      "text": "Please make the required connections as per the given instructions.",
+      "audio": "1st time check button click.wav"
+    },
+    {
+      "id": 26,
+      "text": "Autoconnect completed. All connections are correct and the Check button is now disabled. Turn ON the MCB.",
+      "audio": "Autoconnect.wav"
+    },
+    {
+      "id": 27,
+      "text": "Make and check the connections before turning ON the MCB.",
+      "audio": "Before connection, on-click MCB Alert.wav"
+    },
+    {
+      "id": 28,
+      "text": "Ensure that the MCB is switched ON before switching ON the autotransformer.",
+      "audio": "1st time autotransformer click or after check disabled.wav"
+    },
+    {
+      "id": 29,
+      "text": "Connections Verified: Connections Verified successfully. Now turn ON the MCB by clicking the MCB lever.",
+      "audio": "For correct connections, check click.wav"
+    },
+    {
+      "id": 30,
+      "text": "MCB has been turned ON. Select the resistor, inductor, and capacitor values, then click the power button of the autotransformer.",
+      "audio": "MCB ON.wav"
+    },
+    {
+      "id": 31,
+      "text": "The autotransformer is now ON at 30 volts. The selected meter reading is displayed and the Add button is enabled.",
+      "audio": "After the autotransformer is ON.wav"
+    },
+    {
+      "id": 32,
+      "text": "The voltage has been set to 30 V. The readings are displayed on the voltmeter, ammeter, and wattmeter. Click Add to record the selected reading.",
+      "audio": "After Voltage is set.wav"
+    },
+    {
+      "id": 33,
+      "text": "Reading added successfully. Select a different R-L-C combination for the next reading. The MCB and autotransformer will remain ON, and Add will become available for the new reading.",
+      "audio": "1st readings added.wav"
+    },
+    {
+      "id": 34,
+      "text": "This reading is already in the table. Select a different R-L-C combination to enable Add again. Verification becomes available after five readings.",
+      "audio": "After taking the readings, Add click.wav"
+    },
+    {
+      "id": 35,
+      "text": "The selected readings match the observation table. Verification is successful, and you may generate the report.",
+      "audio": "After correct verification, verify button.wav"
+    },
+    {
+      "id": 36,
+      "text": "Please enter all the calculated values and verify them.",
+      "audio": "Incomplete more than one value.wav"
+    },
+    {
+      "id": 37,
+      "text": "Please enter the required calculated value and verify it.",
+      "audio": "Incomplete one value.wav"
+    },
+    {
+      "id": 38,
+      "text": "Verification failed. The highlighted values are incorrect. Please recheck your calculations and verify again.",
+      "audio": "Incorrect calculations, more than one.wav"
+    },
+    {
+      "id": 39,
+      "text": "Verification failed. The highlighted value is incorrect. Please review your calculation and verify again.",
+      "audio": "Incorrect calculation, one only.wav"
+    },
+    {
+      "id": 40,
+      "text": "Report Generated: Your report has been generated successfully. Click OK to view your report.",
+      "audio": "Generate Report button click.wav"
+    },
+    {
+      "id": 41,
+      "text": "The simulation has been reset. You can start again.",
+      "audio": "Reset.wav"
+    },
+    {
+      "id": 42,
+      "text": "Opening the print dialog.",
+      "audio": "Print.wav"
+    }
+  ]
+}

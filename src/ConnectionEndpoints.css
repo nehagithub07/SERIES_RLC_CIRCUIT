@@ -1,0 +1,282 @@
+/* ================================================================
+   CONNECTION ENDPOINTS — 26-Point System (Colored Outer, White Inner)
+   ================================================================ */
+
+/* ── Base Layering ── */
+.connection-lab .jtk-connector { z-index: 104 !important; }
+.connection-lab .jtk-overlay { z-index: 108 !important; }
+.connection-lab .jtk-endpoint { z-index: 112 !important; }
+.connection-lab .connection-terminal { z-index: 70 !important; }
+
+/* ── Connector Styling ── */
+.connection-lab .jtk-connector {
+  pointer-events: none;
+  filter:
+    drop-shadow(0 6px 10px rgba(15, 23, 42, 0.16))
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.24));
+}
+
+.connection-lab .jtk-connector path {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  shape-rendering: geometricPrecision;
+}
+
+.connection-lab .jtk-connector path:not([fill="none"]) {
+  fill: none;
+}
+
+/* ── Endpoint Styling ── */
+.connection-lab .jtk-endpoint {
+  --jtk-endpoint-ui-opacity: 0;
+  opacity: var(--jtk-endpoint-ui-opacity);
+  border-radius: 999px;
+  filter:
+    drop-shadow(0 2px 4px rgba(15, 23, 42, 0.18))
+    drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
+  transition: filter 140ms ease, opacity 140ms ease;
+}
+
+.connection-lab .jtk-endpoint:hover,
+.connection-lab .jtk-endpoint.jtk-hover {
+  --jtk-endpoint-ui-opacity: 0;
+}
+
+.connection-lab .jtk-endpoint[class*="jtk-endpoint--terminal-"] {
+  translate: var(--jtk-endpoint-visual-offset-x, 0) var(--jtk-endpoint-visual-offset-y, 0);
+}
+
+.connection-lab .jtk-endpoint--terminal {
+  --jtk-endpoint-ui-opacity: 0;
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.connection-lab .jtk-endpoint--terminal.jtk-dragging,
+.connection-lab .jtk-endpoint--terminal:active {
+  cursor: grabbing;
+}
+
+/* ── Terminal Base Layout (THE FIX) ── */
+.connection-terminal {
+  --terminal-size: 32px;
+  position: absolute !important;
+  z-index: 40 !important;
+  display: grid !important;
+  box-sizing: border-box !important;
+  width: var(--terminal-size) !important;
+  height: var(--terminal-size) !important;
+  place-items: center !important;
+  border-radius: 50% !important; /* Perfect circle */
+  cursor: pointer !important;
+  transform-origin: center !important;
+  margin-top: -3px !important;
+  margin-left: -3px !important;
+  transition: filter 180ms ease, box-shadow 180ms ease !important;
+  
+  /* Fallback Base: White Inner, Grey Outer */
+  background:
+    radial-gradient(circle at 38% 30%, rgba(255, 255, 255, 0.72) 0 6%, transparent 8%),
+    radial-gradient(circle, #33414d 0 39%, #10171d 41% 48%, #ffffff 50% 68%, #aab3ba 71% 78%, #f8fafc 81% 100%) !important;
+  border: 1px solid rgba(111, 123, 132, 0.72) !important;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.9),
+    0 4px 7px rgba(15, 23, 42, 0.34),
+    inset 0 1px 1px rgba(255, 255, 255, 0.68) !important;
+}
+
+/* Force-hide any old pseudo-elements causing layering bugs */
+.connection-terminal::before,
+.connection-terminal::after {
+  display: none !important;
+}
+
+.connection-terminal:hover {
+  filter: brightness(1.08) saturate(1.04) !important;
+}
+
+.connection-terminal:active {
+  filter: brightness(0.9) !important;
+}
+
+/* Position mapping alignment */
+.connection-terminal[class*="connection-terminal--endpoint-"] {
+  top: calc(var(--terminal-base-top) + var(--jtk-endpoint-offset-y, 0px) - 3px) !important;
+  left: calc(var(--terminal-base-left) + var(--jtk-endpoint-offset-x, 0px) - 3px) !important;
+}
+
+/* ── Positive Terminals (Red Socket) ── */
+.connection-terminal[data-polarity="plus"] {
+  --endpoint-accent-rgb: 238, 52, 64;
+  background:
+    radial-gradient(circle at 38% 29%, rgba(255, 255, 255, 0.82) 0 6%, transparent 8%),
+    radial-gradient(circle, #f34a54 0 39%, #b80e1b 41% 48%, #ffffff 50% 68%, #aeb7bd 71% 78%, #fbfcfd 81% 100%) !important;
+  border-color: rgba(151, 158, 164, 0.82) !important;
+}
+
+/* ── Negative Terminals (Black Socket) ── */
+.connection-terminal[data-polarity="minus"] {
+  --endpoint-accent-rgb: 35, 46, 55;
+  background:
+    radial-gradient(circle at 38% 29%, rgba(255, 255, 255, 0.42) 0 5%, transparent 8%),
+    radial-gradient(circle, #26343e 0 39%, #05090c 41% 48%, #ffffff 50% 68%, #aeb7bd 71% 78%, #fbfcfd 81% 100%) !important;
+  border-color: rgba(151, 158, 164, 0.82) !important;
+}
+
+/* ── Active Connected Glowing States ── */
+.connection-terminal.jtk-connected[data-polarity="plus"] {
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.92),
+    0 0 0 4px rgba(238, 52, 64, 0.18),
+    0 4px 7px rgba(15, 23, 42, 0.34) !important;
+}
+
+.connection-terminal.jtk-connected[data-polarity="minus"] {
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.92),
+    0 0 0 4px rgba(35, 46, 55, 0.2),
+    0 4px 7px rgba(15, 23, 42, 0.34) !important;
+}
+
+/* ── Number Labels Base ── */
+.terminal-number-label {
+  --endpoint-neutral: #64748b;
+  --endpoint-neutral-rgb: 100, 116, 139;
+  position: absolute;
+  z-index: 120 !important;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  padding: 0;
+  border: 2px solid rgba(var(--endpoint-neutral-rgb), 0.3);
+  border-radius: 999px;
+  color: #172033;
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 1) 0 18%, transparent 19%),
+    linear-gradient(145deg, #ffffff 22%, #eef2f5 100%);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  user-select: none;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.96),
+    0 3px 7px rgba(15, 23, 42, 0.3),
+    inset 1px 1px 1px rgba(255, 255, 255, 0.94),
+    inset -1px -1px 2px rgba(15, 23, 42, 0.06);
+  transform: translateX(-50%);
+  transition: all 150ms ease;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.connection-terminal[data-polarity="plus"] + .terminal-number-label {
+  --endpoint-accent-rgb: 238, 52, 64;
+}
+
+.connection-terminal[data-polarity="minus"] + .terminal-number-label {
+  --endpoint-accent-rgb: 35, 46, 55;
+}
+
+.terminal-number-label::before {
+  position: absolute;
+  inset: 4px;
+  content: "";
+  pointer-events: none;
+  border: 1px solid rgba(var(--endpoint-neutral-rgb), 0.18);
+  border-radius: 999px;
+}
+
+.terminal-number-label:hover {
+  border-color: rgba(var(--endpoint-neutral-rgb), 0.36);
+  color: var(--endpoint-neutral);
+  filter: brightness(1.02);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.96),
+    0 0 0 2px rgba(var(--endpoint-neutral-rgb), 0.06);
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.connection-terminal.jtk-connected + .terminal-number-label {
+  border-color: rgba(var(--endpoint-accent-rgb), 0.42);
+  background: linear-gradient(145deg, #ffffff, #eef4fa);
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.94),
+    0 4px 12px rgba(15, 23, 42, 0.24),
+    inset 0 1px 1px rgba(255, 255, 255, 0.94),
+    0 0 0 6px rgba(var(--endpoint-accent-rgb), 0.12),
+    0 0 12px rgba(var(--endpoint-accent-rgb), 0.18);
+}
+
+/* ── jsPlumb Center Offset Fix ── */
+/* AI Guide: pulse only the numbered labels named by the active narration. */
+@keyframes ai-guide-label-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 3px rgba(255, 255, 255, 0.98),
+      0 0 0 6px rgba(255, 201, 61, 0.72),
+      0 4px 10px rgba(15, 23, 42, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px rgba(255, 255, 255, 1),
+      0 0 0 8px rgba(255, 216, 92, 0.96),
+      0 0 18px 8px rgba(255, 196, 37, 0.5),
+      0 4px 10px rgba(15, 23, 42, 0.3);
+  }
+}
+
+.terminal-number-label.ai-guide-label-highlight,
+.connection-terminal.jtk-connected + .terminal-number-label.ai-guide-label-highlight {
+  border-color: rgba(164, 103, 0, 0.78);
+  color: #2e1c02;
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 1) 0 18%, transparent 19%),
+    linear-gradient(145deg, #fffef7, #ffe39a);
+  animation: ai-guide-label-pulse 1.05s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .terminal-number-label.ai-guide-label-highlight {
+    animation-iteration-count: 1 !important;
+  }
+}
+
+.connection-lab [class*="jtk-endpoint--terminal-"] {
+  --jtk-endpoint-offset-x: -13px;
+  --jtk-endpoint-offset-y: -13px;
+}
+
+
+
+
+/* ================================================================
+   UTILITY MODIFIERS
+   ================================================================ */
+
+.terminal-label {
+  position: absolute;
+  z-index: 60;
+  display: grid;
+  min-width: 23px;
+  height: 24px;
+  place-items: center;
+  border: 1px solid rgba(0, 0, 0, 0.24);
+  border-radius: 4px;
+  color: #21150e;
+  background: #fff8ef;
+  font-size: 13px;
+  font-weight: 900;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.32);
+}
+
+.connection-lab--locked .connection-terminal,
+.connection-lab--locked .terminal-label,
+.connection-lab--locked .terminal-number-label {
+  pointer-events: none;
+  cursor: not-allowed;
+}

@@ -1,0 +1,3749 @@
+/* ===== ROOT VARIABLES — CHANGE ONLY THESE ===== */
+/* ===== MATH FORMULA FONTS ===== */
+@import url('https://fonts.googleapis.com/css2?family=Latin+Modern+Math&display=swap');
+:root {
+  --eq-panel-width: 845px;
+  --eq-panel-height: 835px;
+  --eq-panel-padding-x: 20px;
+  --eq-panel-padding-y: 24px;
+  --eq-grid-cols: 5;
+  --eq-grid-rows: 4;
+  --eq-grid-gap-x: 12px;
+  --eq-grid-gap-y: 16px;
+  /* === NEW: FORMULA MODAL VARIABLES === */
+  --formula-font: "Latin Modern Math", "Cambria Math", "Times New Roman", serif;
+  --formula-bg: #ffffff;
+  --formula-border: #cbd5e1;
+  --formula-text: #1a1a1a;
+  --formula-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== PARENT WRAPPER — MUST EXPAND WITH PANEL ===== */
+.connection-lab {
+  position: relative;
+  display: flex;
+  width: var(--eq-panel-width);
+  height: auto;                    /* ← CHANGED: was 747px */
+  min-height: var(--eq-panel-height);
+  flex-direction: column;
+  gap: 18px;
+  overflow: visible;
+}
+
+/* ===== WORKSPACE GRID — ADJUSTS TO PANEL SIZE ===== */
+.workspace-grid {
+  position: absolute;
+  top: 108px;
+  left: 73px;
+  z-index: 1;
+  display: grid;
+  width: auto;                     /* ← CHANGED: was 1332px */
+  grid-template-columns: 466px var(--eq-panel-width); /* ← CHANGED */
+  gap: 21px;
+}
+
+/* ===== APP SCALE — EXPANDS TO FIT CONTENT ===== */
+#app-scale {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1440px;
+  height: auto;                    /* ← CHANGED: was 1418px */
+  min-height: 1418px;
+  /* Render with a DPR-aware backing layer, then preserve the original final
+     visual footprint. This avoids the blurry single-layer 0.9x rasterization. */
+  zoom: var(--app-render-scale, 1);
+  transform: scale(var(--app-composite-scale, 1));
+  transform-origin: top left;
+  contain: layout paint style;
+}
+
+/* ===== SIMULATION SHELL — EXPANDS TO FIT ===== */
+.simulation-shell {
+  position: relative;
+  width: 1440px;
+  height: auto;                    /* ← CHANGED: was 960px */
+  min-height: 960px;
+  overflow: visible;               /* ← CHANGED: was hidden */
+  isolation: isolate;
+  color: #2f1d14;
+  font-family: Arial, Helvetica, sans-serif;
+  background-image:
+    linear-gradient(90deg, rgba(242, 179, 94, 0.5), rgba(255, 218, 150, 0.2), rgba(138, 73, 29, 0.26)),
+    linear-gradient(rgba(255, 214, 146, 0.42), rgba(120, 62, 24, 0.16)),
+    url("./assets/ekaterina-novitskaya-KugwNl9jX1Q-unsplash.jpg");
+  background-position: center;
+  background-size: cover;
+}
+
+/* ===== EQUIPMENT PANEL — USES VARIABLES ===== */
+.equipment-panel {
+  position: relative;
+  display: grid;
+  width: var(--eq-panel-width);
+  height: var(--eq-panel-height);
+  padding: var(--eq-panel-padding-y) var(--eq-panel-padding-x);
+  overflow: visible;
+  isolation: auto;
+  border: 2px solid rgba(255, 252, 244, 0.9);
+  border-radius: 17px;
+  background:
+    linear-gradient(140deg, rgba(255, 253, 245, 0.98) 0%, rgba(234, 221, 199, 0.98) 44%, rgba(192, 170, 136, 0.98) 100%);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.86),
+    inset 0 -10px 0 rgba(134, 103, 64, 0.16),
+    inset 0 0 0 3px rgba(183, 151, 111, 0.2),
+    inset 0 0 30px rgba(110, 77, 44, 0.15),
+    0 8px 0 rgba(94, 62, 34, 0.28),
+    0 12px 12px rgba(47, 25, 11, 0.2);
+  grid-template-columns: repeat(var(--eq-grid-cols), 1fr);
+  grid-template-rows: auto auto auto auto;
+  gap: var(--eq-grid-gap-y) var(--eq-grid-gap-x);
+  align-items: start;
+  justify-items: center;
+}
+
+/* ===== DECORATIVE BORDERS (keep as-is) ===== */
+.equipment-panel::before {
+  position: absolute;
+  inset: 7px;
+  content: "";
+  pointer-events: none;
+  border: 1px solid rgba(120, 89, 57, 0.28);
+  border-radius: 12px;
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.72),
+    inset 0 -5px 0 rgba(84, 58, 34, 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.62);
+}
+
+.equipment-panel::after {
+  position: absolute;
+  inset: 9px;
+  z-index: 0;
+  content: "";
+  pointer-events: none;
+  border-radius: 11px;
+  background:
+    linear-gradient(110deg, rgba(255, 255, 255, 0.42), transparent 26%),
+    linear-gradient(180deg, transparent 52%, rgba(83, 54, 30, 0.1));
+}
+#app-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-bottom: 24px;
+  background: #2b170d;
+}
+
+#app-viewport {
+  position: relative;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+
+
+.simulation-shell::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 232, 174, 0.3), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 36%, rgba(59, 28, 10, 0.2));
+}
+
+
+
+.left-panel,
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.right-panel {
+  gap: 18px;
+}
+
+.header-board {
+  position: absolute;
+  top: 24px;
+  left: 96px;
+  z-index: 2;
+  display: flex;
+  width: 1248px;
+  height: 68px;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  border: 2px solid rgba(255, 227, 177, 0.82);
+  border-radius: 12px;
+  color: #fff;
+  background:
+    linear-gradient(180deg, rgba(93, 50, 24, 0.92), rgba(34, 21, 16, 0.94)),
+    repeating-linear-gradient(90deg, rgba(120, 64, 25, 0.2) 0 6px, rgba(52, 28, 16, 0.2) 6px 13px);
+  box-shadow:
+    inset 0 2px 8px rgba(255, 210, 128, 0.2),
+    inset 0 -10px 18px rgba(0, 0, 0, 0.34),
+    0 3px 9px rgba(45, 22, 7, 0.58);
+}
+
+.header-board h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
+}
+
+.header-board__ornament {
+  position: relative;
+  width: 88px;
+  height: 2px;
+  border-radius: 999px;
+  background: #e6b56d;
+}
+
+.header-board__ornament::before,
+.header-board__ornament::after {
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  content: "";
+  border-radius: 999px;
+  background: #e6b56d;
+  transform: translateY(-50%);
+}
+
+.header-board__ornament::before {
+  left: 0;
+}
+
+.header-board__ornament::after {
+  right: 0;
+  width: 11px;
+  height: 11px;
+}
+
+.header-board__ornament--right::before {
+  width: 11px;
+  height: 11px;
+}
+
+.header-board__ornament--right::after {
+  width: 8px;
+  height: 8px;
+}
+
+.instructions-tab {
+  position: absolute;
+  top: 95px;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  width: 54px;
+  height: 176px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 2px solid rgba(252, 223, 176, 0.82);
+  border-left: 0;
+  border-radius: 0 10px 10px 0;
+  color: #fff8ed;
+  background: linear-gradient(180deg, #6b381b, #2d1b13);
+  box-shadow: 0 4px 10px rgba(56, 29, 11, 0.46);
+}
+
+.instructions-tab svg {
+  position: absolute;
+  top: 14px;
+  width: 27px;
+  height: 27px;
+}
+
+.instructions-tab span {
+  margin-top: 32px;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.42);
+  transform: rotate(-90deg);
+  white-space: nowrap;
+}
+
+.section-card {
+  position: relative;
+  width: 466px;
+  border: 2px solid rgba(255, 255, 255, 0.72);
+  border-radius: 17px;
+  background:
+    linear-gradient(180deg, rgba(255, 250, 240, 0.96), rgba(238, 225, 205, 0.96)),
+    radial-gradient(circle at 30% 0, rgba(255, 255, 255, 0.9), transparent 40%);
+  box-shadow:
+    inset 0 0 0 3px rgba(182, 147, 105, 0.22),
+    0 4px 8px rgba(60, 32, 10, 0.36);
+}
+
+.section-card::before {
+  position: absolute;
+  inset: 7px;
+  content: "";
+  pointer-events: none;
+  border: 1px solid rgba(161, 125, 84, 0.28);
+  border-radius: 12px;
+}
+
+.section-card__heading {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  padding-top: 9px;
+}
+
+.section-card__heading svg {
+  width: 27px;
+  height: 27px;
+  color: #4b2c1e;
+  flex: 0 0 auto;
+}
+
+.section-card__heading h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  color: #4a2b1f;
+  white-space: nowrap;
+}
+
+.section-card__line {
+  width: 84px;
+  height: 1px;
+  background: rgba(96, 63, 38, 0.3);
+}
+
+.action-buttons__grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  height: calc(100% - 48px);
+  align-content: center;
+  justify-content: center;
+  padding: 0 18px 4px;
+  grid-template-columns: repeat(4, 92px);
+  gap: 8px 12px;
+}
+
+.equation-panel {
+  position: absolute;
+  z-index: 10000;
+  width: 385px;
+  overflow: hidden;
+  border: 1px solid rgba(92, 56, 31, 0.38);
+  border-radius: 14px;
+  color: #342015;
+  background: linear-gradient(155deg, #fffdf8, #f0dfc3);
+  box-shadow: 0 18px 36px rgba(42, 23, 12, 0.32), inset 0 1px 0 #fff;
+  font-family: "Cambria Math", "Times New Roman", serif;
+}
+
+.action-button-wrapper-box {
+  position: relative;
+  display: inline-block;
+}
+
+.action-button-walkthrough-target {
+  position: absolute;
+  top: 15px;
+  left: 20px;
+  z-index: 1000;
+  width: 60%;
+  height: 40%;
+  pointer-events: none;
+}
+
+.equation-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  color: #fff;
+  background: linear-gradient(135deg, #704326, #321c10);
+}
+
+.equation-panel__header span {
+  display: block;
+  margin-bottom: 2px;
+  color: #eed3ac;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.equation-panel__header h3 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.equation-panel__header button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  font-size: 23px;
+  line-height: 1;
+}
+
+.equation-panel__list {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.equation-panel__list > div {
+  display: flex;
+  min-height: 37px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 8px 10px;
+  border: 1px solid rgba(107, 69, 39, 0.13);
+  border-radius: 9px;
+  background: rgba(255, 253, 248, 0.76);
+}
+
+.equation-panel__list > div > span {
+  color: #806247;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.equation-panel__list strong,
+.equation-expression {
+  color: #321d10;
+  font-size: 17px;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.equation-expression {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.equation-expression b {
+  font-weight: 700;
+}
+
+.equation-fraction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  font-size: 14px !important;
+  line-height: 1.05;
+  text-align: center;
+}
+
+.equation-fraction i {
+  padding: 1px 4px;
+  font-style: italic;
+}
+
+.equation-fraction i:first-child {
+  border-bottom: 1px solid currentColor;
+}
+
+.equation-panel__error {
+  align-items: stretch !important;
+  flex-direction: column;
+  gap: 7px !important;
+}
+
+.equation-error-expression {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #321d10;
+  font-family: "Cambria Math", "Times New Roman", serif;
+  font-size: 13px;
+}
+
+.equation-error-expression > strong,
+.equation-error-expression > b {
+  white-space: nowrap;
+}
+
+.equation-error-expression small {
+  flex-basis: 100%;
+  color: #72563e;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.equation-error-fraction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  line-height: 1.05;
+  text-align: center;
+}
+
+.equation-error-fraction i {
+  padding: 2px 4px;
+  font-style: normal;
+}
+
+.equation-error-fraction i:first-child {
+  border-bottom: 1px solid currentColor;
+}
+
+.action-button {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 92px;
+  height: 56px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 6px 3px;
+  border: 2px solid rgba(81, 45, 22, 0.42);
+  border-radius: 9px;
+  color: #fff;
+  font-weight: 900;
+  font-size: 12px;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    inset 0 2px 2px rgba(255, 255, 255, 0.42),
+    inset 0 -8px 13px rgba(0, 0, 0, 0.2),
+    0 4px 7px rgba(37, 22, 13, 0.42);
+  transition: transform 160ms ease, filter 160ms ease;
+}
+
+.action-button:hover {
+  filter: brightness(1.07);
+}
+
+.action-button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.18) brightness(0.82);
+  opacity: 0.58;
+  transform: none;
+}
+
+.action-button:disabled:hover,
+.action-button:disabled:active {
+  filter: grayscale(0.18) brightness(0.82);
+  transform: none;
+}
+
+.action-button:active {
+  transform: translateY(2px);
+}
+
+.action-button:disabled:active {
+  transform: none;
+}
+
+.action-button svg {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 auto;
+}
+
+.action-button span {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+  line-height: 0.95;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.action-button--green {
+  background: linear-gradient(180deg, #7dcc4c, #23821e);
+}
+
+.action-button--blue {
+  background: linear-gradient(180deg, #23b7e3, #075a9a);
+}
+
+.action-button--orange {
+  background: linear-gradient(180deg, #ffbd2c, #e27500);
+}
+
+.action-button--red {
+  background: linear-gradient(180deg, #f85b51, #b51a14);
+}
+.action-button--brown {
+  font-size: 8.5px;
+  letter-spacing: -0.2px;
+  background: linear-gradient(180deg, #5a4a3a, #3d2b1f);
+}
+
+.action-button--brown span {
+  white-space: nowrap;
+}
+/* ===== REPORT BUTTON ===== */
+.report-button {
+  position: absolute;
+  left: 180px;
+  bottom: 24px;
+  z-index: 4;
+  display: inline-flex;
+  min-width: 178px;
+  height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 24px;
+  border: 2px solid rgba(81, 45, 22, 0.42);
+  border-radius: 10px;
+  color: #fff;
+  background: linear-gradient(180deg, #23b7e3, #075a9a);
+  box-shadow:
+    inset 0 2px 2px rgba(255, 255, 255, 0.42),
+    inset 0 -8px 13px rgba(0, 0, 0, 0.2),
+    0 4px 7px rgba(37, 22, 13, 0.42);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+  transition: transform 160ms ease, filter 160ms ease;
+  white-space: nowrap;
+}
+
+.report-equation-control {
+  position: absolute;
+  bottom: 24px;
+  left: 20px;
+  z-index: 5;
+}
+
+.report-equation-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  width: 146px;
+  height: 48px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 9px;
+  padding: 0 13px 0 10px;
+  border: 1px solid rgba(86, 43, 9, 0.82);
+  border-radius: 12px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 22% 0, rgba(255, 245, 181, 0.34), transparent 40%),
+    linear-gradient(180deg, #efae39 0%, #c67b12 48%, #8e4c05 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.68),
+    inset 0 -9px 14px rgba(85, 40, 3, 0.2),
+    0 1px 0 rgba(255, 242, 190, 0.54),
+    0 5px 9px rgba(55, 28, 8, 0.38);
+  cursor: pointer;
+  text-align: left;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+  transition: transform 160ms ease, filter 160ms ease, box-shadow 160ms ease;
+}
+
+.report-equation-button::before {
+  position: absolute;
+  z-index: -1;
+  top: 1px;
+  right: 8px;
+  left: 8px;
+  height: 45%;
+  border-radius: 9px 9px 50% 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.report-equation-button__icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  place-items: center;
+  border: 1px solid rgba(255, 251, 228, 0.76);
+  border-radius: 9px;
+  color: #fff9dc;
+  background: rgba(91, 44, 5, 0.22);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.22),
+    0 2px 4px rgba(73, 34, 3, 0.24);
+}
+
+.report-equation-button__icon svg {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+}
+
+.report-equation-button__copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.report-equation-button__copy small {
+  margin-bottom: 3px;
+  color: #ffedb2;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+}
+
+.report-equation-button__copy strong {
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.35px;
+}
+
+.report-equation-button:hover {
+  filter: brightness(1.08) saturate(1.04);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -9px 14px rgba(85, 40, 3, 0.16),
+    0 1px 0 rgba(255, 242, 190, 0.58),
+    0 7px 12px rgba(55, 28, 8, 0.42);
+  transform: translateY(-1px);
+}
+
+.report-equation-button:active {
+  transform: translateY(1px);
+}
+
+.report-equation-button[aria-expanded="true"] {
+  border-color: rgba(255, 239, 165, 0.9);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -9px 14px rgba(85, 40, 3, 0.17),
+    0 0 0 3px rgba(231, 164, 43, 0.22),
+    0 6px 12px rgba(55, 28, 8, 0.42);
+}
+
+.report-equation-button:focus-visible {
+  outline: 3px solid rgba(255, 224, 142, 0.9);
+  outline-offset: 2px;
+}
+
+.report-equation-control .equation-panel {
+  top: auto;
+  bottom: calc(100% + 12px);
+  left: 0;
+  max-height: min(620px, calc(100vh - 110px));
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.report-button svg {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 auto;
+}
+
+.report-button:hover {
+  filter: brightness(1.07);
+}
+
+.report-button:active {
+  transform: translateY(2px);
+}
+
+.report-button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.18) brightness(0.82);
+  opacity: 0.58;
+  transform: none;
+}
+
+.report-button:disabled:hover,
+.report-button:disabled:active {
+  filter: grayscale(0.18) brightness(0.82);
+  transform: none;
+}
+.action-button--purple {
+  background: linear-gradient(180deg, #a875e7, #5832a8);
+}
+
+.action-button--teal {
+  font-size: 11px;
+  background: linear-gradient(180deg, #22c4a5, #08725f);
+}
+
+.action-button--cyan {
+  font-size: 11.5px;
+  background: linear-gradient(180deg, #37d3f2, #08739a);
+}
+
+.action-button--ai-active {
+  border-color: rgba(219, 255, 252, 0.96);
+  box-shadow:
+    inset 0 2px 2px rgba(255, 255, 255, 0.52),
+    inset 0 -8px 13px rgba(0, 0, 0, 0.18),
+    0 0 0 3px rgba(34, 211, 238, 0.28),
+    0 5px 10px rgba(8, 83, 111, 0.46);
+}
+
+.action-button--ai-active::after {
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  content: "";
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  background: #8fffd8;
+  box-shadow: 0 0 7px rgba(143, 255, 216, 0.92);
+}
+
+
+.observation-card {
+  height: 590px;
+  overflow: hidden;
+}
+
+.observation-table-wrap {
+  position: relative;
+  z-index: 1;
+  margin: 4px 11px 12px;
+  overflow: hidden;
+  border: 1px solid rgba(91, 58, 35, 0.3);
+  border-radius: 11px;
+  background: rgba(255, 250, 243, 0.84);
+  box-shadow: 0 5px 14px rgba(70, 39, 17, 0.09);
+}
+
+.observation-table-meta {
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 9px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 12% 0, rgba(255, 255, 255, 0.15), transparent 40%),
+    linear-gradient(135deg, #6f4428, #351d0e);
+  border-bottom: 1px solid rgba(44, 24, 12, 0.42);
+}
+
+.observation-table-voltage-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15px;
+}
+
+.observation-table-voltage-row strong {
+  padding: 3px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 11px;
+}
+
+.observation-table-count {
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: #4d2e1b;
+  background: #f7e4bd;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.15px;
+}
+
+.observation-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  color: #3d2416;
+  font-size: 10px;
+}
+
+.observation-card .observation-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.observation-card .observation-table th:nth-child(1),
+.observation-card .observation-table td:nth-child(1) { width: 8%; }
+
+.observation-card .observation-table th:nth-child(2),
+.observation-card .observation-table td:nth-child(2),
+.observation-card .observation-table th:nth-child(3),
+.observation-card .observation-table td:nth-child(3) { width: 7%; }
+
+.observation-card .observation-table th:nth-child(4),
+.observation-card .observation-table td:nth-child(4) { width: 8%; }
+
+.observation-card .observation-table th:nth-child(5),
+.observation-card .observation-table td:nth-child(5) { width: 20%; }
+
+.observation-card .observation-table th:nth-child(6),
+.observation-card .observation-table td:nth-child(6) { width: 11%; }
+
+.observation-card .observation-table th:nth-child(7),
+.observation-card .observation-table td:nth-child(7),
+.observation-card .observation-table th:nth-child(8),
+.observation-card .observation-table td:nth-child(8),
+.observation-card .observation-table th:nth-child(9),
+.observation-card .observation-table td:nth-child(9) { width: 10%; }
+
+.observation-card .observation-table th:nth-child(10),
+.observation-card .observation-table td:nth-child(10) { width: 9%; }
+
+.observation-table th {
+  height: 39px;
+  padding: 3px 2px;
+  color: #fff8eb;
+  background: linear-gradient(180deg, #82512e, #5a321a);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: 0.15px;
+}
+
+.observation-table th span {
+  color: #ecd5b5;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.observation-table td {
+  height: 35px;
+  padding: 3px 2px;
+  color: #382317;
+  font-weight: 700;
+  line-height: 1.05;
+  text-align: center;
+  background: rgba(255, 253, 248, 0.94);
+  transition: background 160ms ease;
+}
+
+.observation-card .observation-table th,
+.observation-card .observation-table td {
+  padding-right: 2px;
+  padding-left: 2px;
+}
+
+.observation-card .observation-table td:not(:nth-child(5)) {
+  white-space: nowrap;
+}
+
+.observation-table tbody tr:nth-child(even) td {
+  background: rgba(246, 236, 221, 0.92);
+}
+
+.observation-table tbody tr.observation-row--recorded:hover td {
+  background: #fff2d8;
+}
+
+.observation-table .observation-row--empty td {
+  color: #ae9984;
+  font-weight: 600;
+}
+
+.observation-row-number {
+  display: inline-grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: #6a4025;
+  font-size: 9px;
+  box-shadow: 0 2px 5px rgba(58, 31, 14, 0.2);
+}
+
+.observation-row--empty .observation-row-number {
+  color: #806b59;
+  background: #e4d6c3;
+  box-shadow: none;
+}
+
+.observation-nature {
+  display: inline-block;
+  max-width: 100%;
+  padding: 3px 5px;
+  border: 1px solid rgba(90, 50, 26, 0.13);
+  border-radius: 6px;
+  color: #5a321a;
+  background: #f5e6cd;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1.15;
+  white-space: normal;
+}
+
+.observation-table th:first-child,
+.observation-table td:first-child {
+  width: 34px;
+}
+
+.observation-table th:last-child,
+.observation-table td:last-child {
+  width: 86px;
+}
+
+.observation-table th,
+.observation-table td {
+  border-right: 1px solid rgba(91, 58, 35, 0.15);
+  border-bottom: 1px solid rgba(91, 58, 35, 0.13);
+}
+
+.observation-table th:last-child,
+.observation-table td:last-child {
+  border-right: 0;
+}
+
+.observation-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.calculation-table td {
+  padding: 5px 4px;
+}
+
+.calculation-table th:last-child,
+.calculation-table td:last-child {
+  width: 76px;
+}
+
+
+
+.graph-panel {
+  position: relative;
+  display: grid;
+  width: 845px;
+  height: 166px;
+  grid-template-rows: 48px 1fr;
+  overflow: hidden;
+  border: 1px solid rgba(122, 86, 52, 0.28);
+  border-radius: 14px;
+  color: #2f1d14;
+  background:
+    linear-gradient(180deg, rgba(255, 251, 243, 0.98), rgba(239, 228, 211, 0.98)),
+    radial-gradient(circle at 16% 0, rgba(255, 255, 255, 0.9), transparent 42%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.78),
+    0 10px 24px rgba(48, 26, 11, 0.18);
+}
+
+.graph-panel--separate {
+  margin: 28px 0 0;
+  width: 1440px;
+  height: 510px;
+  grid-template-rows: 74px 1fr;
+}
+
+.experiment-footer {
+  display: flex;
+  width: 1440px;
+  min-height: 52px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 18px;
+  border-top: 1px solid rgba(245, 220, 180, 0.28);
+  color: #f5dfbd;
+  background: linear-gradient(180deg, rgba(76, 43, 23, 0.92), rgba(43, 23, 13, 0.98));
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.35px;
+  text-align: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.calculation-panel__instruction {
+  margin: 5px 0 0;
+  color: #765b43;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.calculation-panel__progress {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border: 1px solid rgba(74, 42, 21, 0.24);
+  border-radius: 999px;
+  color: #4a2a15;
+  background: linear-gradient(180deg, #fffdf8, #f4e6d1);
+  font-size: 10px;
+  font-weight: 800;
+  box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(64, 36, 17, 0.1);
+}
+
+.calculation-panel__progress strong {
+  font-size: 13px;
+}
+
+.calculation-panel__progress-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.calculation-panel__progress-dots i {
+  width: 8px;
+  height: 8px;
+  border: 1px solid #ae9074;
+  border-radius: 50%;
+  background: #e8dac6;
+}
+
+.calculation-panel__progress-dots i.is-complete {
+  border-color: #238449;
+  background: #2fa75c;
+  box-shadow: 0 0 0 3px rgba(47, 167, 92, 0.12);
+}
+
+.calculation-panel__body {
+  display: grid;
+  grid-template-columns: minmax(0, 2.25fr) minmax(310px, 0.9fr);
+  gap: 16px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.calculation-card {
+  position: relative;
+  min-width: 0;
+  padding: 15px;
+  overflow: hidden;
+  border: 1px solid rgba(96, 61, 35, 0.2);
+  border-radius: 13px;
+  background:
+    radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.92), transparent 36%),
+    linear-gradient(145deg, rgba(255, 252, 246, 0.98), rgba(241, 229, 210, 0.94));
+  box-shadow: inset 0 1px 0 #fff, 0 8px 18px rgba(63, 35, 16, 0.1);
+}
+
+.calculation-card::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  content: "";
+  background: linear-gradient(90deg, #8b552d, #d3a35e, #8b552d);
+}
+
+.calculation-card--errors::after {
+  background: linear-gradient(90deg, #315f70, #6ca6ad, #315f70);
+}
+
+.calculation-panel--locked .calculation-card--verification {
+  border-color: rgba(112, 83, 57, 0.28);
+}
+
+.verification-lock-banner {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  margin: -3px 0 11px;
+  padding: 8px 10px;
+  border: 1px solid rgba(137, 93, 48, 0.24);
+  border-radius: 9px;
+  color: #5c3b23;
+  background: linear-gradient(135deg, #fff5de, #ead6b6);
+  font-size: 10px;
+}
+
+.verification-lock-banner > span {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 7px;
+  background: rgba(112, 67, 35, 0.12);
+  font-size: 13px;
+}
+
+.verification-lock-banner strong {
+  font-size: 11px;
+}
+
+.verification-lock-banner small {
+  color: #795d44;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.calculation-card__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 13px;
+}
+
+.calculation-card__heading > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.calculation-card__heading h3 {
+  margin: 0;
+  color: #3e2a1f;
+  font-size: 15px;
+  letter-spacing: 0.1px;
+}
+
+.calculation-card__step {
+  display: inline-grid;
+  width: 31px;
+  height: 31px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(111, 68, 40, 0.24);
+  border-radius: 9px;
+  color: #fff;
+  background: linear-gradient(145deg, #8a552f, #50301c);
+  font-size: 10px;
+  font-weight: 900;
+  box-shadow: 0 4px 8px rgba(69, 38, 19, 0.18);
+}
+
+.calculation-card--errors .calculation-card__step {
+  border-color: rgba(49, 95, 112, 0.3);
+  background: linear-gradient(145deg, #5c8794, #315f70);
+}
+
+.calculation-card__heading p,
+.calculation-card__note,
+.calculation-card__footer p {
+  margin: 3px 0 0;
+  color: #765b43;
+  font-size: 10.5px;
+  line-height: 1.35;
+}
+
+.calculation-table-wrap {
+  max-height: 270px;
+  overflow: auto;
+  border: 1px solid rgba(96, 61, 35, 0.24);
+  border-radius: 10px;
+  background: #fffaf3;
+  box-shadow: 0 4px 12px rgba(65, 36, 18, 0.08);
+}
+
+.calculation-table {
+  min-width: 840px;
+  font-size: 10.5px;
+}
+
+.calculation-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 42px;
+  font-size: 10px;
+}
+
+.calculation-table th.is-known {
+  background: linear-gradient(180deg, #7a624b, #574333);
+}
+
+.calculation-table th.is-calculated {
+  background: linear-gradient(180deg, #936039, #6c4024);
+}
+
+.calculation-table th:first-child,
+.calculation-table td:first-child {
+  width: 168px;
+}
+
+.calculation-table th:last-child,
+.calculation-table td:last-child {
+  width: 64px;
+}
+
+.calculation-table-input,
+.calculation-reading-select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  height: 29px;
+  padding: 4px 5px;
+  border: 1px solid rgba(91, 58, 35, 0.35);
+  border-radius: 6px;
+  color: #2d1b11;
+  background: #fffaf3;
+  font-size: 10.5px;
+  text-align: center;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.calculation-reading-select {
+  font-weight: 700;
+  cursor: pointer;
+  appearance: none;
+  padding-right: 18px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #654126 50%),
+    linear-gradient(135deg, #654126 50%, transparent 50%),
+    linear-gradient(180deg, #fffdf8, #f0e2cd);
+  background-position:
+    calc(100% - 10px) 12px,
+    calc(100% - 7px) 12px,
+    0 0;
+  background-repeat: no-repeat;
+  background-size: 4px 4px, 4px 4px, 100% 100%;
+}
+
+.calculation-reading-select:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.25);
+  opacity: 0.66;
+}
+
+.calculation-table-input:focus,
+.calculation-reading-select:focus {
+  border-color: #9b663c;
+  box-shadow: 0 0 0 3px rgba(155, 102, 60, 0.14);
+}
+
+.calculation-table-input:disabled {
+  color: #5b3a23;
+  background: #f1e6d3;
+  opacity: 1;
+}
+
+.calculation-table-input.is-correct {
+  border-color: #238449;
+  color: #176234;
+  background: #e9f8ef;
+  box-shadow: inset 3px 0 0 #2fa75c;
+}
+
+.calculation-table-input.is-incorrect {
+  border-color: #c0392b;
+  color: #8e261c;
+  background: #fdecea;
+  box-shadow: inset 3px 0 0 #d24a3c;
+}
+
+.calculation-row-add,
+.calculation-row-verify {
+  border: 1px solid #4a2a15;
+  border-radius: 7px;
+  color: #fff;
+  background: linear-gradient(180deg, #7b461f, #4a2a15);
+  font-size: 10.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.calculation-row-add {
+  padding: 7px 11px;
+  white-space: nowrap;
+  box-shadow: 0 4px 9px rgba(62, 34, 16, 0.16);
+}
+
+.calculation-row-add:hover:not(:disabled),
+.calculation-row-verify:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.calculation-row-verify {
+  width: 100%;
+  padding: 6px 3px;
+}
+
+.calculation-row-add:disabled,
+.calculation-row-verify:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+  opacity: 0.55;
+}
+
+.calculation-row-verify.is-verified {
+  border-color: #238449;
+  background: #238449;
+}
+
+.calculation-card__footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 11px;
+  color: #65503d;
+  font-size: 9.5px;
+  font-weight: 700;
+}
+
+.calculation-card__footer > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.calculation-card__footer p {
+  margin: 0 0 0 auto;
+  text-align: right;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot--known {
+  background: #9b8068;
+}
+
+.status-dot--correct {
+  background: #2fa75c;
+}
+
+.status-dot--incorrect {
+  background: #d24a3c;
+}
+
+.calculation-errors {
+  display: grid;
+  gap: 9px;
+  max-height: 310px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.calculation-error-row {
+  padding: 10px;
+  border: 1px solid rgba(49, 95, 112, 0.18);
+  border-radius: 9px;
+  background: rgba(249, 253, 252, 0.88);
+  color: #4a2a15;
+  font-size: 10.5px;
+  box-shadow: 0 3px 9px rgba(45, 74, 79, 0.07);
+}
+
+.calculation-error-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.calculation-error-grid span {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  padding: 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: #edf1ee;
+}
+
+.calculation-error-grid span.is-correct {
+  color: #176234;
+  border-color: #c9ead5;
+  background: #e9f8ef;
+}
+
+.calculation-error-grid span.is-incorrect {
+  color: #8e261c;
+  border-color: #f2cbc6;
+  background: #fdecea;
+}
+
+.calculation-errors__empty {
+  display: grid;
+  min-height: 214px;
+  place-items: center;
+  align-content: center;
+  padding: 20px;
+  border: 1px dashed rgba(49, 95, 112, 0.3);
+  border-radius: 10px;
+  color: #66777a;
+  background: rgba(239, 246, 245, 0.56);
+  text-align: center;
+}
+
+.calculation-errors__empty > span {
+  display: grid;
+  width: 45px;
+  height: 45px;
+  margin-bottom: 9px;
+  place-items: center;
+  border-radius: 14px;
+  color: #fff;
+  background: linear-gradient(145deg, #6e9ca5, #315f70);
+  font-size: 20px;
+  font-weight: 900;
+  box-shadow: 0 6px 14px rgba(49, 95, 112, 0.2);
+}
+
+.calculation-errors__empty strong {
+  color: #38535a;
+  font-size: 12px;
+}
+
+.calculation-errors__empty p {
+  max-width: 210px;
+  margin: 5px 0 0;
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+.graph-panel::before {
+  position: absolute;
+  inset: 8px;
+  content: "";
+  pointer-events: none;
+  border: 1px solid rgba(126, 88, 52, 0.16);
+  border-radius: 10px;
+}
+
+.graph-panel__heading {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 28px 0 30px;
+}
+
+.graph-panel__eyebrow {
+  margin: 0;
+  color: #8e6844;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.graph-panel__heading h2 {
+  margin: 4px 0 0;
+  color: #3e2a1f;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.graph-panel__legend {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #3a2417;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.graph-panel__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid rgba(107, 76, 45, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 250, 243, 0.9);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 2px 5px rgba(60, 32, 10, 0.08);
+}
+
+.graph-panel__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  box-shadow: 0 1px 2px rgba(43, 24, 11, 0.16);
+}
+
+.graph-panel__dot--i1 {
+  background: #c83f35;
+}
+
+.graph-panel__dot--i2 {
+  background: #1579a8;
+}
+
+.graph-panel__dot--i3 {
+  background: #3f8f43;
+}
+
+.graph-panel__body {
+  position: relative;
+  z-index: 1;
+  margin: 6px 24px 24px;
+  overflow: hidden;
+  border: 1px solid rgba(96, 61, 35, 0.24);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(251, 245, 235, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 8px 18px rgba(60, 32, 10, 0.1);
+}
+
+.graph-panel__chart {
+  position: absolute;
+  inset: 18px 20px 16px;
+  width: auto;
+  height: auto;
+}
+
+.graph-panel__plot-bg {
+  fill: #fffdf8;
+  stroke: rgba(112, 82, 55, 0.28);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.graph-panel__band:nth-of-type(odd) {
+  fill: rgba(51, 124, 102, 0.035);
+}
+
+.graph-panel__band:nth-of-type(even) {
+  fill: rgba(210, 78, 58, 0.025);
+}
+
+.graph-panel__axis-line {
+  fill: none;
+  stroke: #563927;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.1;
+  vector-effect: non-scaling-stroke;
+}
+
+.graph-panel__axis-line--x,
+.graph-panel__axis-line--y {
+  marker-end: url("#graph-axis-arrow");
+}
+
+.graph-panel__chart marker path {
+  fill: #563927;
+}
+
+.graph-panel__grid-line {
+  stroke: rgba(117, 88, 62, 0.16);
+  stroke-width: 0.55;
+  vector-effect: non-scaling-stroke;
+}
+
+.graph-panel__grid-line--horizontal {
+  stroke-dasharray: 3 8;
+}
+
+.graph-panel__tick-line {
+  stroke: rgba(74, 43, 31, 0.34);
+  stroke-linecap: round;
+  stroke-width: 0.8;
+  vector-effect: non-scaling-stroke;
+}
+
+.graph-panel__tick-label {
+  fill: #6a4b34;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.graph-panel__tick-label--y {
+  font-size: 10px;
+}
+
+.graph-panel__axis-title {
+  fill: #38271c;
+  font-size: 13.5px;
+  font-weight: 900;
+}
+
+.graph-panel__axis-title--y {
+  letter-spacing: 0;
+}
+
+.graph-panel__line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  shape-rendering: geometricPrecision;
+}
+
+.graph-panel__plot {
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.graph-panel__message {
+  fill: #6c5037;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.graph-panel--plotted .graph-panel__plot {
+  opacity: 1;
+}
+
+.graph-panel__line--i1 {
+  stroke: #c83f35;
+}
+
+.graph-panel__line--i2 {
+  stroke: #1579a8;
+}
+
+.graph-panel__line--i3 {
+  stroke: #3f8f43;
+}
+
+.graph-panel__point {
+  fill: #fffaf0;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  filter: none;
+}
+
+.graph-panel__point--i1 {
+  fill: #fff7f4;
+  stroke: #c83f35;
+}
+
+.graph-panel__point--i2 {
+  fill: #f1fbff;
+  stroke: #1579a8;
+}
+
+.graph-panel__point--i3 {
+  fill: #f5fff2;
+  stroke: #3f8f43;
+}
+
+.graph-panel__series-label {
+  dominant-baseline: middle;
+  font-size: 10.5px;
+  font-weight: 900;
+  paint-order: stroke;
+  stroke: #fffdf8;
+  stroke-linejoin: round;
+  stroke-width: 4px;
+}
+
+.graph-panel__series-label--i1 {
+  fill: #c83f35;
+}
+
+.graph-panel__series-label--i2 {
+  fill: #1579a8;
+}
+
+.graph-panel__series-label--i3 {
+  fill: #3f8f43;
+}
+
+.status-bar {
+  position: absolute;
+  top: 804px;
+  left: 520px;
+  z-index: 4;
+  display: flex;
+  width: 594px;
+  height: 50px;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  border: 1px solid rgba(255, 219, 160, 0.82);
+  border-radius: 14px;
+  color: #fff7e9;
+  background: linear-gradient(180deg, rgba(116, 68, 31, 0.94), rgba(54, 31, 17, 0.94));
+  box-shadow:
+    inset 0 1px 5px rgba(255, 228, 175, 0.24),
+    0 3px 8px rgba(38, 20, 10, 0.42);
+  font-size: 18px;
+  text-shadow: 0 2px 1px rgba(0, 0, 0, 0.54);
+}
+
+.status-bar svg {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  color: #f6e4bd;
+}
+
+.status-bar span {
+  max-width: 500px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(49, 137, 255, 0.75);
+  outline-offset: 3px;
+}
+/* .connection-lab {
+  position: relative;
+  display: flex;
+  width: 845px;
+  height: 747px;
+  flex-direction: column;
+  gap: 18px;
+} */
+
+/* ===== INSTRUCTIONS INLINE OVERLAY ===== */
+/* .instructions-overlay-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #fffdf4;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  font-family: sans-serif;
+  overflow: hidden;
+} */
+
+/* .instructions-header {
+  background-color: #573a24;
+  color: #fff;
+  padding: 16px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 20px;
+  letter-spacing: 1px;
+  position: relative;
+} */
+
+/* .instructions-close {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+} */
+
+/* .instructions-body {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.instructions-connection-box {
+  background-color: #f7ebb8;
+  padding: 12px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 15px;
+  color: #2b2b2b;
+  margin: 10px 0 12px 0;
+  white-space: pre-line;
+  line-height: 1.6;
+}
+
+.instructions-note {
+  font-style: italic;
+  color: #666;
+  margin-bottom: 16px;
+  font-size: 13px;
+} */
+
+/* .instructions-indent {
+  padding-left: 10px;
+  border-left: 3px solid #f7ebb8;
+  margin-bottom: 10px;
+}
+
+.instructions-footer {
+  padding: 12px;
+  border-top: 1px solid #ebdcb2;
+  background-color: #fffbf0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.instructions-footer button {
+  background-color: #573a24;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+} */
+
+/* .left-panel {
+  position: relative;
+} */
+ /* ===== WRAPPER FOR OPERATIONS + OBSERVATION TABLE ===== */
+.panel-content-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ===== INSTRUCTIONS INLINE OVERLAY ===== */
+.instructions-overlay-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #fffdf4;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  font-family: sans-serif;
+  overflow: hidden;
+}
+
+.instructions-header {
+  background-color: #573a24;
+  color: #fff;
+  padding: 16px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 20px;
+  letter-spacing: 1px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.instructions-close {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.instructions-body {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.instructions-connection-box {
+  background-color: #f7ebb8;
+  padding: 12px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 15px;
+  color: #2b2b2b;
+  margin: 10px 0 12px 0;
+  white-space: pre-line;
+  line-height: 1.6;
+}
+
+.instructions-note {
+  font-style: italic;
+  color: #666;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.instructions-indent {
+  padding-left: 10px;
+  border-left: 3px solid #f7ebb8;
+  margin-bottom: 10px;
+}
+
+.instructions-footer {
+  padding: 12px;
+  border-top: 1px solid #ebdcb2;
+  background-color: #fffbf0;
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.instructions-footer button {
+  background-color: #573a24;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Ensure left-panel uses flex column for the wrapper to work */
+.left-panel {
+  display: flex;
+  flex-direction: column;
+}
+/* ==========================================================================
+   FORMULA & VALUES MODAL POPUPS
+   ========================================================================== */
+
+Base modal container
+.formula-modal,
+.values-modal {
+  position: absolute;
+  left: 102%;
+  width: 440px;
+  background: var(--formula-bg);
+  border: 1px solid var(--formula-border);
+  border-radius: 12px;
+  box-shadow: var(--formula-shadow);
+  padding: 28px 32px;
+  z-index: 99999;
+  font-family: var(--formula-font);
+  color: var(--formula-text);
+  box-sizing: border-box;
+  line-height: 1.6;
+}
+
+/* Formula modal specific position */
+.formula-modal {
+  top: 20px;
+}
+
+/* Values modal specific position */
+.values-modal {
+  top: 76px;
+}
+
+/* Grid layout for formulas */
+.formula-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  row-gap: 18px;
+  column-gap: 32px;
+  font-size: 18px;
+  align-items: center;
+}
+
+/* Grid layout for corrected values */
+.values-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 16px;
+  column-gap: 24px;
+  font-size: 18px;
+  font-weight: 600;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+/* Full-width row spanning */
+.formula-grid .span-2,
+.values-grid .span-2 {
+  grid-column: span 2;
+}
+
+/* Italic math variables */
+.math-var {
+  font-style: italic;
+}
+
+/* Subscript styling */
+.math-sub {
+  font-size: 0.72em;
+  vertical-align: baseline;
+  position: relative;
+  top: 0.3em;
+  line-height: 0;
+  font-style: normal;
+}
+
+/* Fraction component */
+.math-fraction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  margin: 0 3px;
+  font-size: 1em;
+}
+
+.math-fraction__top {
+  border-bottom: 1.5px solid var(--formula-text);
+  padding: 0 4px 2px 4px;
+  text-align: center;
+  line-height: 1.1;
+}
+
+.math-fraction__bottom {
+  padding: 2px 4px 0 4px;
+  text-align: center;
+  line-height: 1.1;
+}
+
+/* Square root with overline */
+.math-sqrt {
+  display: inline-flex;
+  align-items: flex-start;
+  vertical-align: middle;
+}
+
+.math-sqrt__symbol {
+  font-size: 1.15em;
+  margin-right: 1px;
+  line-height: 1;
+}
+
+.math-sqrt__content {
+  border-top: 1.5px solid var(--formula-text);
+  padding: 0 3px;
+  margin-top: 2px;
+}
+
+/* Hover safe zone for modal */
+.formula-modal:hover,
+.values-modal:hover {
+  /* Keeps modal open when hovering the popup itself */
+}
+
+/* ==========================================================================
+
+
+/* ========== OPERATIONS SECTION ========== */
+.operations-section {
+  background: #f6ebd0;
+  border: 2px solid #8b7355;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: inset 0 2px 4px rgba(139, 115, 85, 0.1);
+}
+
+.operations-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  color: #5c4033;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+
+.operations-icon {
+  font-size: 16px;
+}
+
+.operation-btn-wrapper {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.operation-btn-wrapper:last-child {
+  margin-bottom: 0;
+}
+.operation-btn {
+  width: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, #faf7f0 0%, #eae2d1 100%);
+  border: 1px solid #c2b8a3;
+  border-bottom: 3px solid #aba089;
+  border-radius: 10px;
+  color: #41291d;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.04), inset 0 1px 0 #ffffff;
+  transition: all 0.1s ease;
+}
+
+.operation-btn:hover:not(:disabled) {
+  background: #eae2d1;
+  border-color: #aba089;
+}
+
+.operation-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  border-bottom-width: 2px;
+}
+
+.operation-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+/* .operation-btn {
+  width: 100%;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, #faf0e6 0%, #e8d5b7 100%);
+  border: 2px solid #a0826d;
+  border-radius: 8px;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 13px;
+  font-weight: bold;
+  color: #5c4033;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.operation-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #fff5e6 0%, #f0d5a0 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.operation-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+} */
+
+/* ========== DIALOG BOX ========== */
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  color: #5c4033;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #d4c4a8;
+}
+
+.dialog-icon {
+  font-size: 16px;
+}
+
+.formula-grid,
+.values-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formula-row,
+.values-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.formula-row span,
+.values-row span {
+  flex: 1;
+  color: #2c1810;
+}
+
+/* Fraction styling */
+.fraction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.fraction span:first-child {
+  border-bottom: 1px solid #2c1810;
+  padding-bottom: 2px;
+  margin-bottom: 2px;
+}
+
+/* ========== OBSERVATION TABLE ========== */
+.observation-section {
+  background: #f6ebd0;
+  border: 2px solid #8b7355;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: inset 0 2px 4px rgba(139, 115, 85, 0.1);
+}
+
+.observation-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  color: #5c4033;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+
+.observation-icon {
+  font-size: 16px;
+}
+
+/* ========== CONTROLS SECTION ========== */
+.controls-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.slider-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.slider-group input[type="range"] {
+  flex: 1;
+  height: 6px;
+  background: #d4c4a8;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.slider-group input[type="range"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.value-display {
+  min-width: 60px;
+  text-align: right;
+  font-weight: bold;
+  color: #5c4033;
+  font-size: 13px;
+}
+
+
+
+/* Main Container - MOVE & RESIZE THE WHOLE COMPONENT */
+.ammeter {
+  /* 📐 SCALING CONTROL: Adjust values if needed */
+  --dial-scale-x: 1;
+  --dial-scale-y: 1.11;
+
+  position: relative;
+  display: inline-block;
+  
+  /* 1. SHIFT: Positions the widget on your console panel */
+  margin-left: -407px;      
+  margin-right: 1px; 
+  
+  /* 2. RESIZE: Base container configuration */
+  width: 160px; 
+  overflow: visible !important;
+  height: auto !important;
+  padding-bottom: 30px;
+}
+
+/* Ammeter Background Dial */
+.ammeter__dial {
+  display: block;
+  width: 120%;       
+  height: auto;
+  
+  position: relative;
+  transform: translate(0px, 2px) scaleX(var(--dial-scale-x)) scaleY(var(--dial-scale-y)); 
+  transform-origin: center top;  
+  z-index: 1;                    
+}
+
+/* ============================================
+   NEEDLE PIVOT (Friend's Logic - ADAPTED)
+   ============================================
+   Positioned at dial center. 
+   Has EXPLICIT size so child image is NOT clipped.
+   transform-origin: 0 50% = pivot from LEFT CENTER
+   ============================================ */
+.ammeter__needle {
+  position: absolute;
+  
+  /* Exact centre of the rendered 160px dial (including its 1.11 Y scale). */
+  top: 121px;
+  left: 80px;
+  
+  z-index: 2;
+  
+  /* EXPLICIT SIZE — same as your friend's: 47px width, some height */
+  /* This prevents the element from collapsing to 0 and clipping children */
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  
+  /* CRITICAL: Pivot from left center (0% X, 50% Y) */
+  transform-origin: 0 0;
+  
+  /* ONLY rotation — no translate! */
+  transform: rotate(var(--ammeter-needle-rotation, -100deg));
+  
+  transition: transform 0.3s ease-out;
+  
+  /* DEBUG: Uncomment to see pivot area */
+  /* background: rgba(255, 0, 0, 0.3); */
+}
+
+/* ============================================
+   NEEDLE IMAGE (Friend's Logic - EXACT)
+   ============================================
+   The actual visual needle, positioned relative
+   to the pivot. Extends LEFT from the pivot.
+   ============================================ */
+.ammeter__needle-image {
+  position: absolute;
+  
+  /* Center vertically on the pivot line */
+  top: -44px;
+  
+  /* Offset left so needle base sits AT the pivot point (left edge of wrapper) */
+  left: -35px;
+  
+  display: block;
+  width: 70px;        /* Your needle image width */
+  max-width: none;
+  height: auto;
+  
+  /* Center the image vertically */
+  object-fit: contain;
+  
+  /* If your needle points UP in the PNG, uncomment below: */
+  /* transform: translateY(-50%) rotate(-90deg); */
+}
+
+/* Terminals Structural Layout */
+.ammeter__terminals {
+  position: absolute;
+  bottom: 1%;     
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  padding: 0 20px;
+  box-sizing: border-box;
+  z-index: 3;      
+}
+
+/* Individual Terminal Nodes */
+.terminal {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+/* ==========================================
+   
+/* ==========================================================================
+   VOLTMETER MODIFIERS (V1, V2, V3, V4)
+   ========================================================================== */
+
+/* ==========================================================================
+   VOLTAGE DIAL POSITIONING (Your Existing Styles — UNCHANGED)
+   ========================================================================== */
+
+/* V1 (Top Row) */
+.voltmeter--V1 {
+  width: 200px;
+  height: 110px;
+  position: relative;
+  right: 292px;
+}
+.voltmeter--V1 .voltmeter__image {
+  transform: scaleX(0.8) scaleY(0.7);
+  transform-origin: center top; 
+}
+
+/* V2 (Top Right) */
+.voltmeter--V2 {
+  width: 195px;
+  height: 105px;
+  position: relative;
+  top: -300px;
+  right: -30px;
+}
+.voltmeter--V2 .voltmeter__image {
+  transform: scaleX(0.8) scaleY(0.7);
+  transform-origin: center top;
+}
+
+/* V3 (Middle Right) */
+.voltmeter--V3 {
+  width: 200px;
+  height: 110px;
+  position: relative;
+  top: -150px;
+  right: -30px;
+}
+.voltmeter--V3 .voltmeter__image {
+  transform: scaleX(0.8) scaleY(0.7);
+  transform-origin: center top;
+}
+
+/* V4 (Bottom Right) */
+.voltmeter--V4 {
+  width: 200px;
+  height: 110px;
+  position: relative;
+  top: 10px;
+  right: -30px;
+}
+.voltmeter--V4 .voltmeter__image {
+  transform: scaleX(0.8) scaleY(0.7);
+  transform-origin: center top;
+}
+
+/* ==========================================================================
+   NEEDLE PIVOT (Friend's Logic — Same as Working Ammeter)
+   ==========================================================================
+   Zero-size rotation anchor positioned at dial center.
+   transform-origin: 0 50% = pivot from LEFT CENTER
+   ========================================================================== */
+
+.voltmeter__needle {
+  position: absolute;
+  z-index: 10;
+  
+  /* EXPLICIT SIZE — prevents clipping, same as working ammeter */
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  
+  /* CRITICAL: Pivot from left center (0% X, 50% Y) */
+  transform-origin: 0 0;
+  
+  /* ONLY rotation — no translate! */
+  transform: rotate(var(--voltmeter-needle-rotation, -100deg));
+  
+  transition: transform 0.3s ease-out;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   NEEDLE IMAGE (Friend's Logic — Exact Same Pattern)
+   ==========================================================================
+   The actual visual needle, positioned relative to the pivot.
+   Extends LEFT from the pivot point.
+   ========================================================================== */
+
+.voltmeter__needle-image {
+  position: absolute;
+  
+  /* Center vertically on the pivot line */
+  top: -44px;
+  
+  /* Offset left so needle base sits AT the pivot point */
+  left: -35px;
+  
+  display: block;
+  width: 70px;        /* Your needle image width */
+  max-width: none;
+  height: auto;
+  
+  /* Center the image vertically on the pivot */
+  object-fit: contain;
+}
+
+/* ==========================================================================
+   INDEPENDENT NEEDLE POSITIONS PER VOLTMETER
+   ========================================================================== */
+
+/* V1 (Top Left) */
+.voltmeter__needle--V1 {
+  top: 129px;
+  left: 50%;
+}
+
+/* V2 (Top Right) */
+.voltmeter__needle--V2 {
+  top: 126px;
+  left: 50%;
+}
+
+/* V3 (Middle Right) */
+.voltmeter__needle--V3 {
+  top: 129px;
+  left: 50%;
+}
+
+/* V4 (Bottom Right) */
+.voltmeter__needle--V4 {
+  top: 129px;
+  left: 50%;
+}
+/* ==========================================================================
+   1. MAIN CONTAINER & BACKGROUND DIAL FACE
+   ========================================================================== */
+/* ==========================================================================
+   WATTMETER CONTAINER
+   ========================================================================== */
+.wattmeter {
+  /* 🎛️ DIAL CONTROL PANEL: ADJUST DIAL SIZE & POSITION FREELY HERE */
+  --dial-width: 153px;
+  --dial-height: auto;
+  
+  --dial-shift-x: -340px;
+  --dial-shift-y: 14.5px;
+  
+  --dial-scale-x: 1;
+  --dial-scale-y: 1.1;
+
+  position: relative;
+  display: inline-block;
+  
+  width: var(--dial-width);
+  height: var(--dial-height);
+  transform: translate(var(--dial-shift-x), var(--dial-shift-y)) 
+             scaleX(var(--dial-scale-x)) 
+             scaleY(var(--dial-scale-y));
+}
+
+/* Background Dial Image */
+.wattmeter__background-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ==========================================================================
+   NEEDLE PIVOT (Friend's Logic — Same as Working Ammeter)
+   ==========================================================================
+   Zero-size rotation anchor positioned at dial center.
+   transform-origin: 0 50% = pivot from LEFT CENTER
+   ========================================================================== */
+.wattmeter__needle {
+  position: absolute;
+  
+  /* Exact centre of the rendered 153px wattmeter scale. */
+  top: 112px;
+  left: 76.5px;
+  
+  z-index: 10;
+  
+  /* EXPLICIT SIZE — prevents clipping, same as working ammeter */
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  
+  /* CRITICAL: Pivot from left center (0% X, 50% Y) */
+  transform-origin: 0 0;
+  
+  /* ONLY rotation — no translate! */
+  transform: rotate(var(--wattmeter-needle-rotation, -100deg));
+  
+  transition: transform 0.3s ease-out;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   NEEDLE IMAGE (Friend's Logic — Exact Same Pattern)
+   ==========================================================================
+   The actual visual needle, positioned relative to the pivot.
+   Extends LEFT from the pivot point.
+   ========================================================================== */
+.wattmeter__needle-image {
+  position: absolute;
+  
+  /* The source artwork's hub is at about (50%, 63.2%). These offsets keep
+     that hub exactly on the dial pivot while extending the pointer far enough
+     to meet the wattmeter's printed scale. */
+  top: -58px;
+  left: -46px;
+  
+  display: block;
+  width: 92px;
+  max-width: none;
+  height: auto;
+  
+  object-fit: contain;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.24));
+}
+/* ==========================================================================
+   VARIAC INSTRUMENT STYLES (Virtual Lab Theme)
+   ========================================================================== */
+
+/* Main outer box container for the instrument card */
+.variac-container {
+  position: relative;
+  width: 370px;   
+  height: 350px;  
+  margin-left: -5px;   
+  margin-top: -70px;    
+  display: inline-block;
+  user-select: none;        
+  overflow: visible;        
+  background: transparent;
+}
+
+/* Base structural panel card */
+.variac-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  z-index: 1;
+}
+
+/* Dead-center alignment over the circular dial space */
+.variac-knob-wrapper {
+  position: absolute;
+  top: 52.5%;                 
+  left: 35.5%;                
+  transform: translate(-50%, -50%); 
+  width: 24%;
+  height: 25.5%;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  cursor: grab;
+}
+
+/* Changes cursor state instantly when clicked and dragged */
+.variac-knob-wrapper.dragging {
+  cursor: grabbing;
+}
+
+/* The actual rotating inner wheel element (inner.jpg) */
+.variac-knob-inner {
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+  border-radius: 50%;
+  pointer-events: none;     
+  display: block;
+  will-change: transform;
+  transform: rotate(293deg);
+  transform-origin: 50% 50%;
+}
+
+@keyframes variac-knob-to-thirty {
+  from { transform: rotate(293deg); }
+  to { transform: rotate(335deg); }
+}
+
+.variac-knob-inner--to-thirty {
+  animation: variac-knob-to-thirty 0.8s cubic-bezier(0.22, 0.8, 0.3, 1) forwards;
+}
+
+/* ==========================================================================
+   POWER TOGGLE BUTTON OVERLAY (Click Target Layer)
+   ========================================================================== */
+.variac-power-button-target {
+  position: absolute;
+  top: 154px;               
+  left: 260px;              
+  width: 54px;              
+  height: 54px;             
+  border-radius: 50%;
+  border: none;
+  background:transparent;  
+  outline: none;
+  z-index: 15;              
+}
+
+/* Hover feedback only applies while it remains in the OFF state */
+.variac-power-button-target:not(.disabled):hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ==========================================================================
+   1. FREE MOVEMENT (Move the ENTIRE component - Image + Label together)
+   ========================================================================== */
+/* ==========================================================================
+   RESISTOR COMPONENT - POSITION & SIZE CONTROLS
+   Edit the CSS variables below to resize and reposition everything
+   ========================================================================== */
+
+.resistor-component {
+  /* === POSITION ON PANEL === */
+  --resistor-pos-x: 360px;      /* 👈 Move left/right */
+  --resistor-pos-y: 270px;      /* 👈 Move up/down */
+
+  /* === IMAGE SIZE === */
+  --resistor-width: 300px;      /* 👈 Image width */
+  --resistor-height: auto;      /* 👈 Image height (auto keeps ratio, or use px) */
+
+  /* === LABEL POSITION === */
+  --label-offset-x: 0px;        /* 👈 Label left/right shift */
+  --label-offset-y: 80px;      /* 👈 Label up/down shift (negative = above image) */
+  margin: 0 0 12px 0;
+  font-family: 'Arial', sans-serif;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #2b2b2b;
+
+  /* --- Internal layout --- */
+  position: absolute;
+  left: var(--resistor-pos-x);
+  top: var(--resistor-pos-y);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
+  width: auto;
+  height: auto;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   LABEL
+   ========================================================================== */
+.resistor-component__label {
+  position: relative;
+  left: var(--label-offset-x);
+  top: var(--label-offset-y);
+  color: var(--label-color);
+  font-family: 'Arial Black', Arial, sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   VALUE DROPDOWN - sits in the blank space just below the resistor image
+   ========================================================================== */
+.resistor-component__value-select {
+  /* 👈 Fine-tune these to nudge the dropdown under the image */
+  --value-select-offset-x: -35px; /* keeps clear of the inductor selector */
+  --value-select-offset-y: -88px;
+
+  position: relative;
+  left: var(--value-select-offset-x);
+  top: var(--value-select-offset-y);
+  align-self: center;
+  pointer-events: auto;
+  cursor: pointer;
+  font-family: 'Arial', sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  color: #1e140e;
+  background: linear-gradient(180deg, #fff5e5, #d4c4ad);
+  border: 1px solid rgba(69, 48, 32, 0.5);
+  border-radius: 6px;
+  padding: 2px 6px;
+  outline: none;
+  appearance: auto;
+  z-index: 10;
+}
+
+.resistor-component__value-select:hover {
+  filter: brightness(1.05);
+}
+
+.resistor-component__value-select:focus-visible {
+  outline: 2px solid #2b7de9;
+  outline-offset: 1px;
+}
+
+/* ==========================================================================
+   INDUCTOR VALUE DROPDOWN - placed near the blue marker beside the inductor.
+   Nudge --inductor-select-x / --inductor-select-y below to align precisely.
+   ========================================================================== */
+.inductor-component__value-select {
+  --inductor-select-x: 135px; /* right of the INDUCTOR label and resistor selector */
+  --inductor-select-y: 118px;
+
+  position: absolute;
+  left: var(--inductor-select-x);
+  top: var(--inductor-select-y);
+  pointer-events: auto;
+  cursor: pointer;
+  font-family: 'Arial', sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  color: #1e140e;
+  background: linear-gradient(180deg, #fff5e5, #d4c4ad);
+  border: 1px solid rgba(69, 48, 32, 0.5);
+  border-radius: 6px;
+  padding: 2px 6px;
+  outline: none;
+  appearance: auto;
+  z-index: 1001;
+}
+
+.inductor-component__value-select:hover {
+  filter: brightness(1.05);
+}
+
+.inductor-component__value-select:focus-visible {
+  outline: 2px solid #2b7de9;
+  outline-offset: 1px;
+}
+
+/* ==========================================================================
+   CAPACITOR VALUE DROPDOWN
+   The dropdown lives INSIDE .capacitor-asset-wrapper (the element that has
+   transform: translate(-500px,150px) scale(2.2)), so it always travels and
+   scales together with the image — it can never end up "lost" somewhere
+   else on the board the way an independently-positioned absolute element
+   could.
+
+   .capacitor-select-anchor cancels the wrapper's 2.2x scale (scale(0.4545))
+   so the dropdown itself renders at normal, readable size, pinned to the
+   bottom-center of the image (left:45px / top:180px = the image's own
+   width/height in .capacitor-asset-wrapper).
+
+   Because the scale is cancelled, --capacitor-select-x / -y below are
+   PLAIN, REAL on-screen pixels — increase/decrease them to nudge the
+   dropdown left/right/up/down; the numbers behave exactly as you'd expect,
+   with no need to compensate for the 2.2x zoom.
+   ========================================================================== */
+.capacitor-select-anchor {
+  position: absolute;
+  left: 0px;    /* left edge of .capacitor-asset-wrapper -> dropdown sits to the left of the image */
+  top: 90px;    /* half of .capacitor-asset-wrapper's 180px height -> vertical center */
+  transform: scale(0.4545); /* 1 / 2.2, cancels the wrapper's scale(2.2) */
+  transform-origin: 0 0;
+  pointer-events: none; /* re-enabled on the select itself below */
+  z-index: 5000; /* forced above every other panel/meter so it can't be hidden underneath them */
+}
+
+.capacitor-component__value-select {
+  --capacitor-select-x: 50px; /* 👈 left/right, real screen pixels (negative = further left) */
+  --capacitor-select-y: -75px;   /* 👈 up/down, real screen pixels */
+
+  position: relative;
+  transform: translate(calc(-100% + var(--capacitor-select-x)), calc(-50% + var(--capacitor-select-y)));
+  display: inline-block;
+  pointer-events: auto;
+  cursor: pointer;
+  font-family: 'Arial', sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+  color: #1e140e;
+  background: linear-gradient(180deg, #fff5e5, #d4c4ad);
+  border: 1px solid rgba(69, 48, 32, 0.5);
+  border-radius: 6px;
+  padding: 2px 6px;
+  outline: none;
+  appearance: auto;
+
+  /* 🔴 TEMP DEBUG - uncomment the line below if you still can't spot the dropdown,
+     then delete it again once you've nudged --capacitor-select-x / -y into place */
+  /* outline: 3px solid red; */
+}
+
+.capacitor-component__value-select:hover {
+  filter: brightness(1.05);
+}
+
+.capacitor-component__value-select:focus-visible {
+  outline: 2px solid #2b7de9;
+  outline-offset: 1px;
+}
+
+/* Shared, accessible treatment for the three component selectors. Positional
+   rules above remain independent so each control stays aligned to its asset. */
+:is(
+  .resistor-component__value-select,
+  .inductor-component__value-select,
+  .capacitor-component__value-select
+) {
+  min-width: 112px;
+  height: 34px;
+  padding: 0 34px 0 12px;
+  border: 1px solid rgba(92, 60, 38, 0.52);
+  border-radius: 8px;
+  background-color: #eee1cd;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.25 6 6.25l5-5' fill='none' stroke='%23613d27' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #fff8ec, #ded0ba);
+  background-position: right 11px center, 0 0;
+  background-repeat: no-repeat;
+  background-size: 12px 8px, 100% 100%;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    0 2px 5px rgba(64, 34, 16, 0.16);
+  appearance: none;
+  color-scheme: light;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+:is(
+  .resistor-component__value-select,
+  .inductor-component__value-select,
+  .capacitor-component__value-select,
+  .calculation-reading-select
+) option {
+  color: #24170f;
+  background: #fffaf2;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+:is(
+  .resistor-component__value-select,
+  .inductor-component__value-select,
+  .capacitor-component__value-select
+):hover:not(:disabled) {
+  border-color: #87522f;
+  filter: brightness(1.04);
+}
+
+:is(
+  .resistor-component__value-select,
+  .inductor-component__value-select,
+  .capacitor-component__value-select
+):focus-visible {
+  outline: none;
+  border-color: #2877c7;
+  box-shadow: 0 0 0 3px rgba(40, 119, 199, 0.2), 0 4px 9px rgba(64, 34, 16, 0.16);
+}
+
+:is(
+  .resistor-component__value-select,
+  .inductor-component__value-select,
+  .capacitor-component__value-select
+):disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.45);
+  opacity: 0.58;
+}
+
+/* ==========================================================================
+   BODY ASSEMBLY (holds terminals + image)
+   ========================================================================== */
+.resistor-body-assembly {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--resistor-width);
+  height: var(--resistor-height);
+}
+
+/* ==========================================================================
+   IMAGE WRAPPER & GRAPHIC
+   ========================================================================== */
+.resistor-asset-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resistor-asset-graphic {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;           /* 👈 Fixes potential inline gap issues */
+  max-width: 100%;          /* 👈 Ensures it doesn't overflow */
+}
+
+/* ==========================================================================
+   TERMINALS (connection points)
+   ========================================================================== */
+.connection-terminal {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  z-index: 5;
+  cursor: pointer;
+}
+
+.connection-terminal--plus {
+  background-color: #ff4444;
+  left: -6px;               /* 👈 Adjust terminal position */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.connection-terminal--minus {
+  background-color: #4444ff;
+  right: -6px;              /* 👈 Adjust terminal position */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* ==========================================================================
+   TERMINAL NUMBER LABELS
+   ========================================================================== */
+.terminal-number-label {
+  position: absolute;
+  font-size: 11px;
+  font-weight: bold;
+  color: #333;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.terminal-number-label--plus {
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.terminal-number-label--minus {
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* ==========================================================================
+   VALUE DISPLAY (if you use .resistor-value elsewhere)
+   ========================================================================== */
+.resistor-value {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  min-width: 60px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgba(69, 48, 32, 0.5);
+  border-radius: 6px;
+  color: #1e140e;
+  background: linear-gradient(180deg, #fff5e5, #d4c4ad);
+  font-size: 19px;
+  font-weight: 900;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.86), 
+              0 2px 3px rgba(0, 0, 0, 0.35);
+}
+/* ==========================================================================
+   MCB Component Styles (Toggle Button Only)
+   ========================================================================== */
+
+/* Main Container */
+/* Main Container */
+.mcb {
+  position: absolute;
+  display: inline-block;
+  user-select: none;
+
+  /* ========================================= */
+  /* CHANGE THESE VALUES TO MOVE THE CONTAINER */
+  /* ========================================= */
+  top: 30px;          /* Distance from the top of the parent container */
+  left: -138px;        /* Distance from the left of the parent container */
+  width: 400px;       /* Set a specific width so it doesn't stretch 100% */
+  /* ========================================= */
+}
+
+/* Image behavior */
+.mcb__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none; /* Prevents image dragging from interfering with clicks */
+}
+
+/* Invisible Toggle Button Overlay */
+.mcb__button {
+  /* Core layout positioning (top, left, width, height, opacity) is handled inline in your JSX. 
+     We manage reset behaviors and focus states here. */
+  outline: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Accessible focus ring for keyboard navigation without spoiling the mouse-click visuals */
+.mcb__button:focus-visible {
+  outline: 2px dashed #4ade80;
+  outline-offset: -4px;
+  border-radius: 4px;
+}
+/* ==========================================================================
+   Virtual Lab Component: Inductor Workbench Layout
+   ========================================================================== */
+
+/* Main component container positioning on the workbench board */
+.inductor-component {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
+  padding: 10px;
+  background: transparent;
+  position: relative; /* Keeps the absolute wrapper contained to this component space */
+}
+
+.inductor-component__label {
+  /* margin: 0 0 12px 0;
+  font-family: 'Arial', sans-serif;
+  font-weight: bold ;
+  letter-spacing: 1px;
+  color: #2b2b2b; */
+  position: relative;
+  left: var(--label-offset-x);
+  top: var(--label-offset-y);
+  color: var(--label-color);
+  font-family: 'Arial Black', Arial, sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+
+  /* 📐 1. RESIZE THE LABEL HERE */
+  font-size: 14px; /* Increased from 11px. Adjust as needed. */
+
+  /* 📍 2. MOVE THE LABEL HERE */
+  position: relative;
+  /* Positive values move it right/down; negative values move it left/up */
+  left: 50px;      /* Nudge it right to align over your shifted graphic */
+  top: 160px;      /* Nudge it up or down (e.g., 15px to push down) */
+}
+
+/* ==========================================================================
+   Inductor Toroid Core Asset (Resize Independently Here)
+   ========================================================================== */
+.inductor-asset-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;  /* Keep the base layout footprint safe so it doesn't push elements away */
+  height: 270px; 
+
+  /* 🚀 FORCE ENLARGEMENT HERE */
+  /* 1.0 = 100%, 1.5 = 150%, 2.0 = 200%, etc. */
+  transform: translate(45px, 160px) scale(1.7);
+  
+  image-rendering: auto;
+}
+
+.inductor-asset-graphic {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain; /* Prevents the image from stretching awkwardly */
+  filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.15)); 
+}
+.equipment-panel .eq-c1 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  justify-self: center;
+  align-self: center;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: visible;
+  padding: 4px;
+}
+
+/* ==========================================================================
+   Capacitor Component Container
+   ========================================================================== */
+.capacitor-component {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
+  padding: 5px;
+  background: transparent;
+  position: relative; 
+  z-index: 50; /* 👈 bumped so its dropdown isn't hidden underneath neighboring equipment */
+}
+
+
+.capacitor-asset-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  image-rendering: auto;
+  position: relative; /* containing block for .capacitor-select-anchor */
+
+  /* 📐 1. RESIZE THE BASE CONTAINER BOUNDS HERE */
+  width: 90px;   
+  height: 180px; 
+
+ 
+  transform: translate(-500px, 150px) scale(2.2); 
+}
+
+.capacitor-asset-graphic {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain; /* Ensures the graphic scales proportionally without distortion */
+  filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.2)); 
+}
+@media print {
+  /* 1. Force landscape orientation at the CSS level */
+  @page {
+    size: landscape;
+    margin: 6mm 8mm; 
+  }
+
+  /* 2. Prevent horizontal clipping and scroll spaces */
+  html, body {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #ffffff !important;
+    overflow-x: hidden !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 3. Strip layout constraints on main view wrappers */
+  #app-wrapper,
+  #app-viewport {
+    width: 100% !important;
+    height: auto !important;
+    max-width: none !important;
+    position: static !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  /* 4. Set zoom to expand width safely across a landscape page sheet */
+  #app-scale {
+    width: 1440px !important;
+    height: auto !important;
+    position: relative !important;
+    transform: none !important;
+    margin: 0 auto !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  /* 5. Keep upper workspace modules structurally aligned */
+  .simulation-shell {
+    width: 1440px !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  .workspace-grid {
+    width: 1440px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow: visible !important;
+  }
+
+  .left-panel,
+  .right-panel {
+    width: auto !important;
+    max-width: none !important;
+    overflow: visible !important;
+  }
+
+  /* 6. Enforce matching widths on the lower panel elements so both pages match up */
+  #graph-panel,
+  .graph-panel--separate,
+  .theoretical-calculations-section,
+  .calculations-container {
+    width: 1440px !important;
+    max-width: 1440px !important;
+    min-width: 1440px !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    margin-top: 40px !important;
+    page-break-inside: avoid !important; /* Prevents splitting calculations across pages */
+  }
+
+  /* 7. Retain visibility for active operations and action buttons */
+  .action-buttons-container,
+  .operations-container,
+  button {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .instructions-overlay-panel,
+  .sr-only {
+    display: none !important;
+  }
+  @media print {
+  /* ...your existing print styles... */
+
+  /* NEW: Ensure formula modal prints if visible */
+  .formula-modal,
+  .values-modal {
+    position: static !important;
+    left: auto !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    page-break-inside: avoid !important;
+  }
+}
+}
+/* ============================================
+   STEP-BY-STEP INSTRUCTION HIGHLIGHTING
+   ============================================ */
+
+/* ---------- Active Step (currently being performed) ---------- */
+.instruction-step-active {
+  background: linear-gradient(90deg, rgba(160, 82, 45, 0.18) 0%, rgba(160, 82, 45, 0.05) 100%);
+  border-left: 4px solid #a0522d;
+  padding: 8px 12px;
+  margin-left: -8px;
+  font-weight: 600;
+  color: #2b1d0c;
+  border-radius: 0 6px 6px 0;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---------- Completed Step (already done) ---------- */
+.instruction-step-completed {
+  opacity: 0.45;
+  color: #7a6b5a;
+  text-decoration: line-through;
+  text-decoration-color: rgba(122, 107, 90, 0.4);
+  text-decoration-thickness: 1px;
+  padding-left: 8px;
+  transition: all 0.3s ease;
+}
+
+.instruction-step-completed strong {
+  color: #7a6b5a;
+}
+
+/* ---------- Future Step (not yet reached) ---------- */
+.instructions-body p:not(.instruction-step-active):not(.instruction-step-completed):not(.instructions-note):not(.instructions-indent) {
+  opacity: 0.75;
+  padding-left: 8px;
+  transition: all 0.3s ease;
+}
+
+/* ============================================
+   ACTION BUTTON HIGHLIGHTING
+   ============================================ */
+
+/* Wrapper highlight - ring pulse */
+.action-button-wrapper-box.action-button--highlighted {
+  position: relative;
+  z-index: 10;
+}
+
+.action-button-wrapper-box.action-button--highlighted::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 10px;
+  border: 2px solid #a0522d;
+  animation: button-ring-pulse 1.8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Button glow effect */
+.action-button.action-button--pulse {
+  animation: button-glow-pulse 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   CONNECTION LAB HIGHLIGHTING
+   ============================================ */
+
+.connection-lab--connect-phase {
+  position: relative;
+}
+
+.connection-lab--connect-phase::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 12px;
+  border: 2px dashed #a0522d;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ============================================
+   CONTROL PANEL HIGHLIGHTING
+   ============================================ */
+
+.control-panel--calculate-phase .section-card--highlighted {
+  position: relative;
+}
+
+.control-panel--calculate-phase .section-card--highlighted::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 10px;
+  border: 2px solid #a0522d;
+  animation: panel-glow 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ============================================
+   CALCULATION PANEL HIGHLIGHTING
+   ============================================ */
+
+.calculation-panel--active-phase {
+  position: relative;
+}
+
+.calculation-panel--active-phase::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 10px;
+  border: 2px solid #a0522d;
+  animation: panel-glow 2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.calculation-panel--active-phase .graph-panel__heading h2 {
+  color: #a0522d;
+}
+
+.verify-button--highlighted {
+  animation: verify-pulse 1.5s ease-in-out infinite;
+}
+
+/* ============================================
+   REPORT CONTROLS HIGHLIGHTING
+   ============================================ */
+
+.report-button--highlighted {
+  animation: report-glow 1.8s ease-in-out infinite;
+}
+
+/* ============================================
+   KEYFRAME ANIMATIONS
+   ============================================ */
+
+@keyframes button-ring-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes button-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(160, 82, 45, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 16px 4px rgba(160, 82, 45, 0.2);
+  }
+}
+
+@keyframes panel-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(160, 82, 45, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px 4px rgba(160, 82, 45, 0.15);
+  }
+}
+
+@keyframes verify-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(92, 64, 51, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 20px 4px rgba(92, 64, 51, 0.2);
+    transform: scale(1.02);
+  }
+}
+
+@keyframes report-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px 4px rgba(76, 175, 80, 0.25);
+  }
+}
+
+/* ============================================
+   INSTRUCTIONS OVERLAY PANEL STYLES
+   ============================================ */
+
+.instructions-overlay-panel {
+  background: #f4ebd4;
+  border: 1px solid #d4c4a8;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(58, 36, 16, 0.25);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.instructions-header {
+  background: linear-gradient(180deg, #5c4033 0%, #3d2b1f 100%);
+  color: #f4ebd4;
+  padding: 14px 20px;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 1px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 12px 12px 0 0;
+}
+
+.instructions-close {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #f4ebd4;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.instructions-close:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.instructions-body {
+  padding: 20px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #3d2b1f;
+}
+
+.instructions-body p {
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+
+.instructions-connection-box {
+  background: #e8dcc8;
+  border: 1px solid #d4c4a8;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  color: #5c4033;
+  margin: 10px 0;
+  white-space: pre-line;
+}
+
+.instructions-note {
+  background: rgba(160, 82, 45, 0.08);
+  border-left: 3px solid #a0522d;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #7a5c3a;
+  border-radius: 0 4px 4px 0;
+}
+
+.instructions-indent {
+  padding-left: 24px;
+  font-size: 12px;
+  color: #6b5a48;
+}
+
+.instructions-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #d4c4a8;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.instructions-footer button {
+  background: linear-gradient(180deg, #5c4033 0%, #3d2b1f 100%);
+  color: #f4ebd4;
+  border: none;
+  padding: 8px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.instructions-footer button:hover {
+  box-shadow: 0 4px 12px rgba(92, 64, 51, 0.3);
+  transform: translateY(-1px);
+}
