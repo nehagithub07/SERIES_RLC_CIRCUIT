@@ -1,93 +1,154 @@
-// 1. DIRECT AUDIO PATH STRINGS (Cleaned up from JSON mapping)
-const afterCorrVerifAudio = "/audio/After correct verification, verify button.wav";
-const forCorrConnCheckClickAudio = "/audio/For correct connections, check click.wav";
-const genRepBtnClickAudio = "/audio/Generate Report button click.wav";
+import { resolveAudioAsset } from './audioAssets.js'
 
-// 2. CREATE AUDIO OBJECTS
-const alertSounds = {
-  // Setup interface & connections
-  aiGuideClick: typeof Audio !== "undefined" ? new Audio('/audio/AI Guide click.wav') : null,
-  interfaceWalkthroughComplete: typeof Audio !== "undefined" ? new Audio('/audio/The interface walkthrough is now complete.wav') : null,
-  correctConnections: typeof Audio !== "undefined" ? new Audio('/audio/Correct Connections.wav') : null,
-  connectTerminal2To24: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 2 to terminal 24.wav') : null,
-  connectTerminal3To25: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 3 to terminal 25.wav') : null,
-  connectTerminal4To26: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 4 to terminal 26.wav') : null,
-  connectTerminal5To25: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 5 to terminal 25.wav') : null,
-  connectTerminal6To9: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 6 to terminal 9.wav') : null,
-  connectTerminal9To10: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 9 to terminal 10.wav') : null,
-  connectTerminal7To18: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 7 to terminal 18.wav') : null,
-  connectTerminal7To26: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 7 to terminal 26.wav') : null,
-  connectTerminal8To17: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 8 to terminal 17.wav') : null,
-  connectTerminal11To17: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 11 to terminal 17.wav') : null,
-  connectTerminal12To18: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 12 to terminal 18.wav') : null,
-  connectTerminal13To19: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 13 to terminal 19.wav') : null,
-  connectTerminal14To20: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 14 to terminal 20.wav') : null,
-  connectTerminal15To21: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 15 to terminal 21.wav') : null,
-  connectTerminal16To22: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 16 to terminal 22.wav') : null,
-  connectTerminal18To19: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 18 to terminal 19.wav') : null,
-  connectTerminal20To21: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 20 to terminal 21.wav') : null,
-  connectTerminal22To26: typeof Audio !== "undefined" ? new Audio('/audio/Connect terminal 22 to terminal 26.wav') : null,
-  
-  // Checking rules & validation alerts
-  guideAllComplete: typeof Audio !== "undefined" ? new Audio('/audio/Guide all complete conn.wav') : null,
-  wrongConn: typeof Audio !== "undefined" ? new Audio('/audio/Wrong connection.wav') : null,
-  multiWrong: typeof Audio !== "undefined" ? new Audio('/audio/Multiple wrong connections.wav') : null,
-  firstCheck: typeof Audio !== "undefined" ? new Audio('/audio/1st time check button click.wav') : null,
-  autoConnect: typeof Audio !== "undefined" ? new Audio('/audio/Autoconnect.wav') : null,
-  mcbAlert: typeof Audio !== "undefined" ? new Audio('/audio/Before connection, on-click MCB Alert.wav') : null,
-  firstAutoTransClick: typeof Audio !== "undefined" ? new Audio('/audio/1st time autotransformer click or after ch...wav') : null,
-  forCorrConnCheckClick: typeof Audio !== "undefined" ? new Audio(forCorrConnCheckClickAudio) : null,
-  
-  // Simulation hardware operational phases
-  mcbOn: typeof Audio !== "undefined" ? new Audio('/audio/MCB ON.wav') : null,
-  afterAutoTransOn: typeof Audio !== "undefined" ? new Audio('/audio/After the autotransformer is ON.wav') : null,
-  afterVolSet: typeof Audio !== "undefined" ? new Audio('/audio/After Voltage is set.wav') : null,
-  
-  // Table action & Calculations verification responses
-  firstReadAdded: typeof Audio !== "undefined" ? new Audio('/audio/1st readings added.wav') : null,
-  afterReadAddClick: typeof Audio !== "undefined" ? new Audio('/audio/After taking the readings, Add click.wav') : null,
-  afterCorrVerif: typeof Audio !== "undefined" ? new Audio(afterCorrVerifAudio) : null,
-  incompltMultiVal: typeof Audio !== "undefined" ? new Audio('/audio/Incomplete more than one value.wav') : null,
-  incompltOneVal: typeof Audio !== "undefined" ? new Audio('/audio/Incomplete one value.wav') : null,
-  incorrCalcMulti: typeof Audio !== "undefined" ? new Audio('/audio/Incorrect calculations, more than one.wav') : null,
-  incorrCalcOne: typeof Audio !== "undefined" ? new Audio('/audio/Incorrect calculation, one only.wav') : null,
-  
-  // Footer utilities / report actions
-  genRepBtnClick: typeof Audio !== "undefined" ? new Audio(genRepBtnClickAudio) : null,
-  reset: typeof Audio !== "undefined" ? new Audio('/audio/Reset.wav') : null,
-  print: typeof Audio !== "undefined" ? new Audio('/audio/Print.wav') : null,
-};
+const ALERT_AUDIO_SOURCES = {
+  // Connection and setup alerts
+  aiGuideClick: 'AI Guide click.wav',
+  interfaceWalkthroughComplete: 'The interface walkthrough is now complete..wav',
+  correctConnections: 'Click and drag the wire from terminal 1 and drop it on terminal 23.wav',
+  connectTerminal2To24: "Let's move on to the next connection. Connect terminal 2 to terminal 24..wav",
+  connectTerminal3To25: 'Connect terminal 3 to terminal 25.wav',
+  connectTerminal4To26: 'Connect terminal 4 to terminal 26.wav',
+  connectTerminal5To25: 'Connect terminal 5 to terminal 25.wav',
+  connectTerminal6To9: 'Connect terminal 6 to terminal 9.wav',
+  connectTerminal9To10: 'Connect terminal 9 to terminal 10.wav',
+  connectTerminal7To18: 'Connect terminal 7 to terminal 18.wav',
+  connectTerminal7To26: 'Connect terminal 7 to terminal 26.wav',
+  connectTerminal8To17: 'Connect terminal 8 to terminal 17.wav',
+  connectTerminal11To17: 'Connect terminal 11 to terminal 17.wav',
+  connectTerminal12To18: 'Connect terminal 12 to terminal 18.wav',
+  connectTerminal13To19: 'Connect terminal 13 to terminal 19.wav',
+  connectTerminal14To20: 'Connect terminal 14 to terminal 20.wav',
+  connectTerminal15To21: 'Connect terminal 15 to terminal 21.wav',
+  connectTerminal16To22: 'Connect terminal 16 to terminal 22..wav',
+  connectTerminal18To19: 'Connect terminal 18 to terminal 19. .wav',
+  connectTerminal20To21: 'Connect terminal 20 to terminal 21..wav',
+  connectTerminal22To26: 'Connect terminal 22 to terminal 26.wav',
+  guideAllComplete: 'Guide all complete conn.wav',
+  wrongConn: 'Wrong connection.wav',
+  multiWrong: 'Multiple wrong connections.wav',
+  firstCheck: '1st time check button click.wav',
+  autoConnect: 'Autoconnect.wav',
+  mcbAlert: 'Before connection, on-click MCB Alert.wav',
+  autotransformerNotReady: '1st time autotransformer click or after check disabled (1).wav',
+  connectionsVerified: 'For correct connections, check click.wav',
+  mcbOn: 'MCB ON.wav',
 
-let currentPlayingAudio = null;
+  // Series RLC experiment steps
+  componentValuesSelected: 'Component Values Selected.wav',
+  autotransformerOn: 'After the autotransformer is ON.wav',
+  voltageSet: 'After Voltage is set.wav',
+  firstReadingAdded: '1st reading added.wav',
+  newRlcValueSelected: '2nd time value selected.wav',
+  duplicateRlcCombination: 'Dropdown alert.wav',
+  secondReadingAdded: '2nd reading added.wav',
+  allReadingsRecorded: '12th reading added All readings recorded.wav',
+  maximumReadingsReached: 'Max. readings,  Add click.wav',
+  calculationsVerified: 'After correct verification, verify button.wav',
 
-// 3. PLAY FUNCTION
-export const playAlertSound = (key) => {
-  const sound = alertSounds[key];
-  if (sound) {
-    if (currentPlayingAudio) {
-      currentPlayingAudio.pause();
-      currentPlayingAudio.currentTime = 0;
+  // Existing aliases used by other alert call sites
+  firstAutoTransClick: '1st time autotransformer click or after check disabled (1).wav',
+  forCorrConnCheckClick: 'For correct connections, check click.wav',
+  afterAutoTransOn: 'After the autotransformer is ON.wav',
+  afterVolSet: 'After Voltage is set.wav',
+  firstReadAdded: '1st reading added.wav',
+  afterReadAddClick: 'After taking the readings, Add click.wav',
+  afterCorrVerif: 'After correct verification, verify button.wav',
+  incompltMultiVal: 'Incomplete more than one value.wav',
+  incompltOneVal: 'Incomplete one value.wav',
+  incorrCalcMulti: 'Incorrect calculations, more than one.wav',
+  incorrCalcOne: 'Incorrect calculation, one only.wav',
+  genRepBtnClick: 'Generate Report button click.wav',
+  reset: 'Reset.wav',
+  print: 'Print.wav',
+}
+
+let currentPlayingAudio = null
+let currentSpeech = null
+let playbackId = 0
+
+const canSpeak = () => (
+  typeof window !== 'undefined'
+  && typeof window.speechSynthesis !== 'undefined'
+  && typeof window.SpeechSynthesisUtterance !== 'undefined'
+)
+
+const speakFallback = (text, runId) => {
+  if (!text || runId !== playbackId || !canSpeak()) {
+    return
+  }
+
+  const utterance = new window.SpeechSynthesisUtterance(text)
+  utterance.lang = 'en-US'
+  utterance.rate = 0.95
+  utterance.pitch = 1
+  utterance.onend = () => {
+    if (currentSpeech === utterance) {
+      currentSpeech = null
     }
-    
-    sound.currentTime = 0;
-    sound.onended = () => {
-      if (currentPlayingAudio === sound) {
-        currentPlayingAudio = null;
-      }
-    };
-    sound.play().catch((e) => console.warn(`Audio playback blocked for ${key}:`, e));
-    
-    currentPlayingAudio = sound;
-  } else {
-    console.log(`Audio key '${key}' not found.`);
   }
-};
+  utterance.onerror = utterance.onend
 
-// 4. STOP FUNCTION 
+  currentSpeech = utterance
+  window.speechSynthesis.speak(utterance)
+}
+
 export const stopAlertSound = () => {
+  playbackId += 1
+
   if (currentPlayingAudio) {
-    currentPlayingAudio.pause();
-    currentPlayingAudio.currentTime = 0;
-    currentPlayingAudio = null;
+    currentPlayingAudio.pause()
+    currentPlayingAudio.currentTime = 0
+    currentPlayingAudio = null
   }
-};
+
+  if (canSpeak() && currentSpeech) {
+    window.speechSynthesis.cancel()
+    currentSpeech = null
+  }
+}
+
+export const playAlertSound = (key, fallbackNarration = '') => {
+  stopAlertSound()
+
+  const source = ALERT_AUDIO_SOURCES[key]
+  const audioUrl = resolveAudioAsset(source)
+  const runId = playbackId
+
+  if (!audioUrl || typeof Audio === 'undefined') {
+    if (source && !audioUrl) {
+      console.warn(`Alert audio file not found in src/audios: ${source}`)
+    }
+
+    speakFallback(fallbackNarration, runId)
+    return
+  }
+
+  const sound = new Audio(audioUrl)
+  let fallbackStarted = false
+
+  const playFallback = (error) => {
+    if (fallbackStarted || runId !== playbackId) {
+      return
+    }
+
+    fallbackStarted = true
+    sound.pause()
+
+    if (currentPlayingAudio === sound) {
+      currentPlayingAudio = null
+    }
+
+    console.warn(`Unable to play alert audio "${source}"; using browser narration instead.`, error)
+    speakFallback(fallbackNarration, runId)
+  }
+
+  sound.addEventListener('ended', () => {
+    if (currentPlayingAudio === sound) {
+      currentPlayingAudio = null
+    }
+  }, { once: true })
+  sound.addEventListener('error', () => playFallback(), { once: true })
+
+  currentPlayingAudio = sound
+  sound.play().catch(playFallback)
+}

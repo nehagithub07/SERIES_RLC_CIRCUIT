@@ -49,6 +49,7 @@ const ConnectionLab = ({
   autoConnectRequest,
   checkRequest,
   onCheckConnections,
+  onConnectionReadinessChange,
   onVariacBlocked,
   onVariacOn,
   onVariacRotate,
@@ -75,6 +76,7 @@ const ConnectionLab = ({
   const containerRef = useRef(null)
   const instanceRef = useRef(null)
   const onCheckConnectionsRef = useRef(onCheckConnections)
+  const onConnectionReadinessChangeRef = useRef(onConnectionReadinessChange)
   const scaleRef = useRef(getJsPlumbZoom(scale))
   const aiGuideRef = useRef(aiGuide)
   const isAutoConnectingRef = useRef(false)
@@ -86,6 +88,10 @@ const ConnectionLab = ({
   useEffect(() => {
     onCheckConnectionsRef.current = onCheckConnections
   }, [onCheckConnections])
+
+  useEffect(() => {
+    onConnectionReadinessChangeRef.current = onConnectionReadinessChange
+  }, [onConnectionReadinessChange])
 
   useEffect(() => {
     aiGuideRef.current = aiGuide
@@ -123,7 +129,7 @@ const ConnectionLab = ({
   // doesn't double up with the dedicated "Autoconnect completed" narration.
   const handleManualConnection = (sourceId, targetId) => {
     const guide = aiGuideRef.current
-    if (!guide?.playStep || isAutoConnectingRef.current) {
+    if (isAutoConnectingRef.current) {
       return
     }
 
@@ -145,9 +151,11 @@ const ConnectionLab = ({
         ? nextExpectedIndex + FIRST_CONNECTION_STEP_ID
         : ALL_CONNECTIONS_DONE_STEP_ID
 
-      guide.playStep(WRONG_CONNECTION_STEP_ID).then(() => {
-        guide.playStep(repeatStepId)
-      })
+      if (guide?.playStep) {
+        guide.playStep(WRONG_CONNECTION_STEP_ID).then(() => {
+          guide.playStep(repeatStepId)
+        })
+      }
       return
     }
 
@@ -157,9 +165,11 @@ const ConnectionLab = ({
     const nextIndex = REQUIRED_PAIR_KEYS.findIndex((requiredKey) => !madeSet.has(requiredKey))
 
     if (nextIndex >= 0) {
-      guide.playStep(nextIndex + FIRST_CONNECTION_STEP_ID)
+      onConnectionReadinessChangeRef.current?.(false)
+      guide?.playStep?.(nextIndex + FIRST_CONNECTION_STEP_ID)
     } else {
-      guide.playStep(ALL_CONNECTIONS_DONE_STEP_ID)
+      onConnectionReadinessChangeRef.current?.(true)
+      guide?.playStep?.(ALL_CONNECTIONS_DONE_STEP_ID)
     }
   }
 
@@ -308,6 +318,7 @@ const ConnectionLab = ({
         // treat them as already narrated (its own "Autoconnect completed"
         // audio is triggered separately from the ActionButtons handler).
         madeConnectionsRef.current = new Set(REQUIRED_PAIR_KEYS)
+        onConnectionReadinessChangeRef.current?.(true)
 
         // Auto Connect creates the known-correct circuit, validates it, and
         // locks the wires immediately. CHECK is therefore no longer needed.
@@ -380,11 +391,18 @@ const ConnectionLab = ({
     // 🎙️ AI GUIDE: forget any required pair involving the removed terminal so
     // re-connecting it plays the right narration again instead of being
     // silently treated as a duplicate.
+    let removedRequiredConnection = false
+
     madeConnectionsRef.current.forEach((key) => {
       if (key.split('|').includes(terminalId)) {
         madeConnectionsRef.current.delete(key)
+        removedRequiredConnection = true
       }
     })
+
+    if (removedRequiredConnection) {
+      onConnectionReadinessChangeRef.current?.(false)
+    }
   }
 
   const combinedReadings = {

@@ -1,5 +1,3 @@
-import needleImg from '../assets/needle.png';
-
 import v1Img from '../assets/V1.png';
 import v2Img from '../assets/V2.png';
 import v3Img from '../assets/V3.png';
@@ -90,7 +88,7 @@ const Voltmeter = ({ label = "V1", value = 0, angleDeg = null }) => {
   const currentLayout = walkthroughLayouts[label] || { left: '0px', top: '0px', width: '120px', height: '200px' };
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div className={`meter-shell meter-shell--voltmeter meter-shell--${label}`}>
       
       <article 
         id={articleId} 
@@ -98,22 +96,16 @@ const Voltmeter = ({ label = "V1", value = 0, angleDeg = null }) => {
       >
         <img
           src={voltmeterImages[label]}
-          alt={label}
+          alt={`${label} AC voltmeter`}
           className="voltmeter__image"
         />
 
         {/* Needle Pivot — handles rotation */}
         <div
+          aria-hidden="true"
           className={`voltmeter__needle voltmeter__needle--${label}`}
           style={{ '--voltmeter-needle-rotation': `${angle}deg` }}
-        >
-          {/* Needle Image — the actual visual needle */}
-          <img
-            src={needleImg}
-            alt=""
-            className="voltmeter__needle-image"
-          />
-        </div>
+        />
       </article>
 
       {/* Production Walkthrough Target Container — Clean and invisible */}

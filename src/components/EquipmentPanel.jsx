@@ -14,57 +14,57 @@ const mcbTerminals = [
 ];
 
 const voltmeter1Terminals = [
-  { id: '3-endpoint', label: '3', polarity: 'plus', left: 156, top: 210, lLeft: 170, lTop: 250 },
-  { id: '4-endpoint', label: '4', polarity: 'minus', left: 226, top: 210, lLeft: 240, lTop: 250 },
+  { id: '3-endpoint', label: '3', polarity: 'plus', left: 160, top: 175, lLeft: 173, lTop: 210 },
+  { id: '4-endpoint', label: '4', polarity: 'minus', left: 235, top: 175, lLeft: 248, lTop: 210 },
 ];
 
 const ammeter1Terminals = [
-  { id: '5-endpoint', label: '5', polarity: 'plus', left: 334, top: 202, lLeft: 345, lTop: 245 },
-  { id: '6-endpoint', label: '6', polarity: 'minus', left: 401, top: 202, lLeft: 415, lTop: 245 },
+  { id: '5-endpoint', label: '5', polarity: 'plus', left: 338, top: 170, lLeft: 351, lTop: 205 },
+  { id: '6-endpoint', label: '6', polarity: 'minus', left: 413, top: 170, lLeft: 426, lTop: 205 },
 ];
 
 const wattmeterTerminals = [
-  { id: '7-endpoint', label: '7', polarity: 'minus', left: 495, top: 205, lLeft: 505, lTop: 240 },
+  { id: '7-endpoint', label: '7', polarity: 'minus', left: 492, top: 205, lLeft: 505, lTop: 240 },
   { id: '8-endpoint', label: '8', polarity: 'plus', left: 530, top: 205, lLeft: 540, lTop: 240 },
-  { id: '9-endpoint', label: '9', polarity: 'plus', left: 560, top: 205, lLeft: 575, lTop: 240 },
-  { id: '10-endpoint', label: '10', polarity: 'plus', left: 595, top: 205, lLeft: 610, lTop: 240 },
+  { id: '9-endpoint', label: '9', polarity: 'plus', left: 568, top: 205, lLeft: 575, lTop: 240 },
+  { id: '10-endpoint', label: '10', polarity: 'plus', left: 605, top: 205, lLeft: 610, lTop: 240 },
 ];
 
 const voltmeter2Terminals = [
-  { id: '11-endpoint', label: '11', polarity: 'plus', left: 688, top: 210, lLeft: 700, lTop: 250 },
-  { id: '12-endpoint', label: '12', polarity: 'minus', left: 758, top: 210, lLeft: 770, lTop: 250 },
+  { id: '11-endpoint', label: '11', polarity: 'plus', left: 690, top: 180, lLeft: 703, lTop: 215 },
+  { id: '12-endpoint', label: '12', polarity: 'minus', left: 760, top: 180, lLeft: 773, lTop: 215 },
 ];
 
 const voltmeter3Terminals = [
-  { id: '13-endpoint', label: '13', polarity: 'plus', left: 690, top: 470, lLeft: 700, lTop: 505 },
-  { id: '14-endpoint', label: '14', polarity: 'minus', left: 760, top: 470, lLeft: 775, lTop: 505 },
+  { id: '13-endpoint', label: '13', polarity: 'plus', left: 695, top: 435, lLeft: 710, lTop: 480 },
+  { id: '14-endpoint', label: '14', polarity: 'minus', left: 770, top: 435, lLeft: 785, lTop: 480 },
 ];
 
 const voltmeter4Terminals = [
-  { id: '15-endpoint', label: '15', polarity: 'plus', left: 690, top: 748, lLeft: 705, lTop: 780 },
-  { id: '16-endpoint', label: '16', polarity: 'minus', left: 760, top: 748, lLeft: 775, lTop: 780 },
+  { id: '15-endpoint', label: '15', polarity: 'plus', left: 690, top: 710, lLeft: 703, lTop: 745 },
+  { id: '16-endpoint', label: '16', polarity: 'minus', left: 770, top: 710, lLeft: 783, lTop: 745 },
 ];
 
 const resistorTerminals = [
-  { id: '17-endpoint', label: '17', polarity: 'plus', left: 380, top: 380, lLeft: 640, lTop: 420 },
-  { id: '18-endpoint', label: '18', polarity: 'minus', left: 610, top: 380, lLeft: 404, lTop: 420 },
+  { id: '17-endpoint', label: '17', polarity: 'plus', left: 380, top: 380, lLeft: 404, lTop: 420 },
+  { id: '18-endpoint', label: '18', polarity: 'minus', left: 610, top: 380, lLeft: 640, lTop: 420 },
 ];
 
 const inductorTerminals = [
-  { id: '19-endpoint', label: '19', polarity: 'plus', left: 503, top: 715, lLeft: 517, lTop: 750 },
-  { id: '20-endpoint', label: '20', polarity: 'minus', left: 550, top: 715, lLeft: 565, lTop: 750 },
+  { id: '19-endpoint', label: '19', polarity: 'plus', left: 488, top: 706, lLeft: 501, lTop: 741 },
+  { id: '20-endpoint', label: '20', polarity: 'minus', left: 537, top: 706, lLeft: 550, lTop: 741 },
 ];
 
 const capacitorTerminals = [
-  { id: '21-endpoint', label: '21', polarity: 'plus', left: 360, top: 737, lLeft: 373, lTop: 773 },
-  { id: '22-endpoint', label: '22', polarity: 'minus', left: 393, top: 737, lLeft: 407, lTop: 773 },
+  { id: '21-endpoint', label: '21', polarity: 'plus', left: 306, top: 734, lLeft: 319, lTop: 769 },
+  { id: '22-endpoint', label: '22', polarity: 'minus', left: 344, top: 734, lLeft: 360, lTop: 769 },
 ];
 
 const variacTerminals = [
-  { id: '23-endpoint', label: '23', polarity: 'plus', left: 240, top: 373, lLeft: 252, lTop: 405 },
-  { id: '24-endpoint', label: '24', polarity: 'minus', left: 315, top: 373, lLeft: 330, lTop: 405 },
-  { id: '25-endpoint', label: '25', polarity: 'plus', left: 240, top: 470, lLeft: 252, lTop: 503 },
-  { id: '26-endpoint', label: '26', polarity: 'minus', left: 315, top: 470, lLeft: 330, lTop: 503 },
+  { id: '23-endpoint', label: '23', polarity: 'plus', left: 240, top: 365, lLeft: 253, lTop: 400 },
+  { id: '24-endpoint', label: '24', polarity: 'minus', left: 315, top: 365, lLeft: 330, lTop: 405 },
+  { id: '25-endpoint', label: '25', polarity: 'plus', left: 240, top: 465, lLeft: 252, lTop: 503 },
+  { id: '26-endpoint', label: '26', polarity: 'minus', left: 315, top: 465, lLeft: 330, lTop: 503 },
 ];
 
 const renderTerminals = (terminals) => (

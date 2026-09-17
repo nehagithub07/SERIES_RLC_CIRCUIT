@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { playAlertSound } from '../utils/alertAudioManager.js'
 
 const EXIT_DURATION = 180
 
@@ -23,7 +22,6 @@ const LabAlertCard = ({ alert, onDismiss }) => {
     icon,
     id,
     onConfirm,
-    onNarration,
     onNext,
     onPrevious,
     placement,
@@ -38,7 +36,6 @@ const LabAlertCard = ({ alert, onDismiss }) => {
   const titleId = `lab-alert-title-${id}`
   const descriptionId = `lab-alert-description-${id}`
   const role = type === 'error' || type === 'warning' ? 'alert' : 'status'
-  const showNarration = Boolean(alert.sound || alert.audioNarration || alert.narration || onNarration)
   const showTutorialControls = Boolean(tutorialMode || onNext || onPrevious)
 
   const dismiss = useCallback((reason = 'dismiss', callClose = true) => {
@@ -94,20 +91,6 @@ const LabAlertCard = ({ alert, onDismiss }) => {
     dismiss('ok')
   }
 
-  const handleNarration = () => {
-    if (alert.sound) {
-      playAlertSound(alert.sound)
-    }
-    onNarration?.(alert)
-    dispatchLabAlertEvent('lab-alert:narration', {
-      id,
-      narration: alert.narration ?? `${title}. ${description ?? ''}`.trim(),
-      stepNumber,
-      title,
-      type,
-    })
-  }
-
   return (
     <article
       aria-describedby={description ? descriptionId : undefined}
@@ -132,16 +115,6 @@ const LabAlertCard = ({ alert, onDismiss }) => {
         </div>
 
         <div className="lab-alert-card__tools">
-          {showNarration ? (
-            <button
-              aria-label="Play alert narration"
-              className="lab-alert-card__icon-button"
-              onClick={handleNarration}
-              type="button"
-            >
-              🔊
-            </button>
-          ) : null}
           <button
             aria-label="Close alert"
             className="lab-alert-card__icon-button"

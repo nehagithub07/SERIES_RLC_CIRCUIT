@@ -8,6 +8,7 @@ import GraphPanel from './components/GraphPanel.jsx'
 import HeaderBoard from './components/HeaderBoard.jsx'
 import ReportControls from './components/ReportControls.jsx' 
 import { useLabAlerts } from './alerts/useLabAlerts.js'
+import { EXPERIMENT_ALERTS } from './alerts/experimentStepAlerts.js'
 import { generateRlcReport } from './utils/reportGenerator.js' 
 import WalkthroughProvider from './walkthrough/WalkthroughProvider.jsx'
 import WalkthroughStartButton from './walkthrough/components/WalkthroughStartButton.jsx'
@@ -19,10 +20,10 @@ import { getRlcMeterCase, getNeedleAngle, getRlcCaseKey } from './utils/rlcMeter
 const BASE_WIDTH = 1440
 const BASE_HEIGHT = 1260
 const GRAPH_SECTION_GAP = 24
-const GRAPH_SECTION_HEIGHT = 380 
+const GRAPH_SECTION_HEIGHT = 480
 const CONTENT_HEIGHT = BASE_HEIGHT + GRAPH_SECTION_GAP + GRAPH_SECTION_HEIGHT
-const PANEL_MAX_SCALE = 0.9
-const PANEL_VIEWPORT_MARGIN = 24
+const PANEL_MAX_SCALE = 0.96
+const PANEL_VIEWPORT_MARGIN = 16
 const MIN_VERIFICATION_READINGS = 5
 const MIN_REPORT_READINGS = MIN_VERIFICATION_READINGS
 const MAX_OBSERVATIONS = 12
@@ -50,7 +51,10 @@ const getScale = () => {
   if (typeof window === 'undefined') {
     return 1
   }
-  const widthScale = (window.innerWidth - PANEL_VIEWPORT_MARGIN) / BASE_WIDTH
+  const viewportWidth = window.visualViewport?.width
+    ?? document.documentElement.clientWidth
+    ?? window.innerWidth
+  const widthScale = (viewportWidth - PANEL_VIEWPORT_MARGIN) / BASE_WIDTH
   return Math.max(Math.min(widthScale, PANEL_MAX_SCALE), 0.1)
 }
 
@@ -64,7 +68,7 @@ const getRenderScale = () => {
 }
 
 const App = () => {
-  const { confirmAlert, showAlert } = useLabAlerts()
+  const { confirmAlert, showAlert, showStepAlert } = useLabAlerts()
   const [scale, setScale] = useState(getScale)
   const [renderScale, setRenderScale] = useState(getRenderScale)
   
@@ -139,60 +143,21 @@ const App = () => {
     }
     handleResize()
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  // 🖨️ PRINT FIT: shrink the whole simulation stage so it always lands on a
-  // single printed page with nothing cropped, regardless of how much content
-  // (observations, calculations, graph) is currently visible.
-  useEffect(() => {
-    // Conservative printable area shared by common landscape paper sizes
-    // (A4 / Letter) after the @page margins defined in App.css.
-    const PRINTABLE_WIDTH_MM = 279.4
-    const PRINTABLE_HEIGHT_MM = 210
-    const PAGE_MARGIN_X_MM = 8
-    const PAGE_MARGIN_Y_MM = 6
-    const MM_TO_PX = 96 / 25.4
-
-    const availableWidthPx = (PRINTABLE_WIDTH_MM - PAGE_MARGIN_X_MM * 2) * MM_TO_PX
-    const availableHeightPx = (PRINTABLE_HEIGHT_MM - PAGE_MARGIN_Y_MM * 2) * MM_TO_PX
-
-    const applyPrintFit = () => {
-      const stage = document.getElementById('app-scale')
-      if (!stage) return
-
-      // Reset any previous print zoom so we measure the natural content size.
-      stage.style.removeProperty('zoom')
-
-      const naturalWidth = stage.scrollWidth || BASE_WIDTH
-      const naturalHeight = stage.scrollHeight || CONTENT_HEIGHT
-
-      const fitScale = Math.min(
-        availableWidthPx / naturalWidth,
-        availableHeightPx / naturalHeight,
-        1,
-      )
-
-      stage.style.setProperty('zoom', `${(fitScale * 100).toFixed(2)}%`, 'important')
-    }
-
-    const clearPrintFit = () => {
-      document.getElementById('app-scale')?.style.removeProperty('zoom')
-    }
-
-    window.addEventListener('beforeprint', applyPrintFit)
-    window.addEventListener('afterprint', clearPrintFit)
-
+    window.addEventListener('orientationchange', handleResize)
+    window.visualViewport?.addEventListener('resize', handleResize)
     return () => {
-      window.removeEventListener('beforeprint', applyPrintFit)
-      window.removeEventListener('afterprint', clearPrintFit)
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('orientationchange', handleResize)
+      window.visualViewport?.removeEventListener('resize', handleResize)
     }
   }, [])
 
   // 🎯 DERIVED STEP STATUS
   const derivedStep = useMemo(() => {
     if (currentStep === STEPS.WALKTHROUGH) return STEPS.WALKTHROUGH;
-    if (!connectionsVerified) return STEPS.CONNECT;
+    if (!connectionsVerified) {
+      return currentStep === STEPS.CHECK ? STEPS.CHECK : STEPS.CONNECT;
+    }
     if (!powerOn) return STEPS.POWER_ON;
     if (!componentsSelected) return STEPS.SELECT_COMPONENTS;
     if (voltage <= 0) return variacPowered ? STEPS.SET_VOLTAGE : STEPS.VARIAC_ON;
@@ -218,11 +183,11 @@ const App = () => {
       [STEPS.CHECK]: 22,
       [STEPS.POWER_ON]: 29,
       [STEPS.SELECT_COMPONENTS]: 30,
-      [STEPS.VARIAC_ON]: 30,
-      [STEPS.SET_VOLTAGE]: 31,
-      [STEPS.ADD_READING]: 32,
-      [STEPS.CALCULATE]: 36,
-      [STEPS.GENERATE_REPORT]: 35,
+      [STEPS.VARIAC_ON]: 31,
+      [STEPS.SET_VOLTAGE]: 32,
+      [STEPS.ADD_READING]: 33,
+      [STEPS.CALCULATE]: observations.length >= MAX_OBSERVATIONS ? 38 : 42,
+      [STEPS.GENERATE_REPORT]: 41,
     }
 
     aiGuideEnabledRef.current = true
@@ -230,7 +195,7 @@ const App = () => {
     stopAlertSound()
     setStatus('AI Guide is ON and will narrate the current experiment steps. Click AI Guide again to turn it OFF.')
     playAiGuideStep(stepByPhase[derivedStep] ?? 1)
-  }, [derivedStep, playAiGuideStep, stopAiGuideStep])
+  }, [derivedStep, observations.length, playAiGuideStep, stopAiGuideStep])
 
   const handleWalkthroughStart = useCallback(() => {
     // The walkthrough owns its popup narration and must not share playback
@@ -318,14 +283,7 @@ const App = () => {
     }
     if (readingCount >= MAX_OBSERVATIONS) {
       setStatus(`${MAX_OBSERVATIONS} readings are already recorded. Click reset for a new laboratory run.`)
-      showAlert({
-        title: 'All Readings Recorded',
-        description: `All ${MAX_OBSERVATIONS} readings are already in the observation table.`,
-        type: 'info',
-        icon: '📊',
-        duration: 5000,
-        sound: 'afterReadAddClick',
-      })
+      showStepAlert(EXPERIMENT_ALERTS.maximumReadingsReached)
       return
     }
     if (!componentsSelected) {
@@ -334,14 +292,7 @@ const App = () => {
     }
     if (hasRecordedCombo) {
       setStatus('This R-L-C combination has already been recorded. Select a different combination to enable Add again.')
-      showAlert({
-        title: 'Reading Already Added',
-        description: 'This R-L-C combination is already in the table. Select a different combination.',
-        type: 'warning',
-        icon: '⚠️',
-        duration: 5500,
-        sound: 'afterReadAddClick',
-      })
+      showStepAlert(EXPERIMENT_ALERTS.duplicateRlcCombination)
       return
     }
 
@@ -372,15 +323,7 @@ const App = () => {
       setStatus(`Reading added. All ${MAX_OBSERVATIONS} R-L-C combinations have been recorded.`)
       setCurrentStep(STEPS.CALCULATE);
       window.setTimeout(() => {
-        showAlert({
-          title: 'All Readings Recorded',
-          description: `You have added all ${MAX_OBSERVATIONS} readings. Select a reading in the verification section and enter its observation-table values exactly.`,
-          type: 'success',
-          icon: '📊',
-          placement: 'top-right',
-          duration: 15000,
-          sound: 'afterReadAddClick',
-        })
+        showStepAlert(EXPERIMENT_ALERTS.allReadingsRecorded)
       }, 50)
     } else {
       setStatus(verificationJustUnlocked
@@ -388,16 +331,23 @@ const App = () => {
         : 'Reading added. Select a different R-L-C combination for the next reading; the MCB and autotransformer remain ON.')
       setCurrentStep(verificationJustUnlocked ? STEPS.CALCULATE : STEPS.ADD_READING);
       window.setTimeout(() => {
-        showAlert({
-          title: verificationJustUnlocked ? 'Verification Unlocked' : 'Reading Added',
+        const nextReadingNumber = readingCount + 1
+
+        if (nextReadingNumber === 1) {
+          showStepAlert(EXPERIMENT_ALERTS.firstReadingAdded)
+          return
+        }
+
+        if (nextReadingNumber === 2) {
+          showStepAlert(EXPERIMENT_ALERTS.secondReadingAdded)
+          return
+        }
+
+        showStepAlert(EXPERIMENT_ALERTS.readingAdded, {
           description: verificationJustUnlocked
-            ? `Reading ${readingCount + 1} of ${MAX_OBSERVATIONS} was added. The verification section is now enabled, and you may continue recording the remaining combinations.`
-            : `Reading ${readingCount + 1} of ${MAX_OBSERVATIONS} was added. Select a different R-L-C combination to enable Add again. The MCB and autotransformer will remain ON.`,
-          type: 'success',
-          icon: '✅',
-          placement: 'top-right',
-          duration: 14000,
-          sound: readingCount === 0 ? 'firstReadAdded' : 'afterReadAddClick',
+            ? `Reading ${nextReadingNumber} of ${MAX_OBSERVATIONS} has been added. Reading verification is now available, and you may continue recording the remaining combinations.`
+            : `Reading ${nextReadingNumber} of ${MAX_OBSERVATIONS} has been added. Select a different RLC combination and click the Add button again.`,
+          sound: 'readingAdded',
         })
       }, 50)
     }
@@ -494,17 +444,12 @@ const App = () => {
     setIsResistorCorrect(requiredRowsVerified)
     setCalculationsVerified(requiredRowsVerified)
 
-    if (requiredRowsVerified) {
-      setCurrentStep(STEPS.GENERATE_REPORT);
-      showAlert({
-        title: 'Success',
-        description: 'Two observation readings have been verified correctly. Your simulation is now complete. You may generate the report.',
-        type: 'success',
-        icon: '✅',
-        placement: 'center',
-        duration: 13000,
-        sound: 'afterCorrVerif',
-      })
+    if (isRowOk === true) {
+      setCurrentStep(requiredRowsVerified ? STEPS.GENERATE_REPORT : STEPS.CALCULATE)
+      setStatus(requiredRowsVerified
+        ? 'Two readings have been verified successfully. You may now generate the report.'
+        : 'Theoretical calculations verified successfully. Verify one more reading to enable report generation.')
+      showStepAlert(EXPERIMENT_ALERTS.calculationsVerified)
     } else if (isRowOk === false) {
       const hasMultipleIncorrectValues = verificationMeta.incorrectCount > 1
       showAlert({
@@ -520,16 +465,7 @@ const App = () => {
   }
  
   const handlePrint = () => {
-    setStatus('Preparing laboratory worksheet layout for printing...')
-    showAlert({
-      title: 'Print',
-      description: 'Opening the print dialog.',
-      type: 'info',
-      icon: '🖨️',
-      duration: 2500,
-      sound: 'print',
-    })
-    window.setTimeout(() => window.print(), 150)
+    window.print()
   }
 
   const handleGenerateReport = () => {
@@ -609,15 +545,7 @@ const App = () => {
       setCurrentStep(STEPS.POWER_ON);
       setStatus('Right connections! Turn ON the MCB, then select the resistor, inductor, and capacitor values.')
       if (!silent) {
-        showAlert({
-          title: 'Connections Verified',
-          description: 'Connections verified successfully. Turn ON the MCB, then select the resistor, inductor, and capacitor values.',
-          type: 'success',
-          icon: '✅',
-          placement: 'center',
-          duration: 7000,
-          sound: 'forCorrConnCheckClick',
-        })
+        showStepAlert(EXPERIMENT_ALERTS.connectionsVerified)
       }
       return
     }
@@ -635,11 +563,17 @@ const App = () => {
         sound: 'multiWrong',
       })
     }
-  }, [showAlert])
+  }, [showAlert, showStepAlert])
 
   const handleCheck = () => {
     setCheckRequest((current) => current + 1)
   }
+
+  const handleConnectionReadinessChange = useCallback((isReady) => {
+    if (!connectionsVerified) {
+      setCurrentStep(isReady ? STEPS.CHECK : STEPS.CONNECT)
+    }
+  }, [connectionsVerified])
   
 
   const handleTogglePower = () => {
@@ -667,15 +601,7 @@ const App = () => {
     setCurrentStep(STEPS.SELECT_COMPONENTS);
     setStatus('MCB switched ON. Select the resistor, inductor, and capacitor values, then turn ON the autotransformer.')
     window.setTimeout(() => {
-      showAlert({
-        title: 'MCB Turned ON',
-        description: 'MCB is ON. Select the resistor, inductor, and capacitor values, then click the autotransformer power button.',
-        type: 'success',
-        icon: '⚡',
-        placement: 'top-right',
-        duration: 7000,
-        sound: 'mcbOn',
-      })
+      showStepAlert(EXPERIMENT_ALERTS.mcbOn)
     }, 50)
   }
 
@@ -686,32 +612,30 @@ const App = () => {
   const advanceWhenComponentsSelected = useCallback((nextResistor, nextInductor, nextCapacitor) => {
     if (powerOn && nextResistor && nextInductor && nextCapacitor) {
       const readingIsReady = voltage >= 30
+      const nextComboKey = getRlcCaseKey(nextResistor, nextInductor, nextCapacitor)
+      const combinationAlreadyRecorded = observations.some((row) => row.comboKey === nextComboKey)
+
+      if (readingIsReady && combinationAlreadyRecorded) {
+        setStatus('This RLC combination is already in the table. Select a different combination to enable Add.')
+        showStepAlert(EXPERIMENT_ALERTS.duplicateRlcCombination)
+        return
+      }
+
       setCurrentStep(readingIsReady ? STEPS.ADD_READING : (variacPowered ? STEPS.SET_VOLTAGE : STEPS.VARIAC_ON))
       setStatus(readingIsReady
         ? 'New R-L-C reading selected. Click Add to record it.'
         : variacPowered
           ? 'Component values selected. Click the Variac knob to set it to 30 V.'
           : 'Component values selected. Now switch ON the autotransformer.')
-      showAlert({
-        title: 'Component Values Selected',
-        description: readingIsReady
-          ? 'A new R-L-C reading is ready. Click Add to record it.'
-          : variacPowered
-            ? 'The values are selected. Click the Variac knob to rotate it to the 30 V position.'
-            : 'Resistor, inductor, and capacitor values have been selected. Now switch ON the autotransformer.',
-        type: 'success',
-        icon: '✅',
-        placement: 'top-right',
-        duration: 6500,
-        sound:
-          readingIsReady
-            ? 'afterVolSet'
-            : variacPowered
-              ? 'afterAutoTransOn'
-              : 'mcbOn',
-      })
+      if (readingIsReady) {
+        showStepAlert(EXPERIMENT_ALERTS.newRlcValueSelected)
+      } else if (variacPowered) {
+        showStepAlert(EXPERIMENT_ALERTS.autotransformerOn)
+      } else {
+        showStepAlert(EXPERIMENT_ALERTS.componentValuesSelected)
+      }
     }
-  }, [powerOn, variacPowered, voltage, showAlert])
+  }, [observations, powerOn, showStepAlert, variacPowered, voltage])
 
   const handleResistorValueChange = useCallback((value) => {
     setSelectedResistor(value)
@@ -742,31 +666,15 @@ const App = () => {
 
   const handleVariacBlocked = useCallback(() => {
     setStatus('Turn ON the MCB and select the R, L, and C values before using the autotransformer.')
-    showAlert({
-      title: 'Autotransformer Not Ready',
-      description: 'Turn ON the MCB and select the resistor, inductor, and capacitor values before switching ON the autotransformer.',
-      type: 'warning',
-      icon: '⚠️',
-      placement: 'center',
-      duration: 6500,
-      sound: 'firstAutoTransClick',
-    })
-  }, [showAlert])
+    showStepAlert(EXPERIMENT_ALERTS.autotransformerNotReady)
+  }, [showStepAlert])
 
   const handleVariacOn = useCallback(() => {
     setVariacPowered(true)
     setCurrentStep(STEPS.SET_VOLTAGE)
     setStatus('Autotransformer is ON. Click the Variac knob to rotate it to the 30 V position.')
-    showAlert({
-      title: 'Autotransformer ON',
-      description: 'Autotransformer is ON. Click the Variac knob to set the output to 30 V.',
-      type: 'success',
-      icon: '🎛️',
-      placement: 'top-right',
-      duration: 6500,
-      sound: 'afterAutoTransOn',
-    })
-  }, [showAlert])
+    showStepAlert(EXPERIMENT_ALERTS.autotransformerOn)
+  }, [showStepAlert])
 
   // The Add button unlocks when the autotransformer supplies the selected
   // reading. It is locked again for that combination after the row is added.
@@ -815,18 +723,10 @@ const App = () => {
       setCurrentStep(STEPS.ADD_READING);
 
       window.setTimeout(() => {
-        showAlert({
-          title: 'Voltage Reached',
-          description: 'The voltage has been set to 30 V to ensure safe operation of the RLC circuit experiment. The readings are now displayed on the voltmeter, ammeter, and wattmeter. Now, click on the Add button to add the readings to the observation table.',
-          type: 'success',
-          icon: '⚡',
-          placement: 'center',
-          duration: 18000,
-          sound: 'afterVolSet',
-        })
+        showStepAlert(EXPERIMENT_ALERTS.voltageSet)
       }, 50)
     }
-  }, [powerOn, currentStep, showAlert])
+  }, [powerOn, currentStep, showStepAlert])
 
   // 🎯 STEP HIGHLIGHTING HELPERS
   const isStepActive = (stepNumber) => derivedStep === stepNumber;
@@ -855,11 +755,13 @@ const App = () => {
         >
           <main className="simulation-shell" id="walkthrough-demo-experiment">
             <HeaderBoard />
-            <WalkthroughStartButton />
+            <WalkthroughStartButton
+              highlighted={aiGuideEnabled && activeAiGuideStepId === 1}
+            />
 
             <span className="sr-only" role="status" aria-live="polite">{status}</span>
 
-            <section className="workspace-grid">
+            <section className={`workspace-grid ${isModalOpen ? 'workspace-grid--instructions-open' : ''}`}>
               <aside className="left-panel">
                 <ActionButtons
                   aiGuideActive={aiGuideEnabled}
@@ -868,8 +770,7 @@ const App = () => {
                       || !powerOn
                       || !componentsSelected
                       || !variacRotated
-                      || hasRecordedCombo
-                      || readingCount >= MAX_OBSERVATIONS,
+                      || (hasRecordedCombo && readingCount < MAX_OBSERVATIONS),
                     onAutoConnect: connectionsVerified || powerOn,
                     onCheck: connectionsVerified,
                     onPrint: false,
@@ -891,9 +792,14 @@ const App = () => {
                   />
 
                   {isModalOpen && (
-                    <div className="instructions-overlay-panel">
+                    <div
+                      className="instructions-overlay-panel"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="instructions-dialog-title"
+                    >
                       <div className="instructions-header">
-                        INSTRUCTIONS
+                        <span id="instructions-dialog-title">INSTRUCTIONS</span>
                         <button 
                           onClick={() => setIsModalOpen(false)}
                           className="instructions-close"
@@ -905,7 +811,7 @@ const App = () => {
                       
                       <div className="instructions-body">
                         <p className={isStepActive(STEPS.CONNECT) ? 'instruction-step-active' : (isStepCompleted(STEPS.CONNECT) ? 'instruction-step-completed' : '')}>
-                          <strong style={{ color: '#a0522d' }}>Step 1:</strong> Make connections as per the instructions given below.
+                          <strong>Step 1:</strong> Make connections as per the instructions given below.
                         </p>
                         
                         <div className="instructions-connection-box">
@@ -915,33 +821,37 @@ const App = () => {
                         <p className="instructions-note"><strong>Note:</strong> Click on the label to delete connection for the corresponding node.</p>
                         
                         <p className={isStepActive(STEPS.CHECK) ? 'instruction-step-active' : (isStepCompleted(STEPS.CHECK) ? 'instruction-step-completed' : '')}>
-                          <strong style={{ color: '#a0522d' }}>Step 2:</strong> Now, Check the connections by clicking on <strong>'CHECK'</strong> button.
+                          <strong>Step 2:</strong> Now, Check the connections by clicking on <strong>'CHECK'</strong> button.
                         </p>
                         <p className="instructions-indent">If the connections are 'Invalid connections' click on corresponding node to remove the connection.</p>
                         <p className="instructions-indent">And if the connections are 'Right Connections' then follow the below steps.</p>
                         
-                        <p className={isStepActive(STEPS.SELECT_COMPONENTS) ? 'instruction-step-active' : (isStepCompleted(STEPS.SELECT_COMPONENTS) ? 'instruction-step-completed' : '')}>
-                          <strong style={{ color: '#a0522d' }}>Step 3:</strong> Turn on the MCB.
+                        <p className={isStepActive(STEPS.POWER_ON) ? 'instruction-step-active' : (isStepCompleted(STEPS.POWER_ON) ? 'instruction-step-completed' : '')}>
+                          <strong>Step 3:</strong> Turn on the MCB.
                         </p>
 
-                        <p className={isStepActive(STEPS.POWER_ON) ? 'instruction-step-active' : (isStepCompleted(STEPS.POWER_ON) ? 'instruction-step-completed' : '')}>
-                          <strong style={{ color: '#a0522d' }}>Step 4:</strong> Select the resistor, inductor, and capacitor values from their dropdowns.
+                        <p className={isStepActive(STEPS.SELECT_COMPONENTS) ? 'instruction-step-active' : (isStepCompleted(STEPS.SELECT_COMPONENTS) ? 'instruction-step-completed' : '')}>
+                          <strong>Step 4:</strong> Select the resistor, inductor, and capacitor values from their dropdowns.
                         </p>
                         
                         <p className={isStepActive(STEPS.VARIAC_ON) ? 'instruction-step-active' : (isStepCompleted(STEPS.VARIAC_ON) ? 'instruction-step-completed' : '')}>
-                          <strong style={{ color: '#a0522d' }}>Step 5:</strong> Switch on the autotransformer.
+                          <strong>Step 5:</strong> Switch on the autotransformer.
                         </p>
                         
                         <p className={isStepActive(STEPS.SET_VOLTAGE) ? 'instruction-step-active' : (isStepCompleted(STEPS.SET_VOLTAGE) ? 'instruction-step-completed' : '')}>
-                          <strong style={{ color: '#a0522d' }}>Step 6:</strong> Click the <strong>Variac knob</strong> to rotate it to the 30 V position.
+                          <strong>Step 6:</strong> Click the <strong>Variac knob</strong> to rotate it to the 30 V position.
                         </p>
                         
                         <p className={isStepActive(STEPS.ADD_READING) ? 'instruction-step-active' : (isStepCompleted(STEPS.ADD_READING) ? 'instruction-step-completed' : '')}>
-                          <strong style={{ color: '#a0522d' }}>Step 7:</strong> Click <strong>'ADD'</strong> to record the reading. Choose another R-L-C combination and repeat.
+                          <strong>Step 7:</strong> Click <strong>'ADD'</strong> to record the reading. Choose another R-L-C combination and repeat.
                         </p>
                         
                         <p className={isStepActive(STEPS.CALCULATE) ? 'instruction-step-active' : (isStepCompleted(STEPS.CALCULATE) ? 'instruction-step-completed' : '')}>
-                          <strong style={{ color: '#a0522d' }}>Step 8:</strong> After five readings, select a recorded reading, enter its table values, and click <strong>Verify</strong>. V and I (mA) are prefilled.
+                          <strong>Step 8:</strong> After five readings, select a recorded reading, enter its table values, and click <strong>Verify</strong>. V and I (mA) are prefilled.
+                        </p>
+
+                        <p className={isStepActive(STEPS.GENERATE_REPORT) ? 'instruction-step-active' : ''}>
+                          <strong>Step 9:</strong> After verifying two readings successfully, click <strong>Generate Report</strong>.
                         </p>
                       </div>
                       
@@ -960,6 +870,7 @@ const App = () => {
                   autoConnectRequest={autoConnectRequest}
                   checkRequest={checkRequest}
                   onCheckConnections={handleCheckConnections}
+                  onConnectionReadinessChange={handleConnectionReadinessChange}
                   onVariacBlocked={handleVariacBlocked}
                   onVariacOn={handleVariacOn}
                   onVariacRotate={handleVariacRotate}

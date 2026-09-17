@@ -10,55 +10,55 @@
   "steps": [
     {
       "id": 1,
-      "target": "#experiment-title-board-walkthrough-target",
+      "target": "#experiment-title-board",
       "title": {
         "en": "Aim"
       },
       "description": {
         "en": "The aim of the experiment is to study and measure the Voltage, Current, Power and Power Factor in a series RLC circuit."
       },
-      "audio": "aim.wav",
+      "audio": "Aim.wav",
       "placement": "bottom"
     },
     {
       "id": 2,
-      "target": "#instruction-button-walkthrough-target",
+      "target": "#instruction-button",
       "title": {
         "en": "Instructions Button"
       },
       "description": {
         "en": "The Instructions provide step-by-step guidance on how to perform the simulation."
       },
-      "audio": "Instructions Button.wav",
+      "audio": "Instruction Button.wav",
       "placement": "right"
     },
     {
       "id": 3,
-      "target": "#ai-guide-button-walkthrough-target",
+      "target": "#ai-guide-button",
       "title": {
         "en": "AI Guide Button"
       },
       "description": {
-        "en": "To use this feature, click on the “AI Guide” button. The AI guide will assist you in performing the simulation accurately at each step."
+        "en": "The AI guide will assist you in performing the simulation accurately at each step."
       },
       "audio": "AI Guide Button.wav",
       "placement": "right"
     },
     {
       "id": 4,
-      "target": "#check-button-walkthrough-target",
+      "target": "#check-button",
       "title": {
         "en": "Check Button"
       },
       "description": {
-        "en": "The CHECK button verifies all the connections to ensure that they are correct. Note: If a wire is connected incorrectly, click the corresponding label number to remove the connection."
+        "en": "The CHECK button verifies all the connections to ensure that they are correct."
       },
       "audio": "Check Button.wav",
       "placement": "right"
     },
     {
       "id": 5,
-      "target": "#auto-connect-button-walkthrough-target",
+      "target": "#auto-connect-button",
       "title": {
         "en": "Auto Connect Button"
       },
@@ -70,7 +70,7 @@
     },
     {
       "id": 6,
-      "target": "#add-button-walkthrough-target",
+      "target": "#add-reading-button",
       "title": {
         "en": "Add Button"
       },
@@ -82,19 +82,19 @@
     },
     {
       "id": 7,
-      "target": "#reset-button-walkthrough-target",
+      "target": "#reset-button",
       "title": {
         "en": "Reset Button"
       },
       "description": {
-        "en": "The RESET button refresh the simulation to its initial state for a fresh start. "
+        "en": "The RESET button refreshes the simulation to its initial state for a fresh start."
       },
-      "audio": "Reset Button-.wav",
+      "audio": "Reset Button.wav",
       "placement": "right"
     },
     {
       "id": 8,
-      "target": "#print-button-walkthrough-target",
+      "target": "#print-button",
       "title": {
         "en": "Print Button"
       },
@@ -104,21 +104,10 @@
       "audio": "Print Button.wav",
       "placement": "right"
     },
-    {
-      "id": 9,
-      "target": "#equation-button-walkthrough-target",
-      "title": {
-        "en": "Equation Button"
-      },
-      "description": {
-        "en": "The Equation button beside Generate Report opens the circuit equations and percentage-error equation."
-      },
-      "audio": "Mathematical Expressions.wav",
-      "placement": "right"
-    },
+
     {
       "id": 10,
-      "target": "#mcb-supply",
+      "target": "#mcb-supply .mcb__image",
       "title": {
         "en": "MCB "
       },
@@ -130,122 +119,122 @@
     },
     {
       "id": 11,
-      "target": "#autotransformer-panel-walkthrough-target",
+      "target": "#autotransformer-panel .variac-bg",
       "title": {
         "en": "Autotransformer"
       },
       "description": {
-        "en": "After the autotransformer is turned ON, click its Variac knob to set the selected RLC circuit supply to 30 V. Max. kVA: 4.05, Max. Load: 15 A. Input Voltage: 240 V, 50 Hz; Output Voltage: 0-240 V AC."
+        "en": "The autotransformer is used to obtain a variable AC output voltage from the 230 V input supply. It allows the output voltage to be varied gradually and set to 30 V for safe operation of the circuit."
       },
       "audio": "Autotransformer.wav",
       "placement": "right"
     },
     {
       "id": 12,
-      "target": "#resistor-main",
+      "target": "#resistor-main .resistor-asset-graphic",
       "title": {
         "en": "Resistor"
       },
       "description": {
         "en": "The resistor acts as the resistive element of the series RLC circuit and consumes active power. It limits the circuit current and is used to study the effect of resistance on current, voltage drop, power dissipation, and power factor. "
       },
-      "audio": "resistor.wav",
+      "audio": "Resistor.wav",
       "placement": "top"
     },
     {
       "id": 13,
-      "target": "#inductor-main",
+      "target": ".inductor-component .inductor-asset-graphic",
       "title": {
         "en": "Inductor"
       },
       "description": {
         "en": "The inductor provides the inductive element of the series RLC circuit and stores energy in its magnetic field. It introduces inductive reactance, opposes changes in current, affects the phase relationship between voltage and current, and influences the circuit impedance and power factor."
       },
-      "audio": "inductor.wav",
+      "audio": "Inductor.wav",
       "placement": "top"
     },
     {
       "id": 14,
-      "target": "#capacitor-panel-walkthrough-target",
+      "target": ".capacitor-component .capacitor-asset-graphic",
       "title": {
         "en": "Capacitor"
       },
       "description": {
-        "en": " The capacitor acts as the capacitive element of the series RLC circuit and stores energy in its electric field. It introduces capacitive reactance, affects the phase angle between voltage and current, and is used to study the effects of capacitance on impedance, circuit current, and power factor. "
+        "en": "The capacitor acts as the capacitive element of the series RLC circuit and stores energy in its electric field. It introduces capacitive reactance, affects the phase angle between voltage and current, and is used to study the effects of capacitance on impedance, circuit current, and power factor."
       },
-      "audio": "capacitor.wav",
+      "audio": "Capacitor.wav",
       "placement": "top"
     },
     {
       "id": 15,
-      "target": "#voltmeter-v1-walkthrough-target",
+      "target": "#voltmeter-v1 .voltmeter__image",
       "title": {
         "en": "AC Voltmeter 1"
       },
       "description": {
-        "en": "This voltmeter measures the voltage applied to the series RLC circuit. It shows the 30 V output received from the autotransformer. Rating: 0-50 V AC."
+        "en": "This voltmeter is used to measure the voltage applied to the series RLC circuit. It shows the output voltage received from the autotransformer, which is adjusted to 30 V for the experiment. Rating: 0–50 V AC."
       },
       "audio": "AC Voltmeter 1.wav",
       "placement": "bottom"
     },
     {
       "id": 16,
-      "target": "#ammeter-main",
+      "target": ".ammeter .ammeter__dial",
       "title": {
         "en": "AC Ammeter"
       },
       "description": {
-        "en": "This ammeter is used to measure the total current flowing through the series RLC circuit. Since all the components are connected in series, the same current flows through the resistor, inductor, and capacitor.Rating: 0-2A AC"
+        "en": "This ammeter measures the total current flowing through the series RLC circuit. Because all components are connected in series, the same current flows through the resistor, inductor, and capacitor. Rating: 0–30 mA AC."
       },
-      "audio": "ac ammeter.wav",
+      "audio": "AC Ammeter.wav",
       "placement": "bottom"
     },
     {
       "id": 17,
-      "target": "#wattmeter-w1",
+      "target": ".wattmeter--W1 .wattmeter__background-image",
       "title": {
         "en": "AC Wattmeter"
       },
       "description": {
-        "en": "The wattmeter is used to measure the active power consumed by the series RLC circuit. The measured power (P) helps in analyzing the power dissipated by the resistor and studying its effect on the overall circuit behaviour and power factor.Rating: 0-50W AC, 5A, M.F. - 1 "
+        "en": "The wattmeter measures the active power consumed by the series RLC circuit. The measured power (P) helps analyze the power dissipated by the resistor and its effect on circuit behavior and power factor. Rating: 0–1 W."
       },
-      "audio": "ac wattmeter.wav",
+      "audio": "AC Wattmeter.wav",
       "placement": "bottom"
     },
     {
       "id": 18,
-      "target": "#voltmeter-v2-walkthrough-target",
+      "target": "#voltmeter-v2 .voltmeter__image",
       "title": {
         "en": "AC Voltmeter V2"
       },
       "description": {
-        "en": "This voltmeter is used to measure the voltage drop across the resistor in the series RLC circuit. The measured resistive voltage (VR) helps in calculating the resistance present in the circuit and is further used in determining the circuit power factor using the provided formulas. Rating: 0-50V AC"
+        "en": "This voltmeter measures the voltage drop across the resistor in the series RLC circuit. Rating: 0–50 V AC."
       },
-      "audio": "ac voltmeter2.wav",
+      "audio": "AC Voltmeter 2.wav",
       "placement": "left"
     },
     {
       "id": 19,
-      "target": "#voltmeter-v3-walkthrough-target",
+      "target": "#voltmeter-v3 .voltmeter__image",
       "title": {
         "en": "AC Voltmeter V3"
       },
       "description": {
-        "en": "This voltmeter is used to measure the voltage drop across the inductor in the series RLC circuit. The measured inductive voltage (VL) will be used to calculate the inductive reactance and inductance of the circuit using the given formulas.Rating: 0-50V AC"
+        "en": "This voltmeter measures the voltage drop across the inductor in the series RLC circuit. Rating: 0–50 V AC."
       },
-      "audio": "AC Voltmeter3.wav",
+      "audio": "AC Voltmeter 3.wav",
       "placement": "left"
     },
     {
       "id": 20,
-      "target": "#voltmeter-v4-walkthrough-target",
+      "target": "#voltmeter-v4 .voltmeter__image",
       "title": {
         "en": "AC Voltmeter V4"
       },
       "description": {
-        "en": "This voltmeter is used to measure the voltage drop across the capacitor in the series RLC circuit. The measured capacitive voltage (VC) will be used to calculate the capacitive reactance and capacitance of the circuit using the given formulas.Rating: 0-50V AC"
+        "en": "This voltmeter measures the voltage drop across the capacitor in the series RLC circuit. Rating: 0–50 V AC."
       },
-      "audio": "AC Voltmeter4.wav",
+      "audio": "AC Voltmeter 4.wav",
       "placement": "left"
     },
     {
@@ -255,31 +244,43 @@
         "en": "Observation Table"
       },
       "description": {
-        "en": "This table records the measured readings of voltage, supply current, resistive voltage (VR), inductive voltage (VL), capacitive voltage (VC) and power during the experiment. These observations will be used to calculate and analyze the parameters of the series RLC circuit. "
+        "en": "This table records the selected RLC values along with the measured readings of voltage, supply current, resistive voltage (VR), inductive voltage (VL), capacitive voltage (VC) and power during the experiment. These observations will be used to calculate the percentage error and analyse the behaviour of the series RLC circuit."
       },
       "audio": "Observation Table.wav",
       "placement": "right"
     },
     {
       "id": 22,
-      "target": "#theoretical-calculations-panel",
+      "target": "#equation-button-walkthrough-target",
       "title": {
-        "en": "Reading Verification"
+        "en": "Equations"
       },
       "description": {
-        "en": "This section unlocks after five readings. Select a reading and enter the matching observation-table values; current I (mA) is prefilled."
+        "en": "This panel contains the equations required to verify the readings of the series RLC circuit. Use these expressions to calculate the required values and verify the results by clicking the Verify button."
       },
-      "audio": "Theoretical Calculations.wav",
-      "placement": "top"
+      "audio": "Equations.wav",
+      "placement": "right"
     },
     {
       "id": 23,
+      "target": "#theoretical-calculations-panel",
+      "title": {
+        "en": "Theoretical Verification"
+      },
+      "description": {
+        "en": "This section will be used to calculate the theoretical values for the selected RLC parameters using the provided equations. After verification, the percentage error will be calculated using the specified error formula and displayed in the Error Section."
+      },
+      "audio": "Theoretical Verification.wav",
+      "placement": "top"
+    },
+    {
+      "id": 24,
       "target": "#generate-report-button",
       "title": {
         "en": "Generate Report"
       },
       "description": {
-        "en": "The Report button generates a summarised report after two observation-table readings have been verified successfully."
+        "en": "The Report button generates a summarised report of the simulation. After completing the observation table and theoretical calculations, generate the report. The report will include the time taken to complete the simulation, simulation summary, the apparatus used, recorded readings, user-calculated results and conclusion."
       },
       "audio": "Generate Report.wav",
       "placement": "top"

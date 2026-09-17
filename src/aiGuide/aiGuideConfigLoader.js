@@ -36,8 +36,7 @@ export const loadAiGuideConfig = (config, locale = FALLBACK_LOCALE) => {
     steps: rawSteps
       .map((step, index) => ({
         ...step,
-        // Passes the raw file name string safely. 
-        // useAiGuideNarration.js will fetch it automatically from the public/audio folder.
+        // The narration hook resolves this file name from src/audios.
         audio: step?.audio && step.audio !== '#' ? step.audio : '#',
         id: parseInt(step?.id ?? index + 1, 10), // Ensures numeric IDs match up perfectly
         text: getLocalizedValue(step?.text, resolvedLocale, defaultLocale),

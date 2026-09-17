@@ -1,7 +1,6 @@
 import '../App.css' 
 
 import w1Img from '../assets/W1.png'
-import needleImg from '../assets/needle.png'
 import { DIAL_GEOMETRY } from '../utils/rlcMeterCalibration.js'
 
 // Shared with the RLC meter calibration table -- see
@@ -21,7 +20,7 @@ const Wattmeter = ({ value = 0, angleDeg = null }) => {
     : DIAL_START_ANGLE + ratio * DIAL_SWEEP_ANGLE
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div className="meter-shell meter-shell--wattmeter">
       
       <article className="wattmeter wattmeter--W1" >
         {/* Background Dial Image */}
@@ -30,15 +29,9 @@ const Wattmeter = ({ value = 0, angleDeg = null }) => {
         {/* Needle Pivot — handles rotation */}
         <div 
           className="wattmeter__needle" 
+          aria-hidden="true"
           style={{ '--wattmeter-needle-rotation': `${angle}deg` }}
-        >
-          {/* Needle Image — the actual visual needle */}
-          <img 
-            src={needleImg} 
-            alt="Wattmeter needle" 
-            className="wattmeter__needle-image" 
-          />
-        </div>
+        />
       </article>
 
       {/* Production Walkthrough Target Container — Clean and invisible */}

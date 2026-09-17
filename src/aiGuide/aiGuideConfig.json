@@ -11,17 +11,17 @@
     {
       "id": 2,
       "text": "The interface walkthrough is now complete. You are now ready to perform the experiment. You may either click the Auto Connect button to make the circuit connections automatically or connect the circuit manually by following the highlighted terminals. Let's begin with the first connection.",
-      "audio": "The interface walkthrough is now complete.wav"
+      "audio": "The interface walkthrough is now complete..wav"
     },
     {
       "id": 3,
       "text": "Click and drag the wire from terminal 1 and drop it on terminal 23.",
-      "audio": "Correct Connections.wav"
+      "audio": "Click and drag the wire from terminal 1 and drop it on terminal 23.wav"
     },
     {
       "id": 4,
       "text": "Let's move on to the next connection. Connect terminal 2 to terminal 24.",
-      "audio": "Connect terminal 2 to terminal 24.wav"
+      "audio": "Let's move on to the next connection. Connect terminal 2 to terminal 24..wav"
     },
     {
       "id": 5,
@@ -91,17 +91,17 @@
     {
       "id": 18,
       "text": "Connect terminal 16 to terminal 22.",
-      "audio": "Connect terminal 16 to terminal 22.wav"
+      "audio": "Connect terminal 16 to terminal 22..wav"
     },
     {
       "id": 19,
       "text": "Connect terminal 18 to terminal 19.",
-      "audio": "Connect terminal 18 to terminal 19.wav"
+      "audio": "Connect terminal 18 to terminal 19. .wav"
     },
     {
       "id": 20,
       "text": "Connect terminal 20 to terminal 21.",
-      "audio": "Connect terminal 20 to terminal 21.wav"
+      "audio": "Connect terminal 20 to terminal 21..wav"
     },
     {
       "id": 21,
@@ -140,76 +140,111 @@
     },
     {
       "id": 28,
-      "text": "Ensure that the MCB is switched ON before switching ON the autotransformer.",
-      "audio": "1st time autotransformer click or after check disabled.wav"
+      "text": "Ensure that the MCB is switched ON and the RLC values are selected before switching ON the autotransformer.",
+      "audio": "1st time autotransformer click or after check disabled (1).wav"
     },
     {
       "id": 29,
-      "text": "Connections Verified: Connections Verified successfully. Now turn ON the MCB by clicking the MCB lever.",
+      "text": "Connections verified successfully. Now turn ON the MCB by clicking the MCB lever.",
       "audio": "For correct connections, check click.wav"
     },
     {
       "id": 30,
-      "text": "MCB has been turned ON. Select the resistor, inductor, and capacitor values, then click the power button of the autotransformer.",
+      "text": "MCB has been turned ON. Select the resistor, inductor, and capacitor values from the dropdowns.",
       "audio": "MCB ON.wav"
     },
     {
       "id": 31,
-      "text": "The autotransformer is now ON at 30 volts. The selected meter reading is displayed and the Add button is enabled.",
-      "audio": "After the autotransformer is ON.wav"
+      "text": "Resistor, inductor, and capacitor values have been selected. Now click the power button of the autotransformer.",
+      "audio": "Component Values Selected.wav"
     },
     {
       "id": 32,
-      "text": "The voltage has been set to 30 V. The readings are displayed on the voltmeter, ammeter, and wattmeter. Click Add to record the selected reading.",
-      "audio": "After Voltage is set.wav"
+      "text": "Autotransformer is now ON. Next, click on the autotransformer knob to set the voltage.",
+      "audio": "After the autotransformer is ON.wav"
     },
     {
       "id": 33,
-      "text": "Reading added successfully. Select a different R-L-C combination for the next reading. The MCB and autotransformer will remain ON, and Add will become available for the new reading.",
-      "audio": "1st readings added.wav"
+      "text": "The voltage has been set to 30 V to ensure safe operation of the RLC circuit experiment. The readings are now displayed on the voltmeters, ammeter, and wattmeter. Now click the Add button to add the readings to the observation table.",
+      "audio": "After Voltage is set.wav"
     },
     {
       "id": 34,
-      "text": "This reading is already in the table. Select a different R-L-C combination to enable Add again. Verification becomes available after five readings.",
-      "audio": "After taking the readings, Add click.wav"
+      "text": "Reading 1 of 12 has been added. Select a different RLC combination and click the Add button again.",
+      "audio": "1st reading added.wav"
     },
     {
       "id": 35,
+      "text": "A new RLC value is set. Click the Add button to record it.",
+      "audio": "2nd time value selected.wav"
+    },
+    {
+      "id": 36,
+      "text": "Select a different RLC combination to enable the Add button.",
+      "audio": "Dropdown alert.wav"
+    },
+    {
+      "id": 37,
+      "text": "Reading 2 of 12 has been added. Repeat the same steps until all 12 readings have been recorded.",
+      "audio": "2nd reading added.wav"
+    },
+    {
+      "id": 38,
+      "text": "All 12 readings have been recorded. Now select the reading you want to verify theoretically from the dropdown menu and click the Verify button.",
+      "audio": "12th reading added All readings recorded.wav"
+    },
+    {
+      "id": 39,
+      "text": "Theoretical calculations verified successfully.",
+      "audio": "After correct verification, verify button.wav"
+    },
+    {
+      "id": 40,
+      "text": "You can add a maximum of 12 readings to the table.",
+      "audio": "Max. readings,  Add click.wav"
+    },
+    {
+      "id": 41,
       "text": "The selected readings match the observation table. Verification is successful, and you may generate the report.",
       "audio": "After correct verification, verify button.wav"
     },
     {
-      "id": 36,
+      "id": 42,
+      "text": "Please verify a minimum of two readings before generating the report.",
+      "audio": "Generate button click, before verification.wav"
+    },
+    {
+      "id": 43,
       "text": "Please enter all the calculated values and verify them.",
       "audio": "Incomplete more than one value.wav"
     },
     {
-      "id": 37,
+      "id": 44,
       "text": "Please enter the required calculated value and verify it.",
       "audio": "Incomplete one value.wav"
     },
     {
-      "id": 38,
+      "id": 45,
       "text": "Verification failed. The highlighted values are incorrect. Please recheck your calculations and verify again.",
       "audio": "Incorrect calculations, more than one.wav"
     },
     {
-      "id": 39,
+      "id": 46,
       "text": "Verification failed. The highlighted value is incorrect. Please review your calculation and verify again.",
       "audio": "Incorrect calculation, one only.wav"
     },
     {
-      "id": 40,
+      "id": 47,
       "text": "Report Generated: Your report has been generated successfully. Click OK to view your report.",
       "audio": "Generate Report button click.wav"
     },
     {
-      "id": 41,
+      "id": 48,
       "text": "The simulation has been reset. You can start again.",
       "audio": "Reset.wav"
     },
     {
-      "id": 42,
+      "id": 49,
       "text": "Opening the print dialog.",
       "audio": "Print.wav"
     }

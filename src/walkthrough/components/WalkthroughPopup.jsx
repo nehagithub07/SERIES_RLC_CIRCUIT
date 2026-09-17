@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 
 import { useFocusTrap } from '../hooks/useFocusTrap.js'
+import { resolveWalkthroughAudio } from '../walkthroughAudio.js'
 
 const EDGE_GAP = 16
 const TARGET_GAP = 18
@@ -106,7 +107,8 @@ const WalkthroughPopup = ({
   const audioRef = useRef(null)
   const [popupSize, setPopupSize] = useState(DEFAULT_POPUP_SIZE)
   const [isPlaying, setIsPlaying] = useState(false)
-  const audioSource = isValidAudioSource(activeStep.audio) ? activeStep.audio : null
+  const configuredAudioSource = isValidAudioSource(activeStep.audio) ? activeStep.audio : null
+  const audioSource = resolveWalkthroughAudio(configuredAudioSource)
   const titleId = `walkthrough-title-${activeStep.id}`
   const descriptionId = `walkthrough-description-${activeStep.id}`
   const progressPercent = (currentStep / totalSteps) * 100
@@ -131,17 +133,23 @@ const WalkthroughPopup = ({
 
     if (!audioSource) {
       audioRef.current = null
+
+      if (configuredAudioSource) {
+        console.error(
+          `Walkthrough: Cannot find audio file "${configuredAudioSource}" in src/walkthrough/audios.`
+        )
+      }
+
       return () => window.clearTimeout(resetPlayingTimer)
     }
 
-    // Audio files live in public/audio; encodeURI handles spaces/commas in filenames.
-    const audio = new Audio(`/audio/${encodeURI(audioSource)}`)
+    const audio = new Audio(audioSource)
     audioRef.current = audio
 
     const handleEnded = () => setIsPlaying(false)
     const handleError = () => {
       console.error(
-        `Walkthrough: Cannot find audio file at ${audio.src}. Did you move it to the public/audio folder?`
+        `Walkthrough: Unable to load audio file "${configuredAudioSource}" from ${audio.src}.`
       )
       setIsPlaying(false)
     }
@@ -162,7 +170,7 @@ const WalkthroughPopup = ({
       audio.removeEventListener('ended', handleEnded)
       audio.removeEventListener('error', handleError)
     }
-  }, [activeStep.id, audioSource, autoPlayAudio])
+  }, [activeStep.id, audioSource, autoPlayAudio, configuredAudioSource])
 
   const popupPosition = useMemo(
     () => getPopupPosition(targetRect, popupSize, activeStep.placement),

@@ -50,7 +50,10 @@ const ReportControls = ({
 
   return (
     <>
-      <div className="report-equation-control" ref={equationControlRef}>
+      <div
+        className={`report-equation-control ${showEquations ? 'report-equation-control--open' : ''}`}
+        ref={equationControlRef}
+      >
         <button
           id="equation-button-walkthrough-target"
           type="button"
@@ -61,7 +64,6 @@ const ReportControls = ({
         >
           <span className="report-equation-button__icon"><EquationIcon /></span>
           <span className="report-equation-button__copy">
-            <small>RLC</small>
             <strong>EQUATIONS</strong>
           </span>
         </button>

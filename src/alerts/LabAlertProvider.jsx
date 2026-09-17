@@ -193,6 +193,9 @@ const LabAlertProvider = ({ children }) => {
 
   const spotlightAlert = centerAlert ?? topRightAlerts.at(-1)
   const hasCriticalAlert = Boolean(centerAlert?.critical)
+  const spotlightNarration = spotlightAlert
+    ? spotlightAlert.narration ?? `${spotlightAlert.title}. ${spotlightAlert.description ?? ''}`.trim()
+    : ''
 
   // Alert narration has its own playback lifecycle. It starts only when the
   // corresponding alert becomes visible and stops when that alert is removed.
@@ -201,9 +204,9 @@ const LabAlertProvider = ({ children }) => {
       return undefined
     }
 
-    playAlertSound(spotlightAlert.sound)
+    playAlertSound(spotlightAlert.sound, spotlightNarration)
     return stopAlertSound
-  }, [spotlightAlert?.id, spotlightAlert?.sound])
+  }, [spotlightAlert?.id, spotlightAlert?.sound, spotlightNarration])
 
   const contextValue = useMemo(() => ({
     clearAlerts,

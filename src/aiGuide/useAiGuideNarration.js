@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import defaultAiGuideConfig from './aiGuideConfig.json';
 import { isConfiguredAudioSource, loadAiGuideConfig } from './aiGuideConfigLoader.js';
+import { resolveAudioAsset } from '../utils/audioAssets.js';
 
 const canUseSpeechSynthesis = () =>
   typeof window !== 'undefined' &&
@@ -106,8 +107,13 @@ export const useAiGuideNarration = ({
   const playAudio = useCallback(
     (audioSource) =>
       new Promise((resolve, reject) => {
-        // encodeURI seamlessly converts unusual characters or ellipses found in your file names (e.g., "...wav")
-        const audioUrl = `/audio/${encodeURI(audioSource)}`;
+        const audioUrl = resolveAudioAsset(audioSource);
+
+        if (!audioUrl) {
+          reject(new Error(`AI Guide audio file not found in src/audios: ${audioSource}`));
+          return;
+        }
+
         const audio = new Audio(audioUrl);
 
         let settled = false;
@@ -134,7 +140,7 @@ export const useAiGuideNarration = ({
         const handleEnded = () => settle(resolve);
         const handleError = () => {
           console.error(
-            `AI Guide: Cannot find audio file at ${audioUrl}. Did you move it to the public/audio folder?`
+            `AI Guide: Unable to load audio file "${audioSource}" from ${audioUrl}.`
           );
           settle(() => reject(new Error(`Unable to play AI Guide audio: ${audioSource}`)));
         };

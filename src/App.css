@@ -348,7 +348,8 @@
 .equation-panel {
   position: absolute;
   z-index: 10000;
-  width: 385px;
+  width: 385px;  
+
   overflow: hidden;
   border: 1px solid rgba(92, 56, 31, 0.38);
   border-radius: 14px;
@@ -616,8 +617,8 @@
 /* ===== REPORT BUTTON ===== */
 .report-button {
   position: absolute;
-  left: 180px;
-  bottom: 24px;
+  left: 300px;
+  bottom: 20px;
   z-index: 4;
   display: inline-flex;
   min-width: 178px;
@@ -650,13 +651,19 @@
   z-index: 5;
 }
 
+.report-equation-control--open {
+  z-index: 950;
+}
+
 .report-equation-button {
   position: relative;
   isolation: isolate;
   overflow: hidden;
   display: inline-flex;
-  width: 146px;
+  width: 200px;
   height: 48px;
+  left: 60px;
+  bottom: -5px;
   align-items: center;
   justify-content: flex-start;
   gap: 9px;
@@ -764,7 +771,7 @@
 .report-equation-control .equation-panel {
   top: auto;
   bottom: calc(100% + 12px);
-  left: 0;
+  left: -20px;
   max-height: min(620px, calc(100vh - 110px));
   overflow-x: hidden;
   overflow-y: auto;
@@ -1779,6 +1786,456 @@
   fill: #3f8f43;
 }
 
+/* ===== READING VERIFICATION PANEL ===== */
+.calculation-panel.graph-panel--separate {
+  height: 650px;
+  grid-template-rows: 88px minmax(0, 1fr);
+  border-color: rgba(75, 48, 30, 0.4);
+  background:
+    linear-gradient(180deg, #fffaf1 0%, #f2e6d3 100%),
+    radial-gradient(circle at 15% 0, rgba(255, 255, 255, 0.95), transparent 44%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 18px 38px rgba(45, 24, 12, 0.24);
+}
+
+.calculation-panel > .graph-panel__heading {
+  align-items: center;
+  padding: 12px 25px 12px 29px;
+  border-bottom: 1px solid rgba(246, 215, 166, 0.3);
+  color: #fffaf0;
+  background:
+    radial-gradient(circle at 12% -60%, rgba(232, 180, 102, 0.32), transparent 42%),
+    linear-gradient(110deg, #2f211a 0%, #55331f 48%, #2e211c 100%);
+  box-shadow: inset 0 -4px 0 rgba(25, 14, 8, 0.14);
+}
+
+.calculation-panel__title-group {
+  min-width: 0;
+}
+
+.calculation-panel__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 5px;
+  color: #e9c98f;
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.calculation-panel__eyebrow span {
+  display: inline-grid;
+  width: 17px;
+  height: 17px;
+  place-items: center;
+  border: 1px solid rgba(235, 205, 150, 0.48);
+  border-radius: 50%;
+  color: #2c2119;
+  background: linear-gradient(145deg, #f4d79b, #c6924e);
+  font-size: 10px;
+  box-shadow: 0 2px 5px rgba(13, 8, 5, 0.35);
+}
+
+.calculation-panel > .graph-panel__heading h2,
+.calculation-panel--active-phase > .graph-panel__heading h2 {
+  margin: 0;
+  color: #fffaf0;
+  font-size: 20px;
+  letter-spacing: 0.45px;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
+}
+
+.calculation-panel .calculation-panel__instruction {
+  margin: 6px 0 0;
+  color: #e1cdb0;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.calculation-panel__progress {
+  gap: 10px;
+  min-width: 244px;
+  padding: 8px 12px 8px 9px;
+  border-color: rgba(243, 213, 163, 0.33);
+  border-radius: 14px;
+  color: #fffaf0;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.13), rgba(22, 13, 8, 0.17));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.13), 0 5px 12px rgba(18, 10, 6, 0.22);
+}
+
+.calculation-panel__progress-ring {
+  position: relative;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: conic-gradient(#55c781 var(--verification-progress), rgba(255, 255, 255, 0.16) 0);
+  box-shadow: 0 3px 9px rgba(12, 8, 5, 0.28);
+}
+
+.calculation-panel__progress-ring::before {
+  width: 30px;
+  height: 30px;
+  border-radius: inherit;
+  content: "";
+  background: #3d2b21;
+}
+
+.calculation-panel__progress-ring i {
+  position: absolute;
+  color: #fffaf0;
+  font-size: 13px;
+  font-style: normal;
+}
+
+.calculation-panel__progress-copy {
+  display: grid;
+  flex: 1;
+  gap: 3px;
+}
+
+.calculation-panel__progress-copy small {
+  color: #d6ba8c;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.calculation-panel__progress-copy strong {
+  color: #fffaf0;
+  font-size: 11.5px;
+}
+
+.calculation-panel__progress-dots i {
+  width: 7px;
+  height: 7px;
+  border-color: rgba(235, 207, 166, 0.46);
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.calculation-panel__body {
+  grid-template-columns: minmax(0, 2.68fr) minmax(330px, 0.82fr);
+  gap: 15px;
+  padding: 15px 17px 17px;
+}
+
+.calculation-panel .calculation-card {
+  padding: 16px;
+  border-radius: 15px;
+  box-shadow: inset 0 1px 0 #fff, 0 10px 22px rgba(63, 35, 16, 0.12);
+}
+
+.calculation-panel .calculation-card::after {
+  height: 4px;
+}
+
+.calculation-panel .calculation-card__heading {
+  margin-bottom: 14px;
+}
+
+.calculation-panel .calculation-card__heading h3 {
+  font-size: 15.5px;
+}
+
+.calculation-card--verification {
+  border-color: rgba(15, 118, 110, 0.26);
+  background:
+    radial-gradient(circle at 0 0, rgba(240, 253, 250, 0.94), transparent 38%),
+    linear-gradient(145deg, #fffefa, #f7f2e8);
+}
+
+.calculation-card--verification::after {
+  background: linear-gradient(90deg, #0f766e, #34d399, #2563eb);
+}
+
+.calculation-card--verification .calculation-card__step {
+  border-color: rgba(13, 148, 136, 0.35);
+  background: linear-gradient(145deg, #0f766e, #115e59);
+  box-shadow: 0 4px 10px rgba(15, 118, 110, 0.24);
+}
+
+.verification-workflow {
+  display: grid;
+  grid-template-columns: auto minmax(22px, 1fr) auto minmax(22px, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  margin: -1px 0 13px;
+  padding: 9px 12px;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  border-radius: 11px;
+  color: #334155;
+  background: linear-gradient(135deg, rgba(240, 253, 250, 0.96), rgba(239, 246, 255, 0.88));
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+.verification-workflow > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  font-size: 9.5px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.verification-workflow > span > b {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(145deg, #14b8a6, #0f766e);
+  font-size: 10px;
+  box-shadow: 0 3px 7px rgba(15, 118, 110, 0.2);
+}
+
+.verification-workflow > span > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.verification-workflow small {
+  display: block;
+  margin-bottom: 1px;
+  color: #0f766e;
+  font-size: 7.5px;
+  font-weight: 900;
+  letter-spacing: 0.55px;
+  text-transform: uppercase;
+}
+
+.verification-workflow > i {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(20, 184, 166, 0.3), rgba(37, 99, 235, 0.35));
+}
+
+.calculation-panel .calculation-card__step {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.calculation-panel .calculation-table-wrap {
+  max-height: 340px;
+  border-radius: 11px;
+  border-color: rgba(15, 118, 110, 0.2);
+  scrollbar-color: #8abcb5 #edf7f5;
+  scrollbar-width: thin;
+  box-shadow: 0 6px 18px rgba(45, 79, 73, 0.11);
+}
+
+.calculation-panel .calculation-table {
+  min-width: 940px;
+}
+
+.calculation-panel .calculation-table th {
+  height: 38px;
+}
+
+.calculation-table__group-row th {
+  top: 0;
+  height: 31px;
+  border-bottom-color: rgba(255, 255, 255, 0.16);
+  letter-spacing: 0.45px;
+  text-transform: uppercase;
+}
+
+.calculation-table__group-row th[rowspan] {
+  z-index: 4;
+  vertical-align: middle;
+  background: linear-gradient(180deg, #513625, #39251a);
+}
+
+.calculation-table__group-row th span,
+.calculation-table__group-row th small {
+  display: block;
+}
+
+.calculation-table__group-row th small {
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: none;
+}
+
+.calculation-table__field-row th {
+  top: 31px;
+  z-index: 3;
+  height: 37px;
+}
+
+.calculation-panel .calculation-table__group-row th:first-child,
+.calculation-panel .calculation-table td:first-child {
+  width: 144px;
+}
+
+.calculation-panel .calculation-table__field-row th:first-child,
+.calculation-panel .calculation-table__field-row th:last-child {
+  width: auto;
+}
+
+.calculation-panel .calculation-table-input,
+.calculation-panel .calculation-reading-select {
+  height: 32px;
+  padding: 5px 6px;
+  border-radius: 7px;
+}
+
+.calculation-panel .calculation-reading-select {
+  border-color: rgba(15, 118, 110, 0.42);
+  color: #134e4a;
+  background-color: #f0fdfa;
+  font-weight: 800;
+}
+
+.calculation-panel .calculation-table td.is-known-value {
+  background: rgba(241, 245, 249, 0.78);
+}
+
+.calculation-panel .calculation-table td.is-entry-value {
+  background: rgba(240, 253, 250, 0.42);
+}
+
+.calculation-panel .calculation-table td.is-entry-value .calculation-table-input:not(:disabled) {
+  border-color: rgba(13, 148, 136, 0.42);
+  background: #fff;
+  box-shadow: inset 0 -2px 0 rgba(20, 184, 166, 0.1);
+  font-weight: 700;
+}
+
+.calculation-panel .calculation-table-input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.calculation-panel .calculation-table-input[type="number"]::-webkit-inner-spin-button,
+.calculation-panel .calculation-table-input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.calculation-panel .calculation-table-input:focus,
+.calculation-panel .calculation-reading-select:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.16);
+}
+
+.calculation-table tbody tr.has-reading td {
+  background: rgba(255, 252, 246, 0.98);
+}
+
+.calculation-table tbody tr.is-verified td {
+  background: rgba(234, 248, 239, 0.9);
+}
+
+.calculation-table tbody tr:hover td {
+  background: #fff5e2;
+}
+
+.calculation-table-input::placeholder {
+  color: #aa927c;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.calculation-panel .calculation-row-add,
+.calculation-panel .calculation-row-verify {
+  border-radius: 8px;
+  transition: transform 150ms ease, filter 150ms ease, box-shadow 150ms ease;
+}
+
+.calculation-panel .calculation-row-add {
+  padding: 8px 12px;
+  border-color: #0f766e;
+  background: linear-gradient(180deg, #14b8a6, #0f766e);
+  box-shadow: 0 4px 10px rgba(15, 118, 110, 0.2);
+}
+
+.calculation-panel .calculation-row-verify {
+  border-color: #0f766e;
+  background: linear-gradient(180deg, #0f8d82, #115e59);
+  box-shadow: 0 3px 8px rgba(15, 118, 110, 0.2);
+}
+
+.calculation-panel .calculation-card__footer {
+  margin-top: 12px;
+}
+
+.calculation-card__result-count {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border: 1px solid rgba(49, 95, 112, 0.2);
+  border-radius: 999px;
+  color: #315f70;
+  background: #e9f2f1;
+  font-size: 8.5px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.calculation-panel .calculation-errors {
+  max-height: 390px;
+}
+
+.calculation-panel .calculation-error-row {
+  padding: 10px 11px;
+  border-radius: 10px;
+}
+
+.calculation-error-row__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.calculation-error-row__heading strong {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.calculation-error-row__heading strong span {
+  display: inline-grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 8px;
+  color: #fff;
+  background: linear-gradient(145deg, #6e9ca5, #315f70);
+  font-size: 8.5px;
+  box-shadow: 0 3px 7px rgba(49, 95, 112, 0.18);
+}
+
+.calculation-error-row__heading small {
+  color: #876e58;
+  font-size: 8.5px;
+  font-weight: 800;
+}
+
+.calculation-error-row__heading small.is-ready {
+  color: #237044;
+}
+
+.calculation-panel .calculation-error-grid span {
+  border-radius: 7px;
+}
+
+.calculation-panel .calculation-errors__empty {
+  min-height: 342px;
+}
+
 .status-bar {
   position: absolute;
   top: 804px;
@@ -2380,36 +2837,44 @@ Base modal container
 
 
 
+/* Shared meter wrapper keeps every instrument on the same rendering layer. */
+.meter-shell {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  user-select: none;
+}
+
 /* Main Container - MOVE & RESIZE THE WHOLE COMPONENT */
 .ammeter {
   /* 📐 SCALING CONTROL: Adjust values if needed */
   --dial-scale-x: 1;
-  --dial-scale-y: 1.11;
+  --dial-scale-y: 1;
 
   position: relative;
   display: inline-block;
   
   /* 1. SHIFT: Positions the widget on your console panel */
-  margin-left: -407px;      
+  margin-left: -360px;      
   margin-right: 1px; 
   
   /* 2. RESIZE: Base container configuration */
-  width: 160px; 
-  overflow: visible !important;
-  height: auto !important;
-  padding-bottom: 30px;
+  width: 170px; 
+  height: auto;
+  padding-bottom: 0;
 }
 
 /* Ammeter Background Dial */
 .ammeter__dial {
   display: block;
-  width: 120%;       
+  width: 100%;
   height: auto;
   
   position: relative;
-  transform: translate(0px, 2px) scaleX(var(--dial-scale-x)) scaleY(var(--dial-scale-y)); 
+  transform: scaleX(var(--dial-scale-x)) scaleY(var(--dial-scale-y));
   transform-origin: center top;  
-  z-index: 1;                    
+  z-index: 1;
+  filter: drop-shadow(0 5px 6px rgba(37, 24, 16, 0.25));
 }
 
 /* ============================================
@@ -2422,9 +2887,9 @@ Base modal container
 .ammeter__needle {
   position: absolute;
   
-  /* Exact centre of the rendered 160px dial (including its 1.11 Y scale). */
-  top: 121px;
-  left: 80px;
+  /* Calibrated pivot for the 0-30 mA artwork. */
+  top: 106px;
+  left: 50%;
   
   z-index: 2;
   
@@ -2438,7 +2903,7 @@ Base modal container
   transform-origin: 0 0;
   
   /* ONLY rotation — no translate! */
-  transform: rotate(var(--ammeter-needle-rotation, -100deg));
+  transform: rotate(var(--ammeter-needle-rotation, -90deg));
   
   transition: transform 0.3s ease-out;
   
@@ -2452,27 +2917,6 @@ Base modal container
    The actual visual needle, positioned relative
    to the pivot. Extends LEFT from the pivot.
    ============================================ */
-.ammeter__needle-image {
-  position: absolute;
-  
-  /* Center vertically on the pivot line */
-  top: -44px;
-  
-  /* Offset left so needle base sits AT the pivot point (left edge of wrapper) */
-  left: -35px;
-  
-  display: block;
-  width: 70px;        /* Your needle image width */
-  max-width: none;
-  height: auto;
-  
-  /* Center the image vertically */
-  object-fit: contain;
-  
-  /* If your needle points UP in the PNG, uncomment below: */
-  /* transform: translateY(-50%) rotate(-90deg); */
-}
-
 /* Terminals Structural Layout */
 .ammeter__terminals {
   position: absolute;
@@ -2505,53 +2949,64 @@ Base modal container
 
 /* V1 (Top Row) */
 .voltmeter--V1 {
-  width: 200px;
+  width: 170px;
   height: 110px;
   position: relative;
-  right: 292px;
+  right: 270px;
 }
 .voltmeter--V1 .voltmeter__image {
-  transform: scaleX(0.8) scaleY(0.7);
+  transform: scale(1);
   transform-origin: center top; 
+  filter: drop-shadow(0 5px 6px rgba(37, 24, 16, 0.25));
 }
 
 /* V2 (Top Right) */
 .voltmeter--V2 {
-  width: 195px;
-  height: 105px;
+  width: 170px;
+  height: 110px;
   position: relative;
-  top: -300px;
-  right: -30px;
+  top: -285px;
+  right: -75px;
 }
 .voltmeter--V2 .voltmeter__image {
-  transform: scaleX(0.8) scaleY(0.7);
+  transform: scale(1);
   transform-origin: center top;
+  filter: drop-shadow(0 5px 6px rgba(37, 24, 16, 0.25));
 }
 
 /* V3 (Middle Right) */
 .voltmeter--V3 {
-  width: 200px;
+  width: 170px;
   height: 110px;
   position: relative;
   top: -150px;
-  right: -30px;
+  right: -80px;
 }
 .voltmeter--V3 .voltmeter__image {
-  transform: scaleX(0.8) scaleY(0.7);
+    transform: scale(1);
   transform-origin: center top;
+  filter: drop-shadow(0 5px 6px rgba(37, 24, 16, 0.25));
 }
 
 /* V4 (Bottom Right) */
 .voltmeter--V4 {
-  width: 200px;
+  width: 170px;
   height: 110px;
   position: relative;
   top: 10px;
-  right: -30px;
+  right: -80px;
 }
 .voltmeter--V4 .voltmeter__image {
-  transform: scaleX(0.8) scaleY(0.7);
+   transform: scale(1);
   transform-origin: center top;
+  filter: drop-shadow(0 5px 6px rgba(37, 24, 16, 0.25));
+}
+
+.voltmeter__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 /* ==========================================================================
@@ -2574,7 +3029,7 @@ Base modal container
   transform-origin: 0 0;
   
   /* ONLY rotation — no translate! */
-  transform: rotate(var(--voltmeter-needle-rotation, -100deg));
+  transform: rotate(var(--voltmeter-needle-rotation, -90deg));
   
   transition: transform 0.3s ease-out;
   pointer-events: none;
@@ -2587,49 +3042,31 @@ Base modal container
    Extends LEFT from the pivot point.
    ========================================================================== */
 
-.voltmeter__needle-image {
-  position: absolute;
-  
-  /* Center vertically on the pivot line */
-  top: -44px;
-  
-  /* Offset left so needle base sits AT the pivot point */
-  left: -35px;
-  
-  display: block;
-  width: 70px;        /* Your needle image width */
-  max-width: none;
-  height: auto;
-  
-  /* Center the image vertically on the pivot */
-  object-fit: contain;
-}
-
 /* ==========================================================================
    INDEPENDENT NEEDLE POSITIONS PER VOLTMETER
    ========================================================================== */
 
 /* V1 (Top Left) */
 .voltmeter__needle--V1 {
-  top: 129px;
+  top: 119px;
   left: 50%;
 }
 
 /* V2 (Top Right) */
 .voltmeter__needle--V2 {
-  top: 126px;
+  top: 119px;
   left: 50%;
 }
 
 /* V3 (Middle Right) */
 .voltmeter__needle--V3 {
-  top: 129px;
+  top: 119px;
   left: 50%;
 }
 
 /* V4 (Bottom Right) */
 .voltmeter__needle--V4 {
-  top: 129px;
+  top: 119px;
   left: 50%;
 }
 /* ==========================================================================
@@ -2640,14 +3077,14 @@ Base modal container
    ========================================================================== */
 .wattmeter {
   /* 🎛️ DIAL CONTROL PANEL: ADJUST DIAL SIZE & POSITION FREELY HERE */
-  --dial-width: 153px;
+  --dial-width: 170px;
   --dial-height: auto;
   
-  --dial-shift-x: -340px;
-  --dial-shift-y: 14.5px;
+  --dial-shift-x: -285px;
+  --dial-shift-y: 5px;
   
   --dial-scale-x: 1;
-  --dial-scale-y: 1.1;
+  --dial-scale-y: 1;
 
   position: relative;
   display: inline-block;
@@ -2657,6 +3094,7 @@ Base modal container
   transform: translate(var(--dial-shift-x), var(--dial-shift-y)) 
              scaleX(var(--dial-scale-x)) 
              scaleY(var(--dial-scale-y));
+  transform-origin: center top;
 }
 
 /* Background Dial Image */
@@ -2664,6 +3102,8 @@ Base modal container
   display: block;
   width: 100%;
   height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 6px rgba(37, 24, 16, 0.25));
 }
 
 /* ==========================================================================
@@ -2675,9 +3115,9 @@ Base modal container
 .wattmeter__needle {
   position: absolute;
   
-  /* Exact centre of the rendered 153px wattmeter scale. */
-  top: 112px;
-  left: 76.5px;
+  /* Calibrated pivot for the 0-1 W artwork. */
+  top: 119px;
+  left: 50%;
   
   z-index: 10;
   
@@ -2690,7 +3130,7 @@ Base modal container
   transform-origin: 0 0;
   
   /* ONLY rotation — no translate! */
-  transform: rotate(var(--wattmeter-needle-rotation, -100deg));
+  transform: rotate(var(--wattmeter-needle-rotation, -90deg));
   
   transition: transform 0.3s ease-out;
   pointer-events: none;
@@ -2702,22 +3142,41 @@ Base modal container
    The actual visual needle, positioned relative to the pivot.
    Extends LEFT from the pivot point.
    ========================================================================== */
-.wattmeter__needle-image {
+.ammeter__needle {
+  --meter-needle-length: 58px;
+}
+
+.voltmeter__needle,
+.wattmeter__needle {
+  --meter-needle-length: 60px;
+}
+
+:is(.ammeter__needle, .voltmeter__needle, .wattmeter__needle)::before {
   position: absolute;
-  
-  /* The source artwork's hub is at about (50%, 63.2%). These offsets keep
-     that hub exactly on the dial pivot while extending the pointer far enough
-     to meet the wattmeter's printed scale. */
-  top: -58px;
-  left: -46px;
-  
-  display: block;
-  width: 92px;
-  max-width: none;
-  height: auto;
-  
-  object-fit: contain;
-  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.24));
+  left: 0;
+  bottom: 0;
+  width: 6px;
+  height: var(--meter-needle-length);
+  content: "";
+  background: linear-gradient(90deg, #9f1239 0%, #fb7185 44%, #be123c 100%);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  filter: drop-shadow(0 1px 1px rgba(68, 10, 24, 0.38));
+  transform: translateX(-50%);
+  transform-origin: 50% 100%;
+}
+
+:is(.ammeter__needle, .voltmeter__needle, .wattmeter__needle)::after {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 11px;
+  height: 11px;
+  content: "";
+  border: 2px solid #3f3f46;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, #f4f4f5 0 12%, #71717a 18%, #18181b 68%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.42);
+  transform: translate(-50%, -50%);
 }
 /* ==========================================================================
    VARIAC INSTRUMENT STYLES (Virtual Lab Theme)
@@ -3337,144 +3796,40 @@ Base modal container
   object-fit: contain; /* Ensures the graphic scales proportionally without distortion */
   filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.2)); 
 }
-@media print {
-  /* 1. Force landscape orientation at the CSS level */
-  @page {
-    size: landscape;
-    margin: 6mm 8mm; 
-  }
-
-  /* 2. Prevent horizontal clipping and scroll spaces */
-  html, body {
-    width: 100% !important;
-    height: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background-color: #ffffff !important;
-    overflow-x: hidden !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* 3. Strip layout constraints on main view wrappers */
-  #app-wrapper,
-  #app-viewport {
-    width: 100% !important;
-    height: auto !important;
-    max-width: none !important;
-    position: static !important;
-    transform: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: visible !important;
-    display: block !important;
-  }
-
-  /* 4. Set zoom to expand width safely across a landscape page sheet */
-  #app-scale {
-    width: 1440px !important;
-    height: auto !important;
-    position: relative !important;
-    transform: none !important;
-    margin: 0 auto !important;
-    display: block !important;
-    overflow: visible !important;
-  }
-
-  /* 5. Keep upper workspace modules structurally aligned */
-  .simulation-shell {
-    width: 1440px !important;
-    display: block !important;
-    overflow: visible !important;
-  }
-
-  .workspace-grid {
-    width: 1440px !important;
-    display: flex !important;
-    flex-direction: row !important;
-    overflow: visible !important;
-  }
-
-  .left-panel,
-  .right-panel {
-    width: auto !important;
-    max-width: none !important;
-    overflow: visible !important;
-  }
-
-  /* 6. Enforce matching widths on the lower panel elements so both pages match up */
-  #graph-panel,
-  .graph-panel--separate,
-  .theoretical-calculations-section,
-  .calculations-container {
-    width: 1440px !important;
-    max-width: 1440px !important;
-    min-width: 1440px !important;
-    box-sizing: border-box !important;
-    display: block !important;
-    margin-top: 40px !important;
-    page-break-inside: avoid !important; /* Prevents splitting calculations across pages */
-  }
-
-  /* 7. Retain visibility for active operations and action buttons */
-  .action-buttons-container,
-  .operations-container,
-  button {
-    display: inline-flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  .instructions-overlay-panel,
-  .sr-only {
-    display: none !important;
-  }
-  @media print {
-  /* ...your existing print styles... */
-
-  /* NEW: Ensure formula modal prints if visible */
-  .formula-modal,
-  .values-modal {
-    position: static !important;
-    left: auto !important;
-    width: 100% !important;
-    box-shadow: none !important;
-    border: 1px solid #ccc !important;
-    page-break-inside: avoid !important;
-  }
-}
-}
 /* ============================================
    STEP-BY-STEP INSTRUCTION HIGHLIGHTING
    ============================================ */
 
 /* ---------- Active Step (currently being performed) ---------- */
 .instruction-step-active {
-  background: linear-gradient(90deg, rgba(160, 82, 45, 0.18) 0%, rgba(160, 82, 45, 0.05) 100%);
-  border-left: 4px solid #a0522d;
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.2) 0%, rgba(220, 252, 231, 0.62) 100%);
+  border: 1px solid rgba(22, 163, 74, 0.28);
+  border-left: 5px solid #16a34a;
   padding: 8px 12px;
   margin-left: -8px;
   font-weight: 600;
-  color: #2b1d0c;
-  border-radius: 0 6px 6px 0;
+  color: #14532d;
+  border-radius: 0 8px 8px 0;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.72);
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.instruction-step-active strong {
+  color: #166534;
 }
 
 /* ---------- Completed Step (already done) ---------- */
 .instruction-step-completed {
-  opacity: 0.45;
-  color: #7a6b5a;
-  text-decoration: line-through;
-  text-decoration-color: rgba(122, 107, 90, 0.4);
-  text-decoration-thickness: 1px;
-  padding-left: 8px;
+  opacity: 0.76;
+  color: #39734d;
+  padding: 6px 8px;
+  border-left: 3px solid rgba(34, 197, 94, 0.52);
+  background: rgba(220, 252, 231, 0.34);
   transition: all 0.3s ease;
 }
 
 .instruction-step-completed strong {
-  color: #7a6b5a;
+  color: #2f6c43;
 }
 
 /* ---------- Future Step (not yet reached) ---------- */
@@ -3566,7 +3921,7 @@ Base modal container
 }
 
 .calculation-panel--active-phase .graph-panel__heading h2 {
-  color: #a0522d;
+  color: #fffaf0;
 }
 
 .verify-button--highlighted {
@@ -3643,12 +3998,20 @@ Base modal container
    ============================================ */
 
 .instructions-overlay-panel {
+  inset: 0;
+  display: grid;
+  height: 100%;
+  max-height: none;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
   background: #f4ebd4;
   border: 1px solid #d4c4a8;
   border-radius: 12px;
   box-shadow: 0 20px 60px rgba(58, 36, 16, 0.25);
-  max-height: 70vh;
-  overflow-y: auto;
+}
+
+.workspace-grid--instructions-open {
+  z-index: 30;
 }
 
 .instructions-header {
@@ -3662,6 +4025,7 @@ Base modal container
   justify-content: space-between;
   align-items: center;
   border-radius: 12px 12px 0 0;
+  flex: 0 0 auto;
 }
 
 .instructions-close {
@@ -3685,7 +4049,11 @@ Base modal container
 }
 
 .instructions-body {
+  min-height: 0;
   padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   font-size: 13px;
   line-height: 1.7;
   color: #3d2b1f;
@@ -3725,10 +4093,14 @@ Base modal container
 }
 
 .instructions-footer {
+  position: relative;
+  z-index: 2;
   padding: 12px 20px;
   border-top: 1px solid #d4c4a8;
+  background: #f4ebd4;
   display: flex;
   justify-content: flex-end;
+  flex: 0 0 auto;
 }
 
 .instructions-footer button {
@@ -3746,4 +4118,914 @@ Base modal container
 .instructions-footer button:hover {
   box-shadow: 0 4px 12px rgba(92, 64, 51, 0.3);
   transform: translateY(-1px);
+}
+
+/* ===== MODERN READING VERIFICATION EXPERIENCE ===== */
+.calculation-panel .calculation-card--verification {
+  border: 1px solid rgba(13, 148, 136, 0.22);
+  background:
+    radial-gradient(circle at 0 0, rgba(204, 251, 241, 0.36), transparent 34%),
+    linear-gradient(145deg, #ffffff 0%, #fbfdfc 52%, #f3f8f7 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 14px 34px rgba(30, 64, 56, 0.12);
+}
+
+.calculation-panel .calculation-card__heading h3 {
+  color: #183b36;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: -0.1px;
+}
+
+.calculation-panel .calculation-card__heading p {
+  max-width: 640px;
+  color: #60716e;
+  font-size: 10.5px;
+}
+
+.verification-workflow {
+  position: relative;
+  padding: 10px 13px;
+  border-color: rgba(15, 118, 110, 0.16);
+  background: linear-gradient(135deg, rgba(248, 255, 253, 0.98), rgba(241, 247, 255, 0.96));
+  box-shadow: inset 0 1px 0 #fff, 0 5px 16px rgba(29, 78, 68, 0.07);
+}
+
+.verification-workflow__step {
+  color: #6b7c79;
+  opacity: 0.72;
+  transition: color 220ms ease, opacity 220ms ease, transform 220ms ease;
+}
+
+.verification-workflow__step > b {
+  border: 1px solid #d6e2df;
+  color: #60716e;
+  background: #f3f7f6;
+  box-shadow: none;
+  transition: color 220ms ease, background 220ms ease, border-color 220ms ease, box-shadow 220ms ease, transform 220ms ease;
+}
+
+.verification-workflow__step small {
+  color: #71817e;
+  transition: color 220ms ease;
+}
+
+.verification-workflow__step.is-active,
+.verification-workflow__step.is-complete {
+  color: #164e43;
+  opacity: 1;
+}
+
+.verification-workflow__step.is-active {
+  transform: translateY(-1px);
+}
+
+.verification-workflow__step.is-active > b {
+  border-color: #22c55e;
+  color: #fff;
+  background: linear-gradient(145deg, #22c55e, #15803d);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.13), 0 5px 12px rgba(21, 128, 61, 0.24);
+  transform: scale(1.06);
+}
+
+.verification-workflow__step.is-complete > b {
+  border-color: #34d399;
+  color: #fff;
+  background: linear-gradient(145deg, #34d399, #059669);
+  box-shadow: 0 4px 10px rgba(5, 150, 105, 0.2);
+}
+
+.verification-workflow__step.is-active small,
+.verification-workflow__step.is-complete small {
+  color: #15803d;
+}
+
+.verification-workflow > i {
+  position: relative;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dce7e5;
+  transition: background 260ms ease, box-shadow 260ms ease;
+}
+
+.verification-workflow > i.is-complete {
+  background: linear-gradient(90deg, #34d399, #22c55e);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.2);
+}
+
+.calculation-panel .calculation-table-wrap {
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  background: #fff;
+  box-shadow: 0 9px 24px rgba(30, 64, 56, 0.1);
+}
+
+.calculation-panel .calculation-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.calculation-panel .calculation-table th,
+.calculation-panel .calculation-table td {
+  transition: background-color 170ms ease, box-shadow 170ms ease;
+}
+
+.calculation-panel .calculation-table__group-row th.is-known {
+  background: linear-gradient(180deg, #476b6a, #315555);
+}
+
+.calculation-panel .calculation-table__group-row th.is-calculated {
+  background: linear-gradient(180deg, #147d70, #0f6159);
+}
+
+.calculation-panel .calculation-table__field-row th.is-known {
+  background: #557371;
+}
+
+.calculation-panel .calculation-table__field-row th.is-calculated {
+  background: #18796f;
+}
+
+.calculation-panel .calculation-table tbody tr:hover td {
+  background: #f0fdfa;
+}
+
+.calculation-input-shell {
+  position: relative;
+  width: 100%;
+}
+
+.calculation-input-shell:has(.calculation-input-feedback) .calculation-table-input {
+  padding-right: 24px;
+}
+
+.calculation-input-feedback {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  display: grid;
+  width: 16px;
+  height: 16px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+  transform: translateY(-50%) scale(0.72);
+  animation: calculation-feedback-in 180ms ease forwards;
+}
+
+.calculation-input-feedback.is-correct {
+  background: #16a34a;
+  box-shadow: 0 2px 7px rgba(22, 163, 74, 0.25);
+}
+
+.calculation-input-feedback.is-incorrect {
+  background: #dc2626;
+  box-shadow: 0 2px 7px rgba(220, 38, 38, 0.25);
+}
+
+.calculation-panel .calculation-table-input,
+.calculation-panel .calculation-reading-select {
+  height: 34px;
+  border-radius: 8px;
+  transition: border-color 170ms ease, box-shadow 170ms ease, background 170ms ease, transform 170ms ease;
+}
+
+.calculation-panel .calculation-table-input:not(:disabled):hover,
+.calculation-panel .calculation-reading-select:not(:disabled):hover {
+  border-color: rgba(13, 148, 136, 0.65);
+}
+
+.calculation-panel .calculation-table-input:focus,
+.calculation-panel .calculation-reading-select:focus {
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.17), 0 4px 10px rgba(15, 118, 110, 0.08);
+  transform: translateY(-1px);
+}
+
+.calculation-panel .calculation-reading-select {
+  padding-right: 25px;
+  border-color: rgba(13, 148, 136, 0.35);
+  background-color: #f0fdfa;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #0f766e 50%),
+    linear-gradient(135deg, #0f766e 50%, transparent 50%),
+    linear-gradient(180deg, #ffffff, #ecfdf9);
+}
+
+.calculation-panel .calculation-row-add,
+.calculation-panel .calculation-row-verify {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 9px;
+  letter-spacing: 0.05px;
+  transition: transform 150ms ease, filter 150ms ease, box-shadow 150ms ease;
+}
+
+.calculation-card__heading-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.calculation-row-capacity {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 3px;
+  padding: 0 9px;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  border-radius: 999px;
+  color: #55706b;
+  background: rgba(240, 253, 250, 0.86);
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.calculation-row-capacity strong {
+  color: #0f766e;
+  font-size: 12px;
+}
+
+.calculation-panel .calculation-row-add {
+  border-color: #2563eb;
+  background: linear-gradient(180deg, #3b82f6, #2563eb);
+  box-shadow: 0 5px 12px rgba(37, 99, 235, 0.22);
+}
+
+.calculation-panel .calculation-row-verify {
+  min-width: 86px;
+  padding-right: 7px;
+  padding-left: 7px;
+  border-color: #15803d;
+  background: linear-gradient(180deg, #22c55e, #15803d);
+  box-shadow: 0 4px 10px rgba(21, 128, 61, 0.2);
+}
+
+.calculation-panel .calculation-row-verify.needs-review {
+  border-color: #c2410c;
+  background: linear-gradient(180deg, #f97316, #c2410c);
+  box-shadow: 0 4px 10px rgba(194, 65, 12, 0.2);
+}
+
+.calculation-panel .calculation-row-add:hover:not(:disabled),
+.calculation-panel .calculation-row-verify:hover:not(:disabled) {
+  filter: brightness(1.07) saturate(1.05);
+  box-shadow: 0 7px 16px rgba(15, 118, 110, 0.24);
+  transform: translateY(-2px);
+}
+
+.calculation-panel .calculation-row-add:active:not(:disabled),
+.calculation-panel .calculation-row-verify:active:not(:disabled) {
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.18);
+  transform: translateY(1px) scale(0.98);
+}
+
+.calculation-button-icon {
+  display: inline-grid;
+  width: 17px;
+  height: 17px;
+  place-items: center;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.calculation-panel .calculation-card__footer {
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.calculation-panel .calculation-card__footer p {
+  min-width: 220px;
+  flex: 1 1 220px;
+}
+
+.calculation-panel .calculation-table th:last-child,
+.calculation-panel .calculation-table td:last-child {
+  width: 102px;
+}
+
+.verification-status-badge {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.verification-status-badge i {
+  display: grid;
+  width: 14px;
+  height: 14px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 9px;
+  font-style: normal;
+}
+
+.verification-status-badge--known {
+  border-color: #cbd5e1;
+  color: #475569;
+  background: #f1f5f9;
+}
+
+.verification-status-badge--known i {
+  background: #64748b;
+}
+
+.verification-status-badge--correct {
+  border-color: #bbf7d0;
+  color: #166534;
+  background: #f0fdf4;
+}
+
+.verification-status-badge--correct i {
+  background: #16a34a;
+}
+
+.verification-status-badge--incorrect {
+  border-color: #fecaca;
+  color: #991b1b;
+  background: #fef2f2;
+}
+
+.verification-status-badge--incorrect i {
+  background: #dc2626;
+}
+
+@keyframes calculation-feedback-in {
+  to {
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@media (max-width: 900px) {
+  .calculation-panel.graph-panel--separate {
+    height: auto;
+    min-height: 650px;
+    grid-template-rows: auto auto;
+  }
+
+  .calculation-panel .graph-panel__heading {
+    align-items: flex-start;
+    gap: 14px;
+    padding-bottom: 14px;
+  }
+
+  .calculation-panel__body {
+    grid-template-columns: minmax(0, 1fr);
+    overflow: visible;
+  }
+
+  .calculation-panel .calculation-errors__empty {
+    min-height: 130px;
+  }
+}
+
+@media (max-width: 760px) {
+  .calculation-panel .graph-panel__heading,
+  .calculation-card__heading {
+    flex-wrap: wrap;
+  }
+
+  .calculation-card__heading-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .calculation-panel__progress {
+    width: 100%;
+    border-radius: 14px;
+  }
+
+  .verification-workflow {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .verification-workflow > i {
+    width: 3px;
+    height: 12px;
+    margin-left: 11px;
+  }
+
+  .verification-workflow__step {
+    white-space: normal;
+  }
+
+  .calculation-panel .calculation-table-wrap {
+    max-height: none;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .calculation-panel .calculation-table {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .calculation-panel .calculation-table thead {
+    display: none;
+  }
+
+  .calculation-panel .calculation-table tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  .calculation-panel .calculation-table tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: hidden;
+    padding: 8px;
+    border: 1px solid rgba(15, 118, 110, 0.18);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(30, 64, 56, 0.09);
+  }
+
+  .calculation-panel .calculation-table td,
+  .calculation-panel .calculation-table td:first-child,
+  .calculation-panel .calculation-table td:last-child {
+    display: grid;
+    width: auto;
+    grid-template-columns: 88px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    border: 0;
+    background: transparent;
+  }
+
+  .calculation-panel .calculation-table td::before {
+    color: #60716e;
+    content: attr(data-label);
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.35px;
+    text-transform: uppercase;
+  }
+
+  .calculation-panel .calculation-table td:first-child,
+  .calculation-panel .calculation-table td:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .calculation-card__footer p {
+    width: 100%;
+    margin-left: 0;
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verification-workflow__step,
+  .verification-workflow__step > b,
+  .verification-workflow > i,
+  .calculation-input-feedback,
+  .calculation-panel .calculation-table-input,
+  .calculation-panel .calculation-reading-select,
+  .calculation-panel .calculation-row-add,
+  .calculation-panel .calculation-row-verify {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* ===== FIXED SINGLE-PAGE SIMULATION PRINT ===== */
+@page {
+  size: 15in 14.770833in;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body,
+  #root,
+  #app-wrapper,
+  #app-viewport,
+  #app-scale {
+    width: 1440px !important;
+    min-width: 1440px !important;
+    max-width: 1440px !important;
+    height: 1418px !important;
+    min-height: 1418px !important;
+    max-height: 1418px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html,
+  body,
+  body * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html {
+    scrollbar-gutter: auto !important;
+  }
+
+  body {
+    background: #2b170d !important;
+  }
+
+  #app-wrapper,
+  #app-viewport {
+    position: relative !important;
+    display: block !important;
+    inset: auto !important;
+    transform: none !important;
+  }
+
+  #app-scale {
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    display: block !important;
+    contain: none !important;
+    transform: none !important;
+    transform-origin: top left !important;
+    zoom: 1 !important;
+  }
+
+  .simulation-shell {
+    width: 1440px !important;
+    min-width: 1440px !important;
+    max-width: 1440px !important;
+    height: 960px !important;
+    min-height: 960px !important;
+    max-height: 960px !important;
+    overflow: hidden !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .workspace-grid {
+    overflow: visible !important;
+  }
+
+  #graph-panel.calculation-panel.graph-panel--separate {
+    display: grid !important;
+    width: 1440px !important;
+    min-width: 1440px !important;
+    max-width: 1440px !important;
+    height: 390px !important;
+    min-height: 390px !important;
+    max-height: 390px !important;
+    grid-template-rows: 58px minmax(0, 1fr) !important;
+    margin: 10px 0 0 !important;
+    overflow: hidden !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  #graph-panel > .graph-panel__heading {
+    min-height: 0 !important;
+    padding: 6px 20px !important;
+  }
+
+  #graph-panel .calculation-panel__eyebrow {
+    display: none !important;
+  }
+
+  #graph-panel > .graph-panel__heading h2 {
+    font-size: 16px !important;
+  }
+
+  #graph-panel .calculation-panel__instruction {
+    margin-top: 3px !important;
+    font-size: 8px !important;
+  }
+
+  #graph-panel .calculation-panel__progress {
+    min-width: 190px !important;
+    gap: 6px !important;
+    padding: 4px 8px !important;
+  }
+
+  #graph-panel .calculation-panel__progress-ring {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  #graph-panel .calculation-panel__progress-ring::before {
+    width: 22px !important;
+    height: 22px !important;
+  }
+
+  #graph-panel .calculation-panel__progress-copy small {
+    font-size: 7px !important;
+  }
+
+  #graph-panel .calculation-panel__progress-copy strong {
+    font-size: 9px !important;
+  }
+
+  #graph-panel .calculation-panel__body {
+    grid-template-columns: minmax(0, 3fr) minmax(310px, 0.82fr) !important;
+    gap: 8px !important;
+    margin: 4px 10px 10px !important;
+    padding: 6px !important;
+    overflow: hidden !important;
+  }
+
+  #graph-panel .calculation-card {
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 7px !important;
+    overflow: hidden !important;
+    border-radius: 9px !important;
+    box-shadow: none !important;
+  }
+
+  #graph-panel .calculation-card::after {
+    height: 2px !important;
+  }
+
+  #graph-panel .calculation-card__heading {
+    min-height: 27px !important;
+    gap: 7px !important;
+    margin-bottom: 5px !important;
+  }
+
+  #graph-panel .calculation-card__step {
+    width: 25px !important;
+    height: 25px !important;
+    border-radius: 7px !important;
+    font-size: 8px !important;
+  }
+
+  #graph-panel .calculation-card__heading h3 {
+    font-size: 11px !important;
+  }
+
+  #graph-panel .calculation-card__heading p {
+    margin-top: 1px !important;
+    font-size: 7px !important;
+    line-height: 1.2 !important;
+  }
+
+  #graph-panel .calculation-card__heading-actions {
+    gap: 4px !important;
+  }
+
+  #graph-panel .calculation-row-capacity,
+  #graph-panel .calculation-row-add {
+    min-height: 24px !important;
+    padding: 0 7px !important;
+    font-size: 8px !important;
+  }
+
+  #graph-panel .calculation-row-capacity strong {
+    font-size: 9px !important;
+  }
+
+  #graph-panel .verification-workflow {
+    gap: 5px !important;
+    margin: 0 0 5px !important;
+    padding: 4px 8px !important;
+    border-radius: 7px !important;
+  }
+
+  #graph-panel .verification-workflow__step {
+    gap: 4px !important;
+    font-size: 7px !important;
+  }
+
+  #graph-panel .verification-workflow__step > b {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 7px !important;
+  }
+
+  #graph-panel .verification-workflow small {
+    font-size: 6px !important;
+  }
+
+  #graph-panel .calculation-table-wrap {
+    max-height: 194px !important;
+    overflow: hidden !important;
+    border-radius: 7px !important;
+    box-shadow: none !important;
+  }
+
+  #graph-panel .calculation-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed !important;
+    font-size: 7px !important;
+  }
+
+  #graph-panel .calculation-table th {
+    height: 22px !important;
+    padding: 2px !important;
+    font-size: 7px !important;
+    line-height: 1.05 !important;
+  }
+
+  #graph-panel .calculation-table__group-row th {
+    top: 0 !important;
+    height: 22px !important;
+  }
+
+  #graph-panel .calculation-table__group-row th small {
+    margin-top: 1px !important;
+    font-size: 5.5px !important;
+  }
+
+  #graph-panel .calculation-table__field-row th {
+    top: 22px !important;
+    height: 25px !important;
+  }
+
+  #graph-panel .calculation-table td {
+    height: 28px !important;
+    padding: 2px !important;
+  }
+
+  #graph-panel .calculation-table__group-row th:first-child,
+  #graph-panel .calculation-table td:first-child {
+    width: 112px !important;
+  }
+
+  #graph-panel .calculation-table th:last-child,
+  #graph-panel .calculation-table td:last-child {
+    width: 78px !important;
+  }
+
+  #graph-panel .calculation-table-input,
+  #graph-panel .calculation-reading-select,
+  #graph-panel .calculation-row-verify {
+    min-height: 0 !important;
+    height: 22px !important;
+    padding: 2px 4px !important;
+    border-radius: 5px !important;
+    font-size: 7px !important;
+    box-shadow: none !important;
+  }
+
+  #graph-panel .calculation-row-verify {
+    min-width: 0 !important;
+    gap: 2px !important;
+  }
+
+  #graph-panel .calculation-button-icon {
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 3px !important;
+    font-size: 8px !important;
+  }
+
+  #graph-panel .calculation-input-feedback {
+    right: 3px !important;
+    width: 11px !important;
+    height: 11px !important;
+    font-size: 7px !important;
+  }
+
+  #graph-panel .calculation-card__footer {
+    gap: 4px !important;
+    margin-top: 4px !important;
+  }
+
+  #graph-panel .verification-status-badge {
+    min-height: 17px !important;
+    gap: 3px !important;
+    padding: 1px 5px !important;
+    font-size: 6.5px !important;
+  }
+
+  #graph-panel .verification-status-badge i {
+    width: 10px !important;
+    height: 10px !important;
+    font-size: 6px !important;
+  }
+
+  #graph-panel .calculation-card__footer p {
+    display: none !important;
+  }
+
+  #graph-panel .calculation-card__result-count {
+    padding: 3px 5px !important;
+    font-size: 6.5px !important;
+  }
+
+  #graph-panel .calculation-errors {
+    gap: 3px !important;
+    max-height: 256px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #graph-panel .calculation-error-row {
+    padding: 3px 4px !important;
+    border-radius: 5px !important;
+    font-size: 7px !important;
+    box-shadow: none !important;
+  }
+
+  #graph-panel .calculation-error-row__heading strong {
+    gap: 4px !important;
+    font-size: 7px !important;
+  }
+
+  #graph-panel .calculation-error-row__heading strong span {
+    width: 16px !important;
+    height: 16px !important;
+    border-radius: 4px !important;
+    font-size: 6px !important;
+  }
+
+  #graph-panel .calculation-error-row__heading small {
+    font-size: 6px !important;
+  }
+
+  #graph-panel .calculation-error-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 2px !important;
+    margin-top: 2px !important;
+  }
+
+  #graph-panel .calculation-error-grid span {
+    display: grid !important;
+    gap: 1px !important;
+    padding: 2px !important;
+    border-radius: 3px !important;
+    font-size: 5.5px !important;
+    line-height: 1.05 !important;
+  }
+
+  #graph-panel .calculation-errors__empty {
+    min-height: 248px !important;
+    padding: 10px !important;
+  }
+
+  .experiment-footer {
+    width: 1440px !important;
+    min-width: 1440px !important;
+    max-width: 1440px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    margin: 8px 0 0 !important;
+    overflow: hidden !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .walkthrough-layer,
+  .walkthrough-start-button,
+  .walkthrough-dim-panel,
+  .walkthrough-interaction-shield,
+  .walkthrough-spotlight-ring,
+  .walkthrough-popup,
+  .lab-alert-region,
+  .lab-alert-interaction-shield,
+  .lab-alert-spotlight,
+  .instructions-overlay-panel,
+  .equation-panel,
+  .tooltip,
+  .tooltip-layer,
+  .guide-layer,
+  .ai-guide-overlay,
+  [role="tooltip"],
+  .sr-only {
+    display: none !important;
+  }
+
+  .ai-guide-label-highlight,
+  .lab-alert-active-target,
+  .action-button--pulse,
+  .report-button--highlighted,
+  .verify-button--highlighted,
+  .calculation-panel--active-phase {
+    animation: none !important;
+  }
+
+  .calculation-panel--active-phase::before,
+  .action-button--highlighted::before {
+    display: none !important;
+  }
 }

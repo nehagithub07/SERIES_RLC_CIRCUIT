@@ -488,12 +488,19 @@ tr:nth-child(even) {
   .print-btn,
   .download-btn,
   .report-actions {
-    display: none;
+    display: none !important;
+  }
+  html,
+  body,
+  body * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   body {
     margin: 0;
     padding: 0;
     background: #ffffff;
+    overflow: visible;
   }
   .report-page {
     width: 100%;
@@ -502,6 +509,8 @@ tr:nth-child(even) {
     border: none;
     box-shadow: none;
     border-radius: 0;
+    break-inside: avoid-page;
+    page-break-inside: avoid;
   }
   .header-row {
     grid-template-columns: 150px minmax(0, 1fr) 86px;
@@ -513,10 +522,18 @@ tr:nth-child(even) {
   .section,
   .header-row,
   .info-grid,
+  .results-section,
+  .results-card,
+  .table-shell,
+  .graph-card,
+  .report-graph,
   thead,
   tr {
-    break-inside: avoid;
+    break-inside: avoid-page;
     page-break-inside: avoid;
+  }
+  .table-shell {
+    overflow: visible;
   }
 }
   `

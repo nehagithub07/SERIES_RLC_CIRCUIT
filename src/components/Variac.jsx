@@ -30,7 +30,7 @@ const Variac = ({ onValueChange, maxVal = 30, powerOn, componentsSelected = true
     e.stopPropagation();
 
     if (!isOn) {
-      window.alert("Turn ON the autotransformer first ");
+      onBlocked?.();
       return;
     }
 
@@ -79,12 +79,10 @@ const Variac = ({ onValueChange, maxVal = 30, powerOn, componentsSelected = true
             e.stopPropagation();
             if (!powerOn) {
               onBlocked?.();
-              window.alert("Please complete the connections first or turn ON the MCB");
               return;
             }
             if (!componentsSelected) {
               onBlocked?.();
-              window.alert("Please select the resistor, inductor, and capacitor values first");
               return;
             }
             if (isOn === false) {

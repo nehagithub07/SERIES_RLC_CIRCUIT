@@ -39,28 +39,6 @@
   border-radius: inherit;
 }
 
-.walkthrough-active-target {
-  animation: walkthrough-target-settle 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  backface-visibility: hidden;
-  filter: brightness(1.06) saturate(1.04);
-  transform-origin: center;
-  will-change: transform, filter;
-}
-
-@keyframes walkthrough-target-settle {
-  0% {
-    transform: perspective(900px) translate3d(0, 0, 0) scale(1);
-  }
-
-  60% {
-    transform: perspective(900px) translate3d(0, -3px, 0) rotateX(0.35deg) scale(1.01);
-  }
-
-  100% {
-    transform: perspective(900px) translate3d(0, -2px, 0) rotateX(0.2deg) scale(1.006);
-  }
-}
-
 .walkthrough-start-button {
   position: fixed;
   left: 0;
@@ -93,6 +71,37 @@
     6px 8px 15px rgba(34, 30, 22, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.38);
   filter: brightness(1.05);
+}
+
+.walkthrough-start-button--highlighted {
+  animation: walkthrough-start-highlight 1.15s ease-in-out infinite;
+}
+
+.walkthrough-start-button--highlighted::after {
+  position: absolute;
+  inset: 5px;
+  content: "";
+  pointer-events: none;
+  border: 3px solid rgba(255, 255, 255, 0.96);
+  border-radius: 0 8px 8px 0;
+  box-shadow: 0 0 18px rgba(103, 232, 249, 0.95);
+}
+
+@keyframes walkthrough-start-highlight {
+  0%, 100% {
+    box-shadow:
+      5px 7px 12px rgba(34, 30, 22, 0.34),
+      0 0 0 0 rgba(45, 212, 191, 0.74),
+      inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  }
+
+  50% {
+    box-shadow:
+      5px 7px 12px rgba(34, 30, 22, 0.34),
+      0 0 0 10px rgba(45, 212, 191, 0),
+      0 0 28px rgba(34, 211, 238, 0.9),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  }
 }
 
 .walkthrough-start-button:focus-visible {
@@ -195,6 +204,9 @@
   font-size: 14px;
   font-weight: 600;
   line-height: 1.55;
+  hyphens: auto;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .walkthrough-popup__progress {
@@ -300,8 +312,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .walkthrough-active-target {
+  .walkthrough-start-button--highlighted {
     animation: none;
+    box-shadow:
+      5px 7px 12px rgba(34, 30, 22, 0.34),
+      0 0 0 8px rgba(45, 212, 191, 0.38),
+      0 0 28px rgba(34, 211, 238, 0.8);
   }
 
   .walkthrough-popup__progress span {

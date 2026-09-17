@@ -1,8 +1,8 @@
 // =================================================================
-// 1. TERMINAL POLARITY GROUPS (Blue vs Red)
+// 1. TERMINAL POLARITY GROUPS (Red vs Black)
 // =================================================================
 
-// All BLUE dots on your instrument panel layout image
+// Positive terminals use red binding posts.
 export const POSITIVE_TERMINALS = [
   '1-endpoint',  // MCB +
   '3-endpoint',  // Voltmeter V1 +
@@ -15,7 +15,7 @@ export const POSITIVE_TERMINALS = [
   '15-endpoint'  // Voltmeter V4 +
 ]
 
-// All RED dots on your instrument panel layout image
+// Negative terminals use black binding posts.
 export const NEGATIVE_TERMINALS = [
   '2-endpoint',  // MCB -
   '4-endpoint',  // Voltmeter V1 -
@@ -26,7 +26,7 @@ export const NEGATIVE_TERMINALS = [
   '16-endpoint'  // Voltmeter V4 -
 ]
 
-// Component Bench Elements - Positives (All BLUE dots)
+// Component bench positive terminals (red binding posts).
 export const CIRCUIT_POSITIVE_TERMINALS = [
   '17-endpoint', // Resistor Left
   '19-endpoint', // Inductor Left
@@ -35,7 +35,7 @@ export const CIRCUIT_POSITIVE_TERMINALS = [
   '25-endpoint'  // Variac Output +
 ]
 
-// Component Bench Elements - Negatives (All RED dots)
+// Component bench negative terminals (black binding posts).
 export const CIRCUIT_NEGATIVE_TERMINALS = [
   '18-endpoint', // Resistor Right
   '20-endpoint', // Inductor Right
@@ -174,13 +174,13 @@ const isNegativeTerminal = (terminalId) => (
 )
 
 const terminalPaintStyles = {
-  positive: { fill: '#0969e8', outlineStroke: '#f8fbff', outlineWidth: 2, stroke: '#062b77', strokeWidth: 1.4 },
-  negative: { fill: '#e33024', outlineStroke: '#fff8f6', outlineWidth: 2, stroke: '#8f140e', strokeWidth: 1.4 }
+  positive: { fill: '#e51d27', outlineStroke: '#fff8f6', outlineWidth: 2, stroke: '#8f140e', strokeWidth: 1.4 },
+  negative: { fill: '#15191c', outlineStroke: '#f8fbff', outlineWidth: 2, stroke: '#030405', strokeWidth: 1.4 }
 }
 
 const terminalHoverPaintStyles = {
-  positive: { fill: '#2a7cff', outlineStroke: '#ffffff', outlineWidth: 2.4, stroke: '#082767', strokeWidth: 1.6 },
-  negative: { fill: '#ff4a3d', outlineStroke: '#ffffff', outlineWidth: 2.4, stroke: '#81130f', strokeWidth: 1.6 }
+  positive: { fill: '#ff4a50', outlineStroke: '#ffffff', outlineWidth: 2.4, stroke: '#81130f', strokeWidth: 1.6 },
+  negative: { fill: '#343b40', outlineStroke: '#ffffff', outlineWidth: 2.4, stroke: '#000000', strokeWidth: 1.6 }
 }
 
 const getTerminalNumber = (terminalId) => terminalId.replace('-endpoint', '')

@@ -1,5 +1,5 @@
 /* ================================================================
-   CONNECTION ENDPOINTS — 26-Point System (Colored Outer, White Inner)
+   CONNECTION ENDPOINTS — red/black laboratory binding posts
    ================================================================ */
 
 /* ── Base Layering ── */
@@ -108,20 +108,20 @@
 
 /* ── Positive Terminals (Red Socket) ── */
 .connection-terminal[data-polarity="plus"] {
-  --endpoint-accent-rgb: 238, 52, 64;
+  --endpoint-accent-rgb: 235, 42, 48;
   background:
-    radial-gradient(circle at 38% 29%, rgba(255, 255, 255, 0.82) 0 6%, transparent 8%),
-    radial-gradient(circle, #f34a54 0 39%, #b80e1b 41% 48%, #ffffff 50% 68%, #aeb7bd 71% 78%, #fbfcfd 81% 100%) !important;
-  border-color: rgba(151, 158, 164, 0.82) !important;
+    radial-gradient(circle at 37% 28%, rgba(255, 255, 255, 0.96) 0 5%, transparent 8%),
+    radial-gradient(circle, #ff4a50 0 37%, #e51d27 39% 47%, #fff 49% 67%, #aeb6bc 70% 77%, #f8fafb 80% 100%) !important;
+  border-color: rgba(148, 156, 163, 0.9) !important;
 }
 
 /* ── Negative Terminals (Black Socket) ── */
 .connection-terminal[data-polarity="minus"] {
-  --endpoint-accent-rgb: 35, 46, 55;
+  --endpoint-accent-rgb: 20, 23, 26;
   background:
-    radial-gradient(circle at 38% 29%, rgba(255, 255, 255, 0.42) 0 5%, transparent 8%),
-    radial-gradient(circle, #26343e 0 39%, #05090c 41% 48%, #ffffff 50% 68%, #aeb7bd 71% 78%, #fbfcfd 81% 100%) !important;
-  border-color: rgba(151, 158, 164, 0.82) !important;
+    radial-gradient(circle at 37% 28%, rgba(255, 255, 255, 0.56) 0 4%, transparent 8%),
+    radial-gradient(circle, #25292d 0 37%, #050607 39% 47%, #fff 49% 67%, #aeb6bc 70% 77%, #f8fafb 80% 100%) !important;
+  border-color: rgba(148, 156, 163, 0.9) !important;
 }
 
 /* ── Active Connected Glowing States ── */

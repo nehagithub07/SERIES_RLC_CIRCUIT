@@ -6,19 +6,19 @@ const MAX_VERIFICATION_ROWS = 5
 const REQUIRED_VERIFICATIONS = 2
 
 const KNOWN_FIELDS = [
-  { key: 'voltage', label: <>V<br />(V)</> },
-  { key: 'current', label: <>I<br />(mA)</> },
-  { key: 'r', label: <>R<br />(kΩ)</> },
-  { key: 'l', label: <>L<br />(H)</> },
-  { key: 'c', label: <>C<br />(µF)</> },
+  { key: 'voltage', label: <>V<br />(V)</>, dataLabel: 'Voltage' },
+  { key: 'current', label: <>I<br />(mA)</>, dataLabel: 'Current' },
+  { key: 'r', label: <>R<br />(kΩ)</>, dataLabel: 'Resistance' },
+  { key: 'l', label: <>L<br />(H)</>, dataLabel: 'Inductance' },
+  { key: 'c', label: <>C<br />(µF)</>, dataLabel: 'Capacitance' },
 ]
 
 const CALCULATED_FIELDS = [
-  { key: 'vR', label: <>V<sub>R</sub><br />(V)</>, errorLabel: 'VR error' },
-  { key: 'vL', label: <>V<sub>L</sub><br />(V)</>, errorLabel: 'VL error' },
-  { key: 'vC', label: <>V<sub>C</sub><br />(V)</>, errorLabel: 'VC error' },
-  { key: 'cosPhi', label: <>cosφ<br />(PF)</>, errorLabel: 'cosφ error' },
-  { key: 'power', label: <>Power<br />(W)</>, errorLabel: 'Power error' },
+  { key: 'vR', label: <>V<sub>R</sub><br />(V)</>, dataLabel: 'VR', errorLabel: 'VR error' },
+  { key: 'vL', label: <>V<sub>L</sub><br />(V)</>, dataLabel: 'VL', errorLabel: 'VL error' },
+  { key: 'vC', label: <>V<sub>C</sub><br />(V)</>, dataLabel: 'VC', errorLabel: 'VC error' },
+  { key: 'cosPhi', label: <>cosφ<br />(PF)</>, dataLabel: 'Power factor', errorLabel: 'cosφ error' },
+  { key: 'power', label: <>Power<br />(W)</>, dataLabel: 'Power', errorLabel: 'Power error' },
 ]
 
 const ALL_FIELDS = [...KNOWN_FIELDS, ...CALCULATED_FIELDS]
@@ -62,6 +62,7 @@ const getPercentError = (measuredValue, trueValue) => {
 }
 
 const createRow = (id) => ({ id, values: { ...EMPTY_ROW }, observationIndex: '' })
+const stopWheelValueChange = (event) => event.currentTarget.blur()
 
 const CalculationPanel = ({ className = '', currentStep = 1, observations = [], onVerify, resetRequest, minReadings = 5 }) => {
   const isCalculatePhase = currentStep === STEPS.CALCULATE
@@ -85,9 +86,19 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
   }, [resetRequest])
 
   const verifiedCount = Object.values(verifiedRows).filter(Boolean).length
+  const completedRequirementCount = Math.min(verifiedCount, REQUIRED_VERIFICATIONS)
   const selectedObservationIndexes = rows
     .map((row) => row.observationIndex)
     .filter((value) => value !== '')
+  const activeWorkflowRow = rows.find((row) => !verifiedRows[row.id]) ?? rows[rows.length - 1]
+  const activeWorkflowStep = activeWorkflowRow.observationIndex === ''
+    ? 1
+    : CALCULATED_FIELDS.every(({ key }) => activeWorkflowRow.values[key] !== '') ? 3 : 2
+  const getWorkflowStepClass = (step) => [
+    'verification-workflow__step',
+    step === activeWorkflowStep ? 'is-active' : '',
+    step < activeWorkflowStep ? 'is-complete' : '',
+  ].filter(Boolean).join(' ')
 
   const handleFieldChange = (rowId, key, value) => {
     setRows((current) => current.map((row) => (
@@ -128,7 +139,7 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
   }
 
   const handleAddRow = () => {
-    if (verificationLocked || rows.length >= MAX_VERIFICATION_ROWS || verifiedCount >= REQUIRED_VERIFICATIONS) return
+    if (verificationLocked || rows.length >= MAX_VERIFICATION_ROWS) return
     const id = nextRowIdRef.current
     nextRowIdRef.current += 1
     setRows((current) => [...current, createRow(id)])
@@ -181,59 +192,103 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
       aria-disabled={verificationLocked}
     >
       <div className="graph-panel__heading">
-        <div>
-          <h2>READING VERIFICATION</h2>
+        <div className="calculation-panel__title-group">
+          <p className="calculation-panel__eyebrow">
+            <span aria-hidden="true">&#10003;</span>
+            Series RLC analysis
+          </p>
+          <h2>Theoretical Verification</h2>
           <p className="calculation-panel__instruction">
             {verificationLocked
               ? `Add ${readingsRemaining} more reading${readingsRemaining === 1 ? '' : 's'} to unlock verification.`
               : 'Choose any two readings and enter the values exactly as recorded in the observation table.'}
           </p>
         </div>
-        <div className="calculation-panel__progress" aria-label={`${verifiedCount} of ${REQUIRED_VERIFICATIONS} readings verified`}>
+        <div
+          className="calculation-panel__progress"
+          aria-label={`${completedRequirementCount} of ${REQUIRED_VERIFICATIONS} required readings verified`}
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax={REQUIRED_VERIFICATIONS}
+          aria-valuenow={completedRequirementCount}
+          style={{ '--verification-progress': `${(completedRequirementCount / REQUIRED_VERIFICATIONS) * 360}deg` }}
+        >
+          <span className="calculation-panel__progress-ring" aria-hidden="true">
+            <i>{completedRequirementCount}</i>
+          </span>
+          <span className="calculation-panel__progress-copy">
+            <small>Verification progress</small>
+            <strong>{completedRequirementCount} of {REQUIRED_VERIFICATIONS} required</strong>
+          </span>
           <span className="calculation-panel__progress-dots" aria-hidden="true">
             {Array.from({ length: REQUIRED_VERIFICATIONS }, (_, index) => (
               <i className={index < verifiedCount ? 'is-complete' : ''} key={index} />
             ))}
           </span>
-          <strong>{verifiedCount}/{REQUIRED_VERIFICATIONS}</strong>
-          <span>verified</span>
         </div>
       </div>
 
       <div className="graph-panel__body calculation-panel__body">
         <article className="calculation-card calculation-card--verification">
-          {verificationLocked && (
-            <div className="verification-lock-banner" role="status">
-              <span aria-hidden="true">&#128274;</span>
-              <strong>Verification unlocks after 5 readings</strong>
-              <small>{observations.length}/5 readings recorded</small>
-            </div>
-          )}
           <div className="calculation-card__heading">
             <span className="calculation-card__step">01</span>
             <div>
-              <h3>Verification Section</h3>
-              <p>V and I (mA) are prefilled. Enter V<sub>R</sub>, V<sub>L</sub>, V<sub>C</sub>, cosφ, and Power.</p>
+              <h3>Select and Verify Readings</h3>
+              <p>V and I (mA) are prefilled with the correct values. Calculate V<sub>R</sub>, V<sub>L</sub>, V<sub>C</sub>, cos⁡ϕ, and Power using the provided Equations.</p>
             </div>
-            <button
-              type="button"
-              className="calculation-row-add"
-              onClick={handleAddRow}
-              disabled={verificationLocked || rows.length >= MAX_VERIFICATION_ROWS || verifiedCount >= REQUIRED_VERIFICATIONS}
-            >
-              + Add row
-            </button>
+            <div className="calculation-card__heading-actions">
+              <span className="calculation-row-capacity" aria-live="polite">
+                <strong>{rows.length}</strong> / {MAX_VERIFICATION_ROWS} rows
+              </span>
+              <button
+                type="button"
+                className="calculation-row-add"
+                onClick={handleAddRow}
+                disabled={verificationLocked || rows.length >= MAX_VERIFICATION_ROWS}
+                title={rows.length >= MAX_VERIFICATION_ROWS ? 'Five verification rows have been added.' : 'Add another verification row.'}
+              >
+                <span className="calculation-button-icon" aria-hidden="true">+</span>
+                <span>{rows.length >= MAX_VERIFICATION_ROWS ? 'Rows added' : 'Add row'}</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="verification-workflow" aria-label={`Reading verification workflow, step ${activeWorkflowStep} of 3`}>
+            <span className={getWorkflowStepClass(1)}>
+              <b>1</b>
+              <span><small>Choose</small>A recorded reading</span>
+            </span>
+            <i className={activeWorkflowStep > 1 ? 'is-complete' : ''} aria-hidden="true" />
+            <span className={getWorkflowStepClass(2)}>
+              <b>2</b>
+              <span><small>Enter</small>Theoretical values</span>
+            </span>
+            <i className={activeWorkflowStep > 2 ? 'is-complete' : ''} aria-hidden="true" />
+            <span className={getWorkflowStepClass(3)}>
+              <b>3</b>
+              <span><small>Check</small>Verify the result</span>
+            </span>
           </div>
 
           <div className="calculation-table-wrap">
             <table className="observation-table calculation-table">
               <thead>
-                <tr>
-                  <th>Reading</th>
+                <tr className="calculation-table__group-row">
+                  <th rowSpan="2">Reading</th>
+                  <th className="is-known" colSpan={KNOWN_FIELDS.length}>
+                    <span>Recorded parameters</span>
+                    <small>Auto-filled</small>
+                  </th>
+                  <th className="is-calculated" colSpan={CALCULATED_FIELDS.length}>
+                    <span>Theoretical results</span>
+                    <small>Enter values</small>
+                  </th>
+                  <th rowSpan="2">Status</th>
+                </tr>
+                <tr className="calculation-table__field-row">
                   {ALL_FIELDS.map(({ key, label }) => (
                     <th className={KNOWN_FIELDS.some((field) => field.key === key) ? 'is-known' : 'is-calculated'} key={key}>{label}</th>
                   ))}
-                  <th>Check</th>
                 </tr>
               </thead>
               <tbody>
@@ -241,55 +296,79 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
                   const hasObservation = row.observationIndex !== ''
                   const isVerified = Boolean(verifiedRows[row.id])
                   const rowStatuses = fieldStatus[row.id] || {}
-                  const verificationLimitReached = verifiedCount >= REQUIRED_VERIFICATIONS && !isVerified
+                  const hasVerificationResult = Object.values(rowStatuses).some((status) => typeof status === 'boolean')
 
                   return (
-                    <tr key={row.id}>
-                      <td>
+                    <tr
+                      className={`${hasObservation ? 'has-reading' : ''} ${isVerified ? 'is-verified' : ''}`}
+                      key={row.id}
+                    >
+                      <td data-label="Reading">
                         <select
                           className="calculation-reading-select"
                           aria-label={`Select observation for verification row ${row.id}`}
                           value={row.observationIndex}
-                          disabled={verificationLocked || isVerified || verificationLimitReached}
+                          disabled={verificationLocked || hasObservation || isVerified}
                           onChange={(event) => handleObservationSelect(row.id, event.target.value)}
                         >
                           <option value="">Select</option>
-                          {observations.map((observation, observationIndex) => (
-                            <option
-                              key={observation.id ?? observationIndex}
-                              value={observationIndex}
-                              disabled={selectedObservationIndexes.includes(String(observationIndex)) && row.observationIndex !== String(observationIndex)}
-                            >
-                              Reading {observationIndex + 1}
-                            </option>
-                          ))}
+                          {observations.map((observation, observationIndex) => {
+                            const value = String(observationIndex)
+                            const isSelectedInAnotherRow = selectedObservationIndexes.includes(value)
+                              && row.observationIndex !== value
+
+                            if (isSelectedInAnotherRow) return null
+
+                            return (
+                              <option key={observation.id ?? observationIndex} value={observationIndex}>
+                                Reading {observationIndex + 1}
+                              </option>
+                            )
+                          })}
                         </select>
                       </td>
-                      {ALL_FIELDS.map(({ key }) => {
+                      {ALL_FIELDS.map(({ key, dataLabel }) => {
                         const isKnown = KNOWN_FIELDS.some((field) => field.key === key)
                         const status = rowStatuses[key]
                         return (
-                          <td key={key}>
-                            <input
-                              type="number"
-                              step="any"
-                              className={`calculation-table-input ${status === true ? 'is-correct' : status === false ? 'is-incorrect' : ''}`}
-                              aria-label={`${key} for verification row ${row.id}`}
-                              value={row.values[key]}
-                              disabled={verificationLocked || !hasObservation || isKnown || isVerified || verificationLimitReached}
-                              onChange={(event) => handleFieldChange(row.id, key, event.target.value)}
-                            />
+                          <td className={isKnown ? 'is-known-value' : 'is-entry-value'} data-label={dataLabel} key={key}>
+                            <div className="calculation-input-shell">
+                              <input
+                                type="number"
+                                step="any"
+                                className={`calculation-table-input ${status === true ? 'is-correct' : status === false ? 'is-incorrect' : ''}`}
+                                aria-label={`${dataLabel} for verification row ${row.id}`}
+                                value={row.values[key]}
+                                placeholder={!isKnown && hasObservation ? 'Enter' : ''}
+                                disabled={verificationLocked || !hasObservation || isKnown || isVerified}
+                                onChange={(event) => handleFieldChange(row.id, key, event.target.value)}
+                                onWheel={stopWheelValueChange}
+                                inputMode="decimal"
+                              />
+                              {typeof status === 'boolean' && (
+                                <span
+                                  className={`calculation-input-feedback ${status ? 'is-correct' : 'is-incorrect'}`}
+                                  aria-label={status ? 'Correct' : 'Recheck'}
+                                  title={status ? 'Correct' : 'Recheck'}
+                                >
+                                  {status ? '✓' : '×'}
+                                </span>
+                              )}
+                            </div>
                           </td>
                         )
                       })}
-                      <td>
+                      <td data-label="Status">
                         <button
                           type="button"
-                          className={`calculation-row-verify ${isVerified ? 'is-verified' : ''}`}
-                          disabled={verificationLocked || !hasObservation || isVerified || verificationLimitReached}
+                          className={`calculation-row-verify ${isVerified ? 'is-verified' : ''} ${hasVerificationResult && !isVerified ? 'needs-review' : ''}`}
+                          disabled={verificationLocked || !hasObservation || isVerified}
                           onClick={() => handleVerifyRow(row)}
                         >
-                          {isVerified ? 'Verified' : 'Verify'}
+                          <span className="calculation-button-icon" aria-hidden="true">
+                            {isVerified ? '✓' : hasVerificationResult ? '↻' : '✓'}
+                          </span>
+                          <span>{isVerified ? 'Verified' : hasVerificationResult ? 'Recheck' : 'Verify'}</span>
                         </button>
                       </td>
                     </tr>
@@ -299,9 +378,9 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
             </table>
           </div>
           <div className="calculation-card__footer">
-            <span><i className="status-dot status-dot--known" />Auto-filled</span>
-            <span><i className="status-dot status-dot--correct" />Correct</span>
-            <span><i className="status-dot status-dot--incorrect" />Recheck</span>
+            <span className="verification-status-badge verification-status-badge--known"><i aria-hidden="true">↗</i>Auto-filled</span>
+            <span className="verification-status-badge verification-status-badge--correct"><i aria-hidden="true">✓</i>Correct</span>
+            <span className="verification-status-badge verification-status-badge--incorrect"><i aria-hidden="true">×</i>Recheck</span>
             <p>A maximum of five verification rows may be created.</p>
           </div>
         </article>
@@ -310,9 +389,12 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
           <div className="calculation-card__heading">
             <span className="calculation-card__step">02</span>
             <div>
-              <h3>Error Section</h3>
+              <h3>Percentage error</h3>
               <p>Measured values are compared with theoretical (true) values.</p>
             </div>
+            <span className="calculation-card__result-count">
+              {rows.filter((row) => row.observationIndex !== '').length} selected
+            </span>
           </div>
           <div className="calculation-errors">
             {rows.filter((row) => row.observationIndex !== '').map((row) => {
@@ -322,7 +404,15 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
               const statuses = fieldStatus[row.id]
               return (
                 <div className="calculation-error-row" key={row.id}>
-                  <strong>Reading {Number(row.observationIndex) + 1}</strong>
+                  <div className="calculation-error-row__heading">
+                    <strong>
+                      <span aria-hidden="true">R{Number(row.observationIndex) + 1}</span>
+                      Reading {Number(row.observationIndex) + 1}
+                    </strong>
+                    <small className={statuses ? 'is-ready' : ''}>
+                      {statuses ? 'Calculated' : 'Awaiting verification'}
+                    </small>
+                  </div>
                   <div className="calculation-error-grid">
                     {CALCULATED_FIELDS.map(({ key, errorLabel }) => {
                       const error = statuses ? getPercentError(tableValues[key], theoretical[key]) : null

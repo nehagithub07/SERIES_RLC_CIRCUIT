@@ -205,9 +205,10 @@
   font-size: 13px;
   font-weight: 700;
   line-height: 1.35;
-  /* 👇 ADD THESE TWO LINES 👇 */
-  white-space: pre-line; 
-  text-align: justify;   
+  hyphens: auto;
+  text-align: justify;
+  text-justify: inter-word;
+  white-space: pre-line;
 }
 
 .lab-alert-card__tools {

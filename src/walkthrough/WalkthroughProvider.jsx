@@ -8,6 +8,7 @@ import WalkthroughOverlay from './components/WalkthroughOverlay.jsx'
 import './walkthrough.css'
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
+const TARGET_VIEWPORT_GAP = 24
 
 const getElementRect = (element) => {
   if (!element) {
@@ -28,6 +29,37 @@ const getElementRect = (element) => {
     top: rect.top,
     width: rect.width,
   }
+}
+
+const revealTargetIfNeeded = (element) => {
+  if (!element) {
+    return
+  }
+
+  const rect = element.getBoundingClientRect()
+  const viewportHeight = window.visualViewport?.height ?? window.innerHeight
+  const isAboveViewport = rect.top < TARGET_VIEWPORT_GAP
+  const isBelowViewport = rect.bottom > viewportHeight - TARGET_VIEWPORT_GAP
+
+  if (!isAboveViewport && !isBelowViewport) {
+    return
+  }
+
+  const absoluteTargetTop = window.scrollY + rect.top
+  const availableHeight = viewportHeight - TARGET_VIEWPORT_GAP * 2
+  const desiredScrollTop = rect.height > availableHeight
+    ? absoluteTargetTop - TARGET_VIEWPORT_GAP
+    : absoluteTargetTop - (viewportHeight - rect.height) / 2
+  const maximumScrollTop = Math.max(
+    0,
+    document.documentElement.scrollHeight - viewportHeight,
+  )
+
+  window.scrollTo({
+    behavior: 'auto',
+    left: window.scrollX,
+    top: clamp(desiredScrollTop, 0, maximumScrollTop),
+  })
 }
 
 const WalkthroughProvider = ({
@@ -120,30 +152,16 @@ const WalkthroughProvider = ({
     moveToStep(stepIndex)
   }, [moveToStep])
 
-  // --- NEW: BLOCK BODY SCROLL WHEN OPEN ---
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-
-    // Cleanup logic when component unmounts or closes
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
-  // ----------------------------------------
-
   useEffect(() => {
     if (!isOpen || !activeTargetSelector) {
       return undefined
     }
 
-    // NOTE: scrollIntoView intentionally removed. The simulation stage is a
-    // fixed-size canvas scaled to fit the viewport, so scrolling it into
-    // view was shifting the whole layout (e.g. during the Autotransformer
-    // step) instead of just highlighting the target in place.
+    const target = document.querySelector(activeTargetSelector)
+
+    // Keep in-view equipment stationary. Only reposition the page for later
+    // walkthrough targets that are genuinely outside the viewport.
+    revealTargetIfNeeded(target)
 
     let secondAnimationFrame = null
     const animationFrame = window.requestAnimationFrame(() => {
@@ -176,36 +194,34 @@ const WalkthroughProvider = ({
       animationFrame = window.requestAnimationFrame(readActiveTarget)
     }
 
+    const target = activeTargetSelector
+      ? document.querySelector(activeTargetSelector)
+      : null
+    const resizeObserver = target && typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(scheduleRefresh)
+      : null
+
+    if (target && resizeObserver) {
+      resizeObserver.observe(target)
+    }
+
     window.addEventListener('resize', scheduleRefresh)
+    window.addEventListener('scroll', scheduleRefresh, true)
     window.visualViewport?.addEventListener('resize', scheduleRefresh)
+    window.visualViewport?.addEventListener('scroll', scheduleRefresh)
 
     return () => {
       if (animationFrame) {
         window.cancelAnimationFrame(animationFrame)
       }
 
+      resizeObserver?.disconnect()
       window.removeEventListener('resize', scheduleRefresh)
+      window.removeEventListener('scroll', scheduleRefresh, true)
       window.visualViewport?.removeEventListener('resize', scheduleRefresh)
+      window.visualViewport?.removeEventListener('scroll', scheduleRefresh)
     }
-  }, [isOpen, isPositioningTarget, readActiveTarget])
-
-  useEffect(() => {
-    if (!isOpen || !activeTargetSelector) {
-      return undefined
-    }
-
-    const target = document.querySelector(activeTargetSelector)
-
-    if (!target) {
-      return undefined
-    }
-
-    target.classList.add('walkthrough-active-target')
-
-    return () => {
-      target.classList.remove('walkthrough-active-target')
-    }
-  }, [activeTargetSelector, isOpen])
+  }, [activeTargetSelector, isOpen, isPositioningTarget, readActiveTarget])
 
   useEffect(() => {
     if (!isOpen) {

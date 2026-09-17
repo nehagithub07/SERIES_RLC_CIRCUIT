@@ -40,11 +40,11 @@
 export const DIAL_GEOMETRY = {
   // The needle artwork points straight up at 0deg. These angles follow the
   // first and last printed tick marks on each meter face.
-  voltmeter: { maxValue: 50, startAngle: -95, sweepAngle: 190 }, // Volts
-  // The artwork is a 0-2 A dial while simulation readings are stored in mA.
-  ammeter: { maxValue: 2000, startAngle: -90, sweepAngle: 180 }, // milliAmps
-  // The wattmeter artwork is a 0-50 W dial.
-  wattmeter: { maxValue: 50, startAngle: -90, sweepAngle: 180 }, // Watts
+  voltmeter: { maxValue: 50, startAngle: -90, sweepAngle: 180 }, // Volts
+  // The current artwork is a 0-30 mA dial, matching the stored readings.
+  ammeter: { maxValue: 30, startAngle: -90, sweepAngle: 180 }, // milliAmps
+  // The current wattmeter artwork is a 0-1 W dial.
+  wattmeter: { maxValue: 1, startAngle: -90, sweepAngle: 180 }, // Watts
 }
 
 // 🎯 THE 12 R/L/C CASES — edit any number below to change what the meters

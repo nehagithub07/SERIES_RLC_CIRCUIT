@@ -1,7 +1,7 @@
 import SectionCard from './SectionCard.jsx'
 
-const formatValue = (value) => value !== undefined ? value.toFixed(2) : '—'
-const formatComponentValue = (value) => value !== undefined ? String(Number(value)) : '—'
+const formatValue = (value) => value !== undefined && value !== null ? value.toFixed(2) : ''
+const formatComponentValue = (value) => value !== undefined && value !== null ? String(Number(value)) : ''
 
 const ObservationTable = ({ observations }) => (
   <SectionCard className="observation-card" icon="table" id="observation-table-panel" title="OBSERVATION TABLE">
@@ -38,7 +38,7 @@ const ObservationTable = ({ observations }) => (
                   <td>{formatComponentValue(row?.r)}</td>
                   <td>{formatComponentValue(row?.l)}</td>
                   <td>{formatComponentValue(row?.c)}</td>
-                  <td>{row?.nature ? <span className="observation-nature">{row.nature}</span> : '—'}</td>
+                  <td>{row?.nature ? <span className="observation-nature">{row.nature}</span> : ''}</td>
                   <td>{formatValue(row?.current)}</td>
                   <td>{formatValue(row?.vR)}</td>
                   <td>{formatValue(row?.vL)}</td>
