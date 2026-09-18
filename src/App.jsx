@@ -74,7 +74,7 @@ const getRenderScale = () => {
 }
 
 const App = () => {
-  const { clearAlerts, confirmAlert, showAlert, showStepAlert } = useLabAlerts()
+  const { clearAlerts, showAlert, showStepAlert } = useLabAlerts()
   const contentRef = useRef(null)
   const [contentHeight, setContentHeight] = useState(CONTENT_HEIGHT)
   const [scale, setScale] = useState(getScale)
@@ -96,6 +96,8 @@ const App = () => {
   const [verifiedRows, setVerifiedRows] = useState({})
   const [isResistorCorrect, setIsResistorCorrect] = useState(false) 
   const [calculationsVerified, setCalculationsVerified] = useState(false)
+  const [hasFailedVerification, setHasFailedVerification] = useState(false)
+  const [showCorrectValues, setShowCorrectValues] = useState(false)
   const [variacPowered, setVariacPowered] = useState(false)
   const [variacRotated, setVariacRotated] = useState(false)
   const [status, setStatus] = useState('Make the series connections, click CHECK, then turn on the MCB switch.')
@@ -153,7 +155,7 @@ const App = () => {
     const observer = new ResizeObserver(() => setContentHeight(element.offsetHeight))
     observer.observe(element)
     return () => observer.disconnect()
-  }, [])
+  }, [resetRequest])
 
   // 🎙️ AI GUIDE NARRATION
   const {
@@ -227,7 +229,7 @@ const App = () => {
       [STEPS.VARIAC_ON]: 31,
       [STEPS.SET_VOLTAGE]: 32,
       [STEPS.ADD_READING]: 33,
-      [STEPS.CALCULATE]: observations.length >= MAX_OBSERVATIONS ? 38 : 42,
+      [STEPS.CALCULATE]: observations.length >= MAX_OBSERVATIONS ? 38 : observations.length === 5 ? 50 : 42,
       [STEPS.GENERATE_REPORT]: 41,
     }
 
@@ -389,6 +391,11 @@ const App = () => {
           return
         }
 
+        if (nextReadingNumber === 5) {
+          showStepAlert(EXPERIMENT_ALERTS.fifthReadingAdded)
+          return
+        }
+
         stopAlertSound()
      
       }, 50)
@@ -410,12 +417,16 @@ const App = () => {
     setVerifiedRows({})
     setIsResistorCorrect(false) 
     setCalculationsVerified(false)
+    setHasFailedVerification(false)
+    setShowCorrectValues(false)
     setVariacPowered(false)
     setVariacRotated(false)
     setSelectedResistor('')
     setSelectedInductor('')
     setSelectedCapacitor('')
     setReportGenerated(false) 
+    setIsModalOpen(false)
+    setAutoConnectRequest(0)
     setCheckRequest(0)
     setConnectionsVerified(false)
     setResetRequest((current) => current + 1)
@@ -438,17 +449,7 @@ const App = () => {
     })
   }, [clearAlerts, clearPendingTimers, showAlert, stopAiGuideStep])
 
-  const handleReset = async () => {
-    const confirmed = await confirmAlert({
-      title: 'All Readings and Connections Will Be Cleared',
-      description: 'Confirm reset before the current table and circuit are cleared.',
-      type: 'warning',
-      icon: '⚠️',
-    })
-    if (confirmed) {
-      resetSimulation()
-    }
-  }
+  const handleReset = resetSimulation
 
   // The learner may create up to five verification rows, but only needs to
   // correctly verify any two distinct observation readings.
@@ -476,7 +477,9 @@ const App = () => {
 
       showAlert({
         title: 'Incomplete Row',
-        description: `Please fill in every value in row ${rowIndex + 1} before verifying it.`,
+        description: hasMultipleMissingValues
+          ? 'Please enter all the calculated values and verify them.'
+          : 'Please enter the required calculated value and verify it.',
         type: 'warning',
         icon: '⚠️',
         placement: 'center',
@@ -498,28 +501,29 @@ const App = () => {
     const requiredRowsVerified = verifiedCount >= 2
     setIsResistorCorrect(requiredRowsVerified)
     setCalculationsVerified(requiredRowsVerified)
-
     if (isRowOk === true) {
-      setCurrentStep(requiredRowsVerified ? STEPS.GENERATE_REPORT : STEPS.CALCULATE)
-      setStatus(requiredRowsVerified
-        ? 'Two readings have been verified successfully. You may now generate the report.'
-        : 'Theoretical calculations verified successfully. Verify one more reading to enable report generation.')
-      showStepAlert(EXPERIMENT_ALERTS.calculationsVerified, {
-        description: requiredRowsVerified
-          ? 'Two theoretical calculation rows have been verified successfully. You may now generate the report.'
-          : 'This theoretical calculation row has been verified successfully. Verify one more reading to enable report generation.',
-        sound: 'verificationSuccessNarration',
-      })
-    } else if (isRowOk === false) {
+
+  setCurrentStep(
+    requiredRowsVerified ? STEPS.GENERATE_REPORT : STEPS.CALCULATE
+  );
+
+  setStatus('Verified');
+
+  showStepAlert(EXPERIMENT_ALERTS.calculationsVerified);
+}
+    else if (isRowOk === false) {
+      setHasFailedVerification(true)
       const hasMultipleIncorrectValues = verificationMeta.incorrectCount > 1
       showAlert({
         title: 'Verification Failed',
-        description: `Row ${rowIndex + 1} does not match the selected observation-table reading. Correct the highlighted values and verify again.`,
+        description: hasMultipleIncorrectValues
+          ? 'Verification failed. The highlighted values are incorrect. Please recheck your calculations and verify again.'
+          : 'Verification failed. The highlighted value is incorrect. Please review your calculation and verify again.',
         type: 'error',
         icon: '❌',
         placement: 'center',
         duration: 8000,
-        sound: hasMultipleIncorrectValues ? 'incorrCalcMulti' : 'incorrCalcOne',
+        sound: hasMultipleIncorrectValues ? 'incorrCalc' : 'incorrCalCR',
       })
     }
   }
@@ -528,103 +532,230 @@ const App = () => {
     window.print()
   }
 
-  const handleGenerateReport = () => {
-    if (readingCount < MIN_REPORT_READINGS) {
-      const remainingReadings = MIN_REPORT_READINGS - readingCount
-      setStatus(`Add ${remainingReadings} more reading(s) before generating the experiment report.`)
-      return
-    }
+  // const handleGenerateReport = () => {
+  //   if (readingCount < MIN_REPORT_READINGS) {
+  //     const remainingReadings = MIN_REPORT_READINGS - readingCount
+  //     setStatus(`Add ${remainingReadings} more reading(s) before generating the experiment report.`)
+  //     return
+  //   }
 
-    if (!calculationsVerified) {
-      setStatus('Correctly verify any two observation readings before generating the report.')
-      return
-    }
+  //   if (!calculationsVerified) {
+  //     setStatus('Correctly verify any two observation readings before generating the report.')
+  //     return
+  //   }
 
-    const reportWindow = generateRlcReport({
-      observations,
-      parameters: { r, l, c },
-      theoreticalCalculations: Object.values(calculationRows),
-      sessionStart,
-    })
+  //   const reportWindow = generateRlcReport({
+  //     observations,
+  //     parameters: { r, l, c },
+  //     theoreticalCalculations: Object.values(calculationRows),
+  //     sessionStart,
+  //   })
 
-    if (!reportWindow) {
-      setStatus('Unable to open the report window.')
-      showAlert({
-        title: 'Popup Blocked',
-        description: 'Unable to open the report window. Please allow pop-ups and try again.',
-        type: 'error',
-        icon: '❌',
-        placement: 'center',
-        duration: 5000,
-      })
-      return
-    }
+  //   if (!reportWindow) {
+  //     setStatus('Unable to open the report window.')
+  //     showAlert({
+  //       title: 'Popup Blocked',
+  //       description: 'Unable to open the report window. Please allow pop-ups and try again.',
+  //       type: 'error',
+  //       icon: '❌',
+  //       placement: 'center',
+  //       duration: 5000,
+  //     })
+  //     return
+  //   }
 
-    window.focus()
-    setReportGenerated(true)
-    setStatus('RLC Experiment report generated successfully from metrics and observations.')
-    scheduleAlert(() => {
-      showAlert({
-        title: 'Report Generated',
-        description: 'Your report has been generated successfully. Click OK to view your report.',
-        type: 'success',
-        icon: '✅',
-        placement: 'center',
-        requiresConfirmation: true,
-        confirmLabel: 'OK',
-        sound: 'genRepBtnClick',
-      })
-    }, 50)
+  //   window.focus()
+  //   setReportGenerated(true)
+  //   setStatus('RLC Experiment report generated successfully from metrics and observations.')
+  //   scheduleAlert(() => {
+  //     showAlert({
+  //       title: 'Report Generated',
+  //       description: 'Your report has been generated successfully. Click OK to view your report.',
+  //       type: 'success',
+  //       icon: '✅',
+  //       placement: 'center',
+  //       requiresConfirmation: true,
+  //       confirmLabel: 'OK',
+  //       sound: 'genRepBtnClick',
+  //     })
+  //   }, 50)
+  // }
+const handleGenerateReport = () => {
+  if (readingCount < MIN_REPORT_READINGS) {
+    const remainingReadings = MIN_REPORT_READINGS - readingCount
+    setStatus(
+      `Add ${remainingReadings} more reading(s) before generating the experiment report.`
+    )
+    return
   }
 
+  if (!calculationsVerified) {
+    setStatus(
+      'Correctly verify any two observation readings before generating the report.'
+    )
+    return
+  }
+
+  showAlert({
+    title: 'Report Generated',
+    description:
+      'Your report has been generated successfully. Click OK to view your report.',
+    type: 'success',
+    icon: '✅',
+    placement: 'center',
+    requiresConfirmation: true,
+    confirmLabel: 'OK',
+    sound: 'genRepBtnClick',
+
+    onConfirm: () => {
+      const reportWindow = generateRlcReport({
+        observations,
+        parameters: { r, l, c },
+        theoreticalCalculations: Object.values(calculationRows),
+        sessionStart,
+      })
+
+      if (!reportWindow) {
+        setStatus('Unable to open the report window.')
+
+        showAlert({
+          title: 'Popup Blocked',
+          description:
+            'Unable to open the report window. Please allow pop-ups and try again.',
+          type: 'error',
+          icon: '❌',
+          placement: 'center',
+          duration: 5000,
+        })
+
+        return
+      }
+
+      setReportGenerated(true)
+      setStatus(
+        'RLC Experiment report generated successfully from metrics and observations.'
+      )
+    },
+  })
+}
   const scaledWidth = Math.ceil(BASE_WIDTH * scale)
   const scaledHeight = Math.ceil(contentHeight * scale)
   
-  const handleCheckConnections = useCallback((result, options = {}) => {
-    const { silent = false } = options
+const handleCheckConnections = useCallback((result, options = {}) => {
+  const { silent = false } = options
 
-    if (result.totalConnections === 0) {
-      setConnectionsVerified(false)
-      setStatus('Please make the circuit node connections first.')
-      if (!silent) {
-        showAlert({
-          title: 'Alert',
-          description: 'Please make the required connections as per the given instructions.',
-          type: 'warning',
-          icon: '⚠️',
-          placement: 'center',
-          duration: 6000,
-          sound: 'firstCheck',
-        })
-      }
-      return
+  const wrongCount = Number(result?.incorrectCount || 0)
+  const missingCount = Number(result?.missingCount || 0)
+
+  // Remove words like "endpoint" / "terminal" and keep only terminal numbers.
+  // Example: endpoint-1-endpoint-23 -> 1-23
+  const formatConnection = (connection) => {
+    const numbers = String(connection).match(/\d+/g)
+
+    if (!numbers || numbers.length < 2) {
+      return connection
     }
 
-    if (result.isCorrect) {
-      setConnectionsVerified(true)
-      setCurrentStep(STEPS.POWER_ON);
-      setStatus('Right connections! Turn ON the MCB, then select the resistor, inductor, and capacitor values.')
-      if (!silent) {
-        showStepAlert(EXPERIMENT_ALERTS.connectionsVerified)
-      }
-      return
-    }
+    return `${numbers[0]}-${numbers[1]}`
+  }
 
-    setConnectionsVerified(false)
-    setStatus(`Invalid connections. Correct matched points: ${result.matchedCount}; total wires: ${result.totalConnections}.`)
+  const wrongConnections =
+    Array.isArray(result?.wrongConnections)
+      ? result.wrongConnections.map(formatConnection)
+      : []
+
+  const missingConnections =
+    Array.isArray(result?.missingConnections)
+      ? result.missingConnections.map(formatConnection)
+      : []
+
+  // =====================================================
+  // ALL CONNECTIONS CORRECT
+  // =====================================================
+
+  if (result?.isCorrect) {
+    setConnectionsVerified(true)
+    setCurrentStep(STEPS.POWER_ON)
+
+    setStatus(
+      'Right connections! Turn ON the MCB, then select the resistor, inductor, and capacitor values.'
+    )
+
     if (!silent) {
-      showAlert({
-        title: 'Connection Error Found',
-        description: 'Wrong connections detected. Please recheck your wiring against the circuit diagram.',
-        type: 'warning',
-        icon: '⚠️',
-        placement: 'center',
-        duration: 6000,
-        sound: 'multiWrong',
-      })
+      showStepAlert(EXPERIMENT_ALERTS.connectionsVerified)
     }
-  }, [showAlert, showStepAlert])
 
+    return
+  }
+
+  // =====================================================
+  // INCOMPLETE / INCORRECT
+  // =====================================================
+
+  setConnectionsVerified(false)
+
+  const sections = []
+
+  // Wrong connections
+  if (wrongCount > 0) {
+    sections.push(
+      `Wrong connections: ${wrongCount}\n` +
+      `${wrongConnections.length > 0
+        ? wrongConnections.join(', ')
+        : '—'}`
+    )
+  }
+
+  // Missing connections
+  sections.push(
+    `Missing connections: ${missingCount}\n` +
+    `${missingConnections.length > 0
+      ? missingConnections.join(', ')
+      : 'None'}`
+  )
+
+  // =====================================================
+  // NEXT 2–3 CORRECT CONNECTIONS
+  // =====================================================
+
+  
+
+  const description = sections.join('\n\n')
+
+  // =====================================================
+  // STATUS
+  // =====================================================
+
+  if (wrongCount > 0) {
+    setStatus(
+      `${wrongCount} wrong connection(s) and ${missingCount} missing connection(s) found.`
+    )
+  } else {
+    setStatus(
+      `${missingCount} connection(s) are still missing.`
+    )
+  }
+
+  // =====================================================
+  // ALERT
+  // =====================================================
+
+  if (!silent) {
+    showAlert({
+      title:
+        wrongCount > 0
+          ? 'Connection Error Found'
+          : 'Incomplete Connections',
+
+      description,
+      type: 'warning',
+      icon: '⚠️',
+      placement: 'center',
+      duration: 12000,
+      sound: wrongCount > 0 ? 'wrongConn' : null,
+    })
+  }
+}, [showAlert, showStepAlert])
   const handleCheck = () => {
     setCheckRequest((current) => current + 1)
   }
@@ -800,6 +931,7 @@ const App = () => {
 
   return (
     <WalkthroughProvider 
+      key={resetRequest}
       onComplete={handleWalkthroughComplete}
       onExit={handleWalkthroughExit}
       onStart={handleWalkthroughStart}
@@ -833,6 +965,7 @@ const App = () => {
               <aside className="left-panel">
                 <ActionButtons
                   aiGuideActive={aiGuideEnabled}
+                  correctValuesOpen={showCorrectValues}
                   disabledButtons={{
                     onAdd: !connectionsVerified
                       || !powerOn
@@ -842,12 +975,16 @@ const App = () => {
                     onAutoConnect: connectionsVerified || powerOn,
                     onCheck: connectionsVerified,
                     onPrint: false,
+                    onCorrectValues: !hasFailedVerification,
                     onInstruction: false,
                   }}
                   onAdd={recordObservation}
                   onAiGuide={handleAiGuide}
                   onCheck={handleCheck}
                   onPrint={handlePrint}
+                  onCorrectValues={() => {
+                    if (hasFailedVerification) setShowCorrectValues((isOpen) => !isOpen)
+                  }}
                   onReset={handleReset}
                   onAutoConnect={handleAutoConnect}
                   onInstruction={() => setIsModalOpen(true)}
@@ -857,6 +994,11 @@ const App = () => {
                 <div className="panel-content-wrapper">
                   <ControlPanel
                     observations={observations}
+                    showCorrectValues={showCorrectValues}
+                    onCloseCorrectValues={() => {
+                      setShowCorrectValues(false)
+                      document.getElementById('correct-values-button')?.focus({ preventScroll: true })
+                    }}
                   />
 
                   {isModalOpen && (

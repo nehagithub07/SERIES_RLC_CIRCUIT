@@ -18,7 +18,8 @@ const CALCULATED_FIELDS = [
   { key: 'vL', label: <>V<sub>L</sub><br />(V)</>, dataLabel: 'V L', errorLabel: <>V<sub>L</sub> error</>, min: 1, max: 50 },
   { key: 'vC', label: <>V<sub>C</sub><br />(V)</>, dataLabel: 'V C', errorLabel: <>V<sub>C</sub> error</>, min: 1, max: 50 },
   { key: 'cosPhi', label: <>cosφ<br />(PF)</>, dataLabel: 'Power factor', errorLabel: <>cosφ error</>, min: 0, max: 1 },
-  { key: 'power', label: <>Power<br />(W)</>, dataLabel: 'Power', errorLabel: <>Power error</>, min: 0, max: 1 },
+  // The reference answers are 0.27–0.89 W, so fractional watts must be allowed.
+  { key: 'power', label: <>Power<br />(W)</>, dataLabel: 'Power', errorLabel: <>P error</>, min: 0, max: 50 },
 ]
 
 const ALL_FIELDS = [...KNOWN_FIELDS, ...CALCULATED_FIELDS]
@@ -142,8 +143,9 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
   const handleObservationSelect = (rowId, value) => {
     if (verificationLocked) return
     const observation = value === '' ? null : observations[Number(value)]
+    const reference = getTheoreticalValues(observation)
     if (observation) {
-      onDraftChange?.(rowId, { ...EMPTY_ROW, voltage: observation.voltage, current: observation.current, r: observation.r, l: observation.l, c: observation.c, observationIndex: Number(value) })
+      onDraftChange?.(rowId, { ...EMPTY_ROW, voltage: observation.voltage, current: reference.current, r: observation.r, l: observation.l, c: observation.c, observationIndex: Number(value) })
     }
     setRows((current) => current.map((row) => row.id === rowId
       ? {
@@ -153,7 +155,7 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
             ? {
                 ...EMPTY_ROW,
                 voltage: observation.voltage,
-                current: observation.current,
+                current: reference.current,
                 r: observation.r,
                 l: observation.l,
                 c: observation.c,
@@ -196,28 +198,17 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
         .filter(([, error]) => error),
     )
 
-    if (Object.keys(rangeErrors).length > 0) {
-      setValidationErrors((current) => ({ ...current, [row.id]: rangeErrors }))
-      setFieldStatus((current) => ({
-        ...current,
-        [row.id]: Object.fromEntries(CALCULATED_FIELDS.map(({ key }) => [key, rangeErrors[key] ? false : undefined])),
-      }))
-      onVerify?.(row.id, row.values, null, row.observationIndex, {
-        validationMessage: Object.values(rangeErrors).join(' '),
-      })
-      return
-    }
-
     setValidationErrors((current) => {
       const next = { ...current }
-      delete next[row.id]
+      if (Object.keys(rangeErrors).length) next[row.id] = rangeErrors
+      else delete next[row.id]
       return next
     })
 
     const verificationValues = getTheoreticalValues(observation)
     const statuses = Object.fromEntries(CALCULATED_FIELDS.map(({ key }) => [
       key,
-      matchesTableValue(Number(row.values[key]), verificationValues[key]),
+      !rangeErrors[key] && matchesTableValue(Number(row.values[key]), verificationValues[key]),
     ]))
     const isRowCorrect = Object.values(statuses).every(Boolean)
 
@@ -293,7 +284,7 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
             <span className="calculation-card__step">01</span>
             <div>
               <h3>Select and Verify Readings</h3>
-              <p>V and I (mA) are prefilled with the correct values. Calculate V<sub>R</sub>, V<sub>L</sub>, V<sub>C</sub>, cos⁡ϕ, and Power using the provided Equations.</p>
+              <p>V and the reference I (mA) are prefilled. Calculate V<sub>R</sub>, V<sub>L</sub>, V<sub>C</sub>, cos⁡ϕ, and Power using the provided Equations.</p>
             </div>
             <div className="calculation-card__heading-actions">
               <span className="calculation-row-capacity" aria-live="polite">
@@ -398,16 +389,16 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
                                 step="any"
                                 className={`calculation-table-input ${status === true ? 'is-correct' : status === false ? 'is-incorrect' : ''}`}
                                 aria-label={`${dataLabel} for verification row ${row.id}`}
-                                aria-invalid={Boolean(validationError)}
+                                aria-invalid={Boolean(validationError) || status === false}
                                 min={min}
                                 max={max}
                                 value={row.values[key]}
-                                placeholder={!isKnown && hasObservation ? 'Enter' : ''}
+                                placeholder={!isKnown && hasObservation ? `${min}–${max}` : ''}
                                 disabled={verificationLocked || !hasObservation || isKnown || isVerified}
                                 onChange={(event) => handleFieldChange(row.id, key, event.target.value)}
                                 onWheel={stopWheelValueChange}
                                 inputMode="decimal"
-                                title={validationError || undefined}
+                                title={validationError || (!isKnown ? `Enter a value from ${min} to ${max}.` : undefined)}
                               />
                               {typeof status === 'boolean' && (
                                 <span
@@ -465,7 +456,7 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
               {rows.filter((row) => row.observationIndex !== '').length} selected
             </span>
           </div>
-          <div className="calculation-errors">
+          <div className="calculation-errors" role="region" aria-label="Verification errors" tabIndex={0}>
             {rows.filter((row) => row.observationIndex !== '').map((row) => {
               const observation = observations[Number(row.observationIndex)]
               const theoretical = getTheoreticalValues(observation)
@@ -488,7 +479,8 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
                       const status = statuses?.[key]
                       return (
                         <span className={status === true ? 'is-correct' : status === false ? 'is-incorrect' : ''} key={key}>
-                          {errorLabel}<b>{error === null ? '—' : `${error.toFixed(2)}%`}</b>
+                          <span className="calculation-error-label">{errorLabel}</span>
+                          <b><sub>{error === null ? '—' : `${error.toFixed(2)}%`}</sub></b>
                         </span>
                       )
                     })}

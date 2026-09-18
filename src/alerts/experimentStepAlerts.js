@@ -5,7 +5,7 @@ export const EXPERIMENT_ALERTS = {
     icon: '⚠️',
     sound: 'autotransformerNotReady',
     target: '#autotransformer-panel',
-    title: ' Autotransformer Only',
+    title: ' Autotransformer',
     type: 'warning',
   },
   connectionsVerified: {
@@ -93,6 +93,15 @@ export const EXPERIMENT_ALERTS = {
     title: 'Second Reading Added',
     type: 'success',
   },
+  fifthReadingAdded: {
+    description: '5th Reading added successfully. Now, select the reading you want to verify theoretically from the dropdown menu, or you can add more readings to the table.',
+    duration: 18000,
+    icon: '✅',
+    sound: 'fifthReadingAdded',
+    target: '#observation-table-panel',
+    title: '5th Reading Added',
+    type: 'success',
+  },
   readingAdded: {
     duration: 12000,
     icon: '✅',
@@ -101,7 +110,7 @@ export const EXPERIMENT_ALERTS = {
     type: 'success',
   },
   allReadingsRecorded: {
-    description: 'All 12 readings have been recorded. Now select the reading you want to verify theoretically from the dropdown menu and click the Verify button.',
+    description: 'All 12 readings have been recorded. Now, select the reading you want to verify theoretically from the dropdown menu and click the Verify button to verify the reading.',
     duration: 20000,
     icon: '📊',
     sound: 'allReadingsRecorded',
@@ -118,13 +127,13 @@ export const EXPERIMENT_ALERTS = {
     title: 'Maximum Readings Reached',
     type: 'info',
   },
-  calculationsVerified: {
-    description: 'Theoretical calculation verified successfully. Verify a second reading to enable report generation.',
-    duration: 13000,
-    icon: '✅',
-    sound: 'verificationSuccessNarration',
-    target: '#theoretical-calculations-panel',
-    title: 'Theoretical Calculations Verified',
-    type: 'success',
-  },
+calculationsVerified: {
+  description: 'Theoretical calculations verified successfully.',
+  duration: 13000,
+  icon: '✅',
+  sound: 'calculationsVerified',
+  target: '#theoretical-calculations-panel',
+  title: 'Verified',
+  type: 'success',
+},
 }

@@ -10,12 +10,26 @@
   grid-template-rows: auto auto;
 }
 .calculation-panel .calculation-panel__body { overflow: visible; }
-.calculation-panel .calculation-table-wrap,
-.calculation-panel .calculation-errors { max-height: none; }
+.calculation-panel .calculation-table-wrap { max-height: none; }
+.calculation-panel .calculation-errors {
+  max-height: min(390px, 60dvh);
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  align-content: start;
+}
+.calculation-panel .calculation-error-grid .calculation-error-label {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.calculation-error-grid sub { font-size: .85em; vertical-align: sub; }
 .equation-panel__list > div { flex-wrap: wrap; }
 .equation-panel__list small { display: block; width: 100%; }
 .equation-unit-note { font-size: 13px; line-height: 1.5; }
-.walkthrough-popup { max-height: calc(100dvh - 32px); overflow-y: auto; }
+.walkthrough-popup { max-height: calc(100dvh - 32px); overflow-y: auto; overscroll-behavior: contain; }
 .walkthrough-popup__button,
 .walkthrough-popup__audio { min-height: 44px; }
 
@@ -77,6 +91,11 @@
   .workspace-grid > .right-panel { order: 1; }
   .workspace-grid > .left-panel > .panel-content-wrapper { order: 2; }
   .left-panel, .right-panel, .panel-content-wrapper, .control-panel { min-width: 0; }
+  .section-card { width: 100%; min-width: 0; }
+  .section-card__heading { gap: 8px; padding: 12px 10px 4px; height: auto; min-height: 48px; }
+  .section-card__heading h2 { font-size: clamp(14px, 2.6vw, 18px); white-space: normal; text-align: center; }
+  .section-card__line { flex: 1; min-width: 0; }
+  .action-button-wrapper-box { min-width: 0; }
   #action-buttons-panel { height: auto; min-height: 0; }
   .action-buttons__grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -180,6 +199,7 @@
   /* Legacy invisible target boxes are superseded by visible asset selectors. */
   .equipment-panel :is(.meter-shell > div[id], #inductor-main, #capacitor-panel-walkthrough-target) { display: none; }
   .observation-card { height: auto; }
+  .observation-table-meta { flex-wrap: wrap; }
   .observation-card .observation-table { font-size: 13px; }
   .simulation-shell .report-equation-control,
   .simulation-shell .report-button { position: relative; inset: auto; }
@@ -233,6 +253,8 @@
     align-items: stretch;
     width: auto !important;
     min-width: 0;
+    height: auto;
+    min-height: 78px;
     padding: 8px;
     gap: 4px;
     font-size: 14px;
@@ -242,6 +264,8 @@
   .calculation-panel .calculation-table td::before { content: attr(data-label); font-size: 12px; font-weight: 700; color: #604c37; }
   .calculation-panel .calculation-table tr > td:first-child,
   .calculation-panel .calculation-table tr > td:last-child { display: flex; grid-column: 1 / -1; }
+  .calculation-panel .calculation-table td:first-child,
+  .calculation-panel .calculation-table td:last-child { display: flex; }
   .calculation-panel .calculation-table-input,
   .calculation-panel .calculation-reading-select { font-size: 16px; width: 100%; }
   .calculation-panel .calculation-panel__progress { width: 100%; min-width: 0; }

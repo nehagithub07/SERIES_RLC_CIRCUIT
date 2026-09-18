@@ -198,7 +198,7 @@ const LabAlertProvider = ({ children }) => {
   const spotlightAlert = centerAlert ?? topRightAlerts.at(-1)
   const hasCriticalAlert = Boolean(centerAlert?.critical)
   const spotlightNarration = spotlightAlert
-    ? spotlightAlert.narration ?? `${spotlightAlert.title}. ${spotlightAlert.description ?? ''}`.trim()
+    ? spotlightAlert.narration ?? spotlightAlert.description ?? spotlightAlert.title
     : ''
 
   // Alert narration has its own playback lifecycle. It starts only when the

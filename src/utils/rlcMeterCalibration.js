@@ -128,18 +128,18 @@ export const RLC_METER_TABLE = [
 // section. They stay separate from the measured meter values above so that
 // verification and error calculations use the supplied answer key.
 export const RLC_VERIFICATION_TABLE = [
-  { r: '1', l: '2', c: '2.2', current: 23.21, vR: 23.21, vL: 14.59, vC: 33.58, cosPhi: 0.77, power: 0.53 },
-  { r: '1', l: '2', c: '4.7', current: 29.96, vR: 29.96, vL: 18.83, vC: 20.29, cosPhi: 0.99, power: 0.89 },
-  { r: '1', l: '5', c: '2.2', current: 29.77, vR: 29.77, vL: 46.77, vC: 43.07, cosPhi: 0.99, power: 0.88 },
-  { r: '1', l: '5', c: '4.7', current: 22.37, vR: 22.37, vL: 35.15, vC: 15.15, cosPhi: 0.74, power: 0.50 },
-  { r: '2', l: '2', c: '2.2', current: 13.88, vR: 27.76, vL: 8.72, vC: 20.08, cosPhi: 0.92, power: 0.38 },
-  { r: '2', l: '2', c: '4.7', current: 15, vR: 29.99, vL: 9.42, vC: 10.16, cosPhi: 0.99, power: 0.45 },
-  { r: '2', l: '5', c: '2.2', current: 14.97, vR: 29.94, vL: 23.52, vC: 21.66, cosPhi: 0.99, power: 0.44 },
-  { r: '2', l: '5', c: '4.7', current: 13.70, vR: 27.39, vL: 21.52, vC: 9.27, cosPhi: 0.91, power: 0.37 },
-  { r: '3', l: '2', c: '2.2', current: 9.65, vR: 28.94, vL: 6.06, vC: 13.96, cosPhi: 0.96, power: 0.27 },
-  { r: '3', l: '2', c: '4.7', current: 10, vR: 30, vL: 6.28, vC: 6.77, cosPhi: 0.99, power: 0.30 },
-  { r: '3', l: '5', c: '2.2', current: 9.99, vR: 29.97, vL: 15.70, vC: 14.46, cosPhi: 0.99, power: 0.29 },
-  { r: '3', l: '5', c: '4.7', current: 9.58, vR: 28.75, vL: 15.06, vC: 6.49, cosPhi: 0.95, power: 0.27 },
+  { r: '1', l: '2', c: '2.2', nature: 'Capacitive', current: 23.21, vR: 23.21, vL: 14.59, vC: 33.58, cosPhi: 0.77, power: 0.53 },
+  { r: '1', l: '2', c: '4.7', nature: 'Near Resonance', current: 29.96, vR: 29.96, vL: 18.83, vC: 20.29, cosPhi: 0.99, power: 0.89 },
+  { r: '1', l: '5', c: '2.2', nature: 'Inductive', current: 29.77, vR: 29.77, vL: 46.77, vC: 43.07, cosPhi: 0.99, power: 0.88 },
+  { r: '1', l: '5', c: '4.7', nature: 'Inductive', current: 22.37, vR: 22.37, vL: 35.15, vC: 15.15, cosPhi: 0.74, power: 0.50 },
+  { r: '2', l: '2', c: '2.2', nature: 'Capacitive', current: 13.88, vR: 27.76, vL: 8.72, vC: 20.08, cosPhi: 0.92, power: 0.38 },
+  { r: '2', l: '2', c: '4.7', nature: 'Near Resonance', current: 15, vR: 29.99, vL: 9.42, vC: 10.16, cosPhi: 0.99, power: 0.45 },
+  { r: '2', l: '5', c: '2.2', nature: 'Inductive', current: 14.97, vR: 29.94, vL: 23.52, vC: 21.66, cosPhi: 0.99, power: 0.44 },
+  { r: '2', l: '5', c: '4.7', nature: 'Inductive', current: 13.70, vR: 27.39, vL: 21.52, vC: 9.27, cosPhi: 0.91, power: 0.37 },
+  { r: '3', l: '2', c: '2.2', nature: 'Capacitive', current: 9.65, vR: 28.94, vL: 6.06, vC: 13.96, cosPhi: 0.96, power: 0.27 },
+  { r: '3', l: '2', c: '4.7', nature: 'Near Resonance', current: 10, vR: 30, vL: 6.28, vC: 6.77, cosPhi: 0.99, power: 0.30 },
+  { r: '3', l: '5', c: '2.2', nature: 'Inductive', current: 9.99, vR: 29.97, vL: 15.70, vC: 14.46, cosPhi: 0.99, power: 0.29 },
+  { r: '3', l: '5', c: '4.7', nature: 'Inductive', current: 9.58, vR: 28.75, vL: 15.06, vC: 6.49, cosPhi: 0.95, power: 0.27 },
 ]
 
 // Builds the "R-L-C" lookup key used to find a case, e.g. "1-2-2.2".

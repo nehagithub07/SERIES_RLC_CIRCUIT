@@ -7,6 +7,7 @@ import {
   CheckIcon,
   PrintIcon,
   ResetIcon,
+  TableIcon,
 } from './Icons.jsx'
 
 const STEPS = {
@@ -78,6 +79,15 @@ const buttons = [
     targetId: 'print-button-walkthrough-target',
     activeStep: null,
   },
+  {
+    id: 'correct-values-button',
+    label: 'CORRECT VALUES',
+    tone: 'action-button--orange',
+    Icon: TableIcon,
+    handlerName: 'onCorrectValues',
+    targetId: 'correct-values-button-walkthrough-target',
+    activeStep: null,
+  },
 ]
 
 const ActionButtons = ({
@@ -89,6 +99,8 @@ const ActionButtons = ({
   onPrint,
   onReset,
   onAutoConnect,
+  onCorrectValues,
+  correctValuesOpen = false,
   aiGuideActive = false,
   currentStep = 1,
 }) => {
@@ -100,6 +112,7 @@ const ActionButtons = ({
     onPrint,
     onReset,
     onAutoConnect,
+    onCorrectValues,
   }
 
   const isButtonHighlighted = (activeStep, handlerName) => {
@@ -119,6 +132,7 @@ const ActionButtons = ({
             : !handler || disabledButtons[handlerName]
           const isHighlighted = isButtonHighlighted(activeStep, handlerName)
           const isAiGuideButton = handlerName === 'onAiGuide'
+          const isCorrectValuesButton = handlerName === 'onCorrectValues'
 
           return (
             <div className={`action-button-wrapper-box ${isHighlighted ? 'action-button--highlighted' : ''}`} key={label}>
@@ -126,10 +140,16 @@ const ActionButtons = ({
                 id={id}
                 type="button"
                 aria-pressed={isAiGuideButton ? aiGuideActive : undefined}
+                aria-expanded={isCorrectValuesButton ? correctValuesOpen : undefined}
+                aria-controls={isCorrectValuesButton ? 'correct-values-panel' : undefined}
                 className={`action-button ${tone} ${isHighlighted ? 'action-button--pulse' : ''} ${isAiGuideButton && aiGuideActive ? 'action-button--ai-active' : ''}`}
                 disabled={isDisabled}
                 onClick={handler}
-                title={isAiGuideButton ? `AI Guide is ${aiGuideActive ? 'ON — click to turn it off' : 'OFF — click to turn it on'}` : undefined}
+                title={isAiGuideButton
+                  ? `AI Guide is ${aiGuideActive ? 'ON — click to turn it off' : 'OFF — click to turn it on'}`
+                  : isCorrectValuesButton
+                    ? isDisabled ? 'Available after an unsuccessful verification.' : 'Show or hide the correct values table.'
+                    : undefined}
               >
                 <Icon />
                 <span>{label}</span>

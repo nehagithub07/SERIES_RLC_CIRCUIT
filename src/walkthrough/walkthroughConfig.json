@@ -111,7 +111,7 @@
         "en": "MCB "
       },
       "description": {
-        "en": "The MCB acts as the main power switch for the experiment. It also protects the circuit by automatically disconnecting the power supply in case of an overload or short circuit. When turned ON, it supplies electrical power to the circuit.\n\n**Rating: 6 A, SP, 240 V AC**\n\nInput supply: 230 V AC, 50 Hz."
+        "en": "The MCB acts as the main power switch for the experiment. It also protects the circuit by automatically disconnecting the power supply in case of an overload or short circuit. When turned ON, it supplies electrical power to the circuit.\n\n**Rating**: 6 A, SP, 240 V AC \n\n**Input supply** 230 V AC, 50 Hz."
       },
       "audio": "MCB.wav",
       "narration": "The MCB acts as the main power switch for the experiment. It protects the circuit by disconnecting the power supply in case of an overload or short circuit. Rating: 6 ampere, single pole, 240 volt AC. Input supply: 230 volt AC, 50 hertz.",
@@ -124,7 +124,7 @@
         "en": "Autotransformer"
       },
       "description": {
-        "en": "The autotransformer is used to obtain a variable AC output voltage from the 230 V input supply. It allows the output voltage to be varied gradually and set to 30 V for safe operation of the circuit."
+        "en": "The autotransformer is used to obtain a variable AC output voltage from the 230 V input supply. It allows the output voltage to be varied gradually and set to 30 V for safe operation of the circuit. \n\n**Ratings:** \n\n**Max. kVA:** 4.05, Max. Load: 15 A \n\n** Input Voltage: **240 V, 50Hz \n\n**Output Voltage:** 0 - 240V AC"
       },
       "audio": "Autotransformer.wav",
       "placement": "right"
@@ -136,7 +136,7 @@
         "en": "Resistor"
       },
       "description": {
-        "en": "The resistor acts as the resistive element of the series RLC circuit and consumes active power. It limits the circuit current and is used to study the effect of resistance on current, voltage drop, power dissipation, and power factor. "
+        "en": "The resistor acts as the resistive element of the series RLC circuit and consumes active power. It limits the circuit current and is used to study the effect of resistance on current, voltage drop, power dissipation, and power factor. \n\n **Rating:** 1 kΩ, 2 kΩ, 3 kΩ"
       },
       "audio": "Resistor.wav",
       "placement": "top"
@@ -148,7 +148,7 @@
         "en": "Inductor"
       },
       "description": {
-        "en": "The inductor provides the inductive element of the series RLC circuit and stores energy in its magnetic field. It introduces inductive reactance, opposes changes in current, affects the phase relationship between voltage and current, and influences the circuit impedance and power factor."
+        "en": "The inductor provides the inductive element of the series RLC circuit and stores energy in its magnetic field. It introduces inductive reactance, opposes changes in current, affects the phase relationship between voltage and current, and influences the circuit impedance and power factor. \n\n**Rating:** 2 H and 5 H"
       },
       "audio": "Inductor.wav",
       "placement": "top"
@@ -160,7 +160,7 @@
         "en": "Capacitor"
       },
       "description": {
-        "en": "The capacitor acts as the capacitive element of the series RLC circuit and stores energy in its electric field. It introduces capacitive reactance, affects the phase angle between voltage and current, and is used to study the effects of capacitance on impedance, circuit current, and power factor."
+        "en": "The capacitor acts as the capacitive element of the series RLC circuit and stores energy in its electric field. It introduces capacitive reactance, affects the phase angle between voltage and current, and is used to study the effects of capacitance on impedance, circuit current, and power factor.\n\n**Rating**: 2.2 µF and 4.7 µF"
       },
       "audio": "Capacitor.wav",
       "placement": "top"
@@ -172,7 +172,7 @@
         "en": "AC Voltmeter 1"
       },
       "description": {
-        "en": "This voltmeter is used to measure the voltage applied to the series RLC circuit. It shows the output voltage received from the autotransformer, which is adjusted to 30 V for the experiment.\n\n**Rating: 0–50 V AC**"
+        "en": "This voltmeter is used to measure the voltage applied to the series RLC circuit. It shows the output voltage received from the autotransformer, which is adjusted to 30 V for the experiment.\n\n**Rating**: 0–50 V AC"
       },
       "audio": "AC Voltmeter 1.wav",
       "placement": "bottom"
@@ -184,10 +184,10 @@
         "en": "AC Ammeter"
       },
       "description": {
-        "en": "This ammeter is used to measure the total current flowing through the series RLC circuit. Since all the components are connected in series, the same current flows through the resistor, inductor, and capacitor.\n\n**Rating: 0–30 mA AC**"
+        "en": "This ammeter is used to measure the total current flowing through the series RLC circuit. Since all the components are connected in series, the same current flows through the resistor, inductor, and capacitor.\n\n**Rating**: 0–30 mA AC"
       },
       "audio": "AC Ammeter.wav",
-      "narration": "This ammeter is used to measure the total current flowing through the series RLC circuit. Since all the components are connected in series, the same current flows through the resistor, inductor, and capacitor.  Rating: zero to thirty milliampere AC.",
+      
       "placement": "bottom"
     },
     {
@@ -197,7 +197,7 @@
         "en": "AC Wattmeter"
       },
       "description": {
-        "en": "The wattmeter is used to measure the active power consumed by the series RLC circuit. The measured power (P) helps in analyzing the power dissipated by the resistor and studying its effect on the overall circuit behaviour and power factor.\n\n**Rating: 0–1 W AC**"
+        "en": "The wattmeter is used to measure the active power consumed by the series RLC circuit. The measured power (P) helps in analyzing the power dissipated by the resistor and studying its effect on the overall circuit behaviour and power factor.\n\n**Rating**: 0–1 W AC"
       },
       "audio": "AC Wattmeter.wav",
       "narration": "The wattmeter is used to measure the active power consumed by the series RLC circuit. The measured power (P) helps in analyzing the power dissipated by the resistor and studying its effect on the overall circuit behaviour and power factor.",
@@ -210,7 +210,7 @@
         "en": "AC Voltmeter V2"
       },
       "description": {
-        "en": "This voltmeter measures the voltage drop across the resistor in the series RLC circuit.\n\n**Rating: 0–50 V AC**"
+        "en": "This voltmeter measures the voltage drop across the resistor in the series RLC circuit.\n\n**Rating**: 0–50 V AC"
       },
       "audio": "AC Voltmeter 2.wav",
       "placement": "left"
@@ -222,7 +222,7 @@
         "en": "AC Voltmeter V3"
       },
       "description": {
-        "en": "This voltmeter measures the voltage drop across the inductor in the series RLC circuit.\n\n**Rating: 0–50 V AC**"
+        "en": "This voltmeter measures the voltage drop across the inductor in the series RLC circuit.\n\n**Rating**: 0–50 V AC"
       },
       "audio": "AC Voltmeter 3.wav",
       "placement": "left"
@@ -234,7 +234,7 @@
         "en": "AC Voltmeter V4"
       },
       "description": {
-        "en": "This voltmeter measures the voltage drop across the capacitor in the series RLC circuit.\n\n**Rating: 0–50 V AC**"
+        "en": "This voltmeter measures the voltage drop across the capacitor in the series RLC circuit.\n\n**Rating**: 0–50 V AC"
       },
       "audio": "AC Voltmeter 4.wav",
       "placement": "left"
@@ -271,10 +271,10 @@
         "en": "Theoretical Verification"
       },
       "description": {
-        "en": "Select a recorded reading; V and I are filled automatically. Calculate and enter V_R, V_L, V_C, cosφ, and Power using the provided equations, then click Verify. After a row is checked, its field-level errors are displayed in the Error Analysis section."
+        "en": "This section will be used to calculate the theoretical values for the selected RLC parameters using the provided equations. After verification, the percentage error will be calculated using the specified error formula and displayed in the Error Section."
       },
       "audio": "Theoretical Verification.wav",
-      "narration": "Select a recorded reading. Voltage and current are filled automatically. Calculate and enter V R, V L, V C, power factor, and power using the provided equations, then click Verify. After a row is checked, its field-level errors are displayed in the Error Analysis section.",
+       
       "placement": "top"
     },
     {

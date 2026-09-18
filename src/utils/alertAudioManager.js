@@ -26,7 +26,6 @@ const ALERT_AUDIO_SOURCES = {
   connectTerminal22To26: 'Connect terminal 22 to terminal 26.wav',
   guideAllComplete: 'Guide all complete conn.wav',
   wrongConn: 'Wrong connection.wav',
-  multiWrong: 'Multiple wrong connections.wav',
   firstCheck: '1st time check button click.wav',
   autoConnect: 'Autoconnect.wav',
   // Updated messages use speech synthesis so stale prerecorded wording is
@@ -45,10 +44,11 @@ const ALERT_AUDIO_SOURCES = {
   newRlcValueSelected: '2nd time value selected.wav',
   duplicateRlcCombination: 'Dropdown alert.wav',
   secondReadingAdded: '2nd reading added.wav',
+  fifthReadingAdded: '5th reading added.wav',
   allReadingsRecorded: '12th reading added All readings recorded.wav',
   maximumReadingsReached: 'Max. readings,  Add click.wav',
   calculationsVerified: 'After correct verification, verify button.wav',
-  verificationSuccessNarration: 'After correct verification, verify button.wav',
+  verificationSuccessNarration: 'Verification successful.wav',
 
   // Existing aliases used by other alert call sites
   firstAutoTransClick: '1st time autotransformer click or after check disabled (1).wav',
@@ -58,13 +58,16 @@ const ALERT_AUDIO_SOURCES = {
   firstReadAdded: '1st reading added.wav',
   afterReadAddClick: 'After taking the readings, Add click.wav',
   afterCorrVerif: 'After correct verification, verify button.wav',
+  // Speak the exact alert text; these recordings contain outdated wording.
   incompltMultiVal: 'Incomplete more than one value.wav',
   incompltOneVal: 'Incomplete one value.wav',
-  incorrCalcMulti: 'Incorrect calculations, more than one.wav',
-  incorrCalcOne: 'Incorrect calculation, one only.wav',
+  incorrCalcMulti: 'Incorrect calculation more than one value.wav',
+  incorrCalcOne: 'Incorrect calculation one value.wav',
+  incorrCalc: 'Incorrect calculations, more than one.wav',
+  incorrCalCR: 'Incorrect calculation, one only',
   genRepBtnClick: 'Generate Report button click.wav',
   reset: 'Reset.wav',
-  print: 'Print.wav',
+  print: 'Print.wav', 
 }
 
 const alertPlayer = createNarrationPlayer('alert')

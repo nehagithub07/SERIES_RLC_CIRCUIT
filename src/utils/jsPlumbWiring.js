@@ -327,6 +327,8 @@ export const validateOldExperimentConnections = (instance) => {
     isCorrect: matchedCount === requiredConnections && totalConnections === requiredConnections,
     matchedCount,
     totalConnections,
+    missingCount: requiredConnections - matchedCount,
+    incorrectCount: totalConnections - matchedCount,
   }
 }
 

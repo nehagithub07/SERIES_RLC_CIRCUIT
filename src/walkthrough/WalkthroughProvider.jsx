@@ -45,6 +45,27 @@ const getElementRect = (element) => {
   }
 }
 
+// Terminals are siblings of the artwork, and jsPlumb endpoints live on the
+// wiring layer. Include all of them in the highlighted equipment bounds.
+const getTargetRect = (target) => {
+  const equipment = target?.closest('.eq-item, .v-meters-right-stack > div')
+  if (!equipment) return getElementRect(target)
+
+  const elements = [target, ...equipment.querySelectorAll(
+    '.connection-terminal, .terminal-number-label, select, h4',
+  )]
+  equipment.querySelectorAll('.connection-terminal').forEach((terminal) => {
+    elements.push(...document.querySelectorAll(`.jtk-endpoint--${terminal.id}`))
+  })
+  const rects = elements.map(getElementRect).filter(Boolean)
+  if (!rects.length) return null
+  const left = Math.min(...rects.map((rect) => rect.left))
+  const top = Math.min(...rects.map((rect) => rect.top))
+  const right = Math.max(...rects.map((rect) => rect.right))
+  const bottom = Math.max(...rects.map((rect) => rect.bottom))
+  return { left, top, right, bottom, width: right - left, height: bottom - top }
+}
+
 const WalkthroughProvider = ({
   autoPlayAudio = false,
   children,
@@ -83,7 +104,7 @@ const WalkthroughProvider = ({
     }
 
     const target = document.querySelector(activeTargetSelector)
-    const nextRect = getElementRect(target)
+    const nextRect = getTargetRect(target)
 
     setTargetRect(nextRect)
 
@@ -145,6 +166,37 @@ const WalkthroughProvider = ({
   }, [moveToStep])
 
   useEffect(() => {
+    if (!isOpen) return undefined
+
+    const root = document.documentElement
+    const body = document.body
+    const original = [root.style.overflow, body.style.overflow, root.style.overscrollBehavior]
+    root.style.overflow = 'hidden'
+    body.style.overflow = 'hidden'
+    root.style.overscrollBehavior = 'none'
+
+    // Permit scrolling long popup text while preventing wheel, touch and
+    // keyboard scrolling of every underlying experiment component.
+    const preventBackgroundScroll = (event) => {
+      if (!event.target.closest?.('.walkthrough-popup')) event.preventDefault()
+    }
+    const preventScrollKeys = (event) => {
+      if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) {
+        preventBackgroundScroll(event)
+      }
+    }
+    document.addEventListener('wheel', preventBackgroundScroll, { passive: false })
+    document.addEventListener('touchmove', preventBackgroundScroll, { passive: false })
+    document.addEventListener('keydown', preventScrollKeys)
+    return () => {
+      ;[root.style.overflow, body.style.overflow, root.style.overscrollBehavior] = original
+      document.removeEventListener('wheel', preventBackgroundScroll)
+      document.removeEventListener('touchmove', preventBackgroundScroll)
+      document.removeEventListener('keydown', preventScrollKeys)
+    }
+  }, [isOpen])
+
+  useEffect(() => {
     if (!isOpen || !activeTargetSelector) {
       return undefined
     }
@@ -152,6 +204,10 @@ const WalkthroughProvider = ({
     let secondAnimationFrame = null
     const target = document.querySelector(activeTargetSelector)
     target?.scrollIntoView({ behavior: 'instant', block: 'center', inline: 'nearest' })
+    const rect = getTargetRect(target)
+    if (rect) {
+      window.scrollBy({ top: rect.top + rect.height / 2 - window.innerHeight / 2, behavior: 'instant' })
+    }
     const animationFrame = window.requestAnimationFrame(() => {
       secondAnimationFrame = window.requestAnimationFrame(() => {
         readActiveTarget()

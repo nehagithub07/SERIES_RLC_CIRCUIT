@@ -122,8 +122,8 @@
     },
     {
       "id": 24,
-      "text": "Some connections are wrong.",
-      "audio": "Multiple wrong connections.wav"
+      "text": "This connection is wrong.",
+      "audio": "Wrong connection.wav"
     },
     {
       "id": 25,
@@ -249,6 +249,11 @@
       "id": 49,
       "text": "Opening the print dialog.",
       "audio": "Print.wav"
+    },
+    {
+      "id": 50,
+      "text": "5th Reading added successfully. Now, select the reading you want to verify theoretically from the dropdown menu, or you can add more readings to the table.",
+      "audio": "5th reading added.wav"
     }
   ]
 }

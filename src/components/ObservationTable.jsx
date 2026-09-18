@@ -9,6 +9,7 @@ const ObservationTable = ({ observations }) => (
         <span className="observation-table-voltage-row">
           <span>Supply voltage</span>
           <strong>{observations?.length ? [...new Set(observations.map((row) => row.voltage))].join(', ') + ' V' : '?'}</strong>
+          <span>, f = 50Hz</span>
         </span>
         <span className="observation-table-count">{observations?.length || 0} / 12 recorded</span>
       </div>
@@ -26,7 +27,7 @@ const ObservationTable = ({ observations }) => (
             {Array.from({ length: 12 }, (_, index) => {
               const row = observations?.[index]
               return (
-                <tr className={row ? 'observation-row--recorded' : 'observation-row--empty'} key={row?.id || index}>
+                <tr className={row ? 'observation-row--recorded' : 'observation-row--empty'} key={row ? `observation-${row.id}` : `empty-${index}`}>
                   <td data-label="Reading"><span className="observation-row-number">{index + 1}</span></td>
                   {OBSERVATION_COLUMNS.map((column) => (
                     <td key={column.key} data-label={`${column.label.replace(/<[^>]*>/g, '')}${column.unit ? ` (${column.unit})` : ''}`}>
