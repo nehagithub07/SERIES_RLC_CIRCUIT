@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import { LabAlertContext } from './LabAlertContext.js'
 import LabAlertCard from './LabAlertCard.jsx'
@@ -91,6 +91,7 @@ const LabAlertProvider = ({ children }) => {
   const recentAlertsRef = useRef(new Map())
   const [alertState, dispatchAlert] = useReducer(alertReducer, initialAlertState)
   const alertStateRef = useRef(alertState)
+  const [finishedAudioId, setFinishedAudioId] = useState(null)
 
   useEffect(() => {
     alertStateRef.current = alertState
@@ -186,6 +187,9 @@ const LabAlertProvider = ({ children }) => {
     currentState.queue.forEach(releaseDedupeKey)
     currentState.topRightAlerts.forEach(releaseDedupeKey)
     releaseDedupeKey(currentState.centerAlert)
+    stopAlertSound()
+    activeDedupeKeysRef.current.clear()
+    recentAlertsRef.current.clear()
     dispatchAlert({ type: 'clear' })
   }, [releaseDedupeKey])
 
@@ -204,8 +208,11 @@ const LabAlertProvider = ({ children }) => {
       return undefined
     }
 
-    playAlertSound(spotlightAlert.sound, spotlightNarration)
-    return stopAlertSound
+    let disposed = false
+    playAlertSound(spotlightAlert.sound, spotlightNarration).then(() => {
+      if (!disposed) setFinishedAudioId(spotlightAlert.id)
+    })
+    return () => { disposed = true; stopAlertSound() }
   }, [spotlightAlert?.id, spotlightAlert?.sound, spotlightNarration])
 
   const contextValue = useMemo(() => ({
@@ -234,7 +241,11 @@ const LabAlertProvider = ({ children }) => {
           aria-live={centerAlert.type === 'error' || centerAlert.type === 'warning' ? 'assertive' : 'polite'}
           className="lab-alert-region lab-alert-region--center"
         >
-          <LabAlertCard alert={centerAlert} onDismiss={dismissAlert} />
+          <LabAlertCard
+            key={centerAlert.id}
+            alert={centerAlert.sound && finishedAudioId !== centerAlert.id ? { ...centerAlert, duration: null } : centerAlert}
+            onDismiss={dismissAlert}
+          />
         </div>
       ) : null}
     </LabAlertContext.Provider>

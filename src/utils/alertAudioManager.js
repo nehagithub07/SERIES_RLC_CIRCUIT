@@ -1,3 +1,4 @@
+import { createNarrationPlayer } from './narrationPlayback.js'
 import { resolveAudioAsset } from './audioAssets.js'
 
 const ALERT_AUDIO_SOURCES = {
@@ -28,6 +29,9 @@ const ALERT_AUDIO_SOURCES = {
   multiWrong: 'Multiple wrong connections.wav',
   firstCheck: '1st time check button click.wav',
   autoConnect: 'Autoconnect.wav',
+  // Updated messages use speech synthesis so stale prerecorded wording is
+  // never replayed after copy changes.
+  autoConnectNarration: 'Autoconnect.wav',
   mcbAlert: 'Before connection, on-click MCB Alert.wav',
   autotransformerNotReady: '1st time autotransformer click or after check disabled (1).wav',
   connectionsVerified: 'For correct connections, check click.wav',
@@ -44,6 +48,7 @@ const ALERT_AUDIO_SOURCES = {
   allReadingsRecorded: '12th reading added All readings recorded.wav',
   maximumReadingsReached: 'Max. readings,  Add click.wav',
   calculationsVerified: 'After correct verification, verify button.wav',
+  verificationSuccessNarration: 'After correct verification, verify button.wav',
 
   // Existing aliases used by other alert call sites
   firstAutoTransClick: '1st time autotransformer click or after check disabled (1).wav',
@@ -62,93 +67,11 @@ const ALERT_AUDIO_SOURCES = {
   print: 'Print.wav',
 }
 
-let currentPlayingAudio = null
-let currentSpeech = null
-let playbackId = 0
+const alertPlayer = createNarrationPlayer('alert')
 
-const canSpeak = () => (
-  typeof window !== 'undefined'
-  && typeof window.speechSynthesis !== 'undefined'
-  && typeof window.SpeechSynthesisUtterance !== 'undefined'
-)
-
-const speakFallback = (text, runId) => {
-  if (!text || runId !== playbackId || !canSpeak()) {
-    return
-  }
-
-  const utterance = new window.SpeechSynthesisUtterance(text)
-  utterance.lang = 'en-US'
-  utterance.rate = 0.95
-  utterance.pitch = 1
-  utterance.onend = () => {
-    if (currentSpeech === utterance) {
-      currentSpeech = null
-    }
-  }
-  utterance.onerror = utterance.onend
-
-  currentSpeech = utterance
-  window.speechSynthesis.speak(utterance)
-}
-
-export const stopAlertSound = () => {
-  playbackId += 1
-
-  if (currentPlayingAudio) {
-    currentPlayingAudio.pause()
-    currentPlayingAudio.currentTime = 0
-    currentPlayingAudio = null
-  }
-
-  if (canSpeak() && currentSpeech) {
-    window.speechSynthesis.cancel()
-    currentSpeech = null
-  }
-}
+export const stopAlertSound = () => alertPlayer.stop()
 
 export const playAlertSound = (key, fallbackNarration = '') => {
-  stopAlertSound()
-
-  const source = ALERT_AUDIO_SOURCES[key]
-  const audioUrl = resolveAudioAsset(source)
-  const runId = playbackId
-
-  if (!audioUrl || typeof Audio === 'undefined') {
-    if (source && !audioUrl) {
-      console.warn(`Alert audio file not found in src/audios: ${source}`)
-    }
-
-    speakFallback(fallbackNarration, runId)
-    return
-  }
-
-  const sound = new Audio(audioUrl)
-  let fallbackStarted = false
-
-  const playFallback = (error) => {
-    if (fallbackStarted || runId !== playbackId) {
-      return
-    }
-
-    fallbackStarted = true
-    sound.pause()
-
-    if (currentPlayingAudio === sound) {
-      currentPlayingAudio = null
-    }
-
-    console.warn(`Unable to play alert audio "${source}"; using browser narration instead.`, error)
-    speakFallback(fallbackNarration, runId)
-  }
-
-  sound.addEventListener('ended', () => {
-    if (currentPlayingAudio === sound) {
-      currentPlayingAudio = null
-    }
-  }, { once: true })
-  sound.addEventListener('error', () => playFallback(), { once: true })
-
-  currentPlayingAudio = sound
-  sound.play().catch(playFallback)
+  window.dispatchEvent(new Event('lab-alert:sound'))
+  return alertPlayer.play({ audioUrl: resolveAudioAsset(ALERT_AUDIO_SOURCES[key]), text: fallbackNarration })
 }

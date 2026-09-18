@@ -1,5 +1,6 @@
 import '../App.css' 
 import a1Img from '../assets/A.png'
+import needleImg from '../assets/needle.png'
 import { DIAL_GEOMETRY } from '../utils/rlcMeterCalibration.js'
 
 // 🎯 Shared with the RLC meter calibration table — see
@@ -27,11 +28,13 @@ const Ammeter = ({ value = 0, angleDeg = null }) => {
         <img src={a1Img} alt="A1 ammeter dial" className="ammeter__dial" />
 
         {/* NEEDLE PIVOT — zero-size rotation anchor */}
-        <div 
+        <div
           className="ammeter__needle" 
           aria-hidden="true"
           style={{ '--ammeter-needle-rotation': `${angle}deg` }}
-        />
+        >
+          <img alt="" className="meter-needle-image" src={needleImg} />
+        </div>
       </article>
 
       {/* Production Walkthrough Target Container */}

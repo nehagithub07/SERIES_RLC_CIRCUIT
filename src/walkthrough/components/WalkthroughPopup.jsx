@@ -1,7 +1,8 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 
 import { useFocusTrap } from '../hooks/useFocusTrap.js'
+import { createNarrationPlayer } from '../../utils/narrationPlayback.js'
 import { resolveWalkthroughAudio } from '../walkthroughAudio.js'
 
 const EDGE_GAP = 16
@@ -12,6 +13,33 @@ const DEFAULT_POPUP_SIZE = {
 }
 
 const isValidAudioSource = (audio) => Boolean(audio && audio !== '#')
+const canUseSpeechSynthesis = () => (
+  typeof window !== 'undefined'
+  && typeof window.speechSynthesis !== 'undefined'
+  && typeof window.SpeechSynthesisUtterance !== 'undefined'
+)
+
+const renderNotation = (text, keyPrefix) => (
+  text.split(/(V_R|V_L|V_C)/g).map((part, index) => {
+    const match = /^V_([RLC])$/.exec(part)
+
+    return match
+      ? <Fragment key={`${keyPrefix}-${index}`}>V<sub>{match[1]}</sub></Fragment>
+      : <Fragment key={`${keyPrefix}-${index}`}>{part}</Fragment>
+  })
+)
+
+const renderDescriptionBlock = (block, blockIndex) => (
+  block.split(/(\*\*[^*]+\*\*)/g).map((part, partIndex) => {
+    const isStrong = part.startsWith('**') && part.endsWith('**')
+    const text = isStrong ? part.slice(2, -2) : part
+    const content = renderNotation(text, `${blockIndex}-${partIndex}`)
+
+    return isStrong
+      ? <strong key={`${blockIndex}-${partIndex}`}>{content}</strong>
+      : <Fragment key={`${blockIndex}-${partIndex}`}>{content}</Fragment>
+  })
+)
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 
@@ -104,11 +132,15 @@ const WalkthroughPopup = ({
   totalSteps,
 }) => {
   const popupRef = useRef(null)
-  const audioRef = useRef(null)
+  const player = useMemo(() => createNarrationPlayer('walkthrough'), [])
   const [popupSize, setPopupSize] = useState(DEFAULT_POPUP_SIZE)
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [audioState, setAudioState] = useState('idle')
+  const isPlaying = audioState === 'playing'
+  const playbackRef = useRef(null)
   const configuredAudioSource = isValidAudioSource(activeStep.audio) ? activeStep.audio : null
   const audioSource = resolveWalkthroughAudio(configuredAudioSource)
+  const speechNarration = activeStep.narration?.trim() || activeStep.description.replace(/\*\*/g, '')
+  const hasNarration = Boolean(audioSource || (speechNarration && canUseSpeechSynthesis()))
   const titleId = `walkthrough-title-${activeStep.id}`
   const descriptionId = `walkthrough-description-${activeStep.id}`
   const progressPercent = (currentStep / totalSteps) * 100
@@ -129,48 +161,20 @@ const WalkthroughPopup = ({
   }, [activeStep.id, targetRect])
 
   useEffect(() => {
-    const resetPlayingTimer = window.setTimeout(() => setIsPlaying(false), 0)
-
-    if (!audioSource) {
-      audioRef.current = null
-
-      if (configuredAudioSource) {
-        console.error(
-          `Walkthrough: Cannot find audio file "${configuredAudioSource}" in src/walkthrough/audios.`
-        )
-      }
-
-      return () => window.clearTimeout(resetPlayingTimer)
-    }
-
-    const audio = new Audio(audioSource)
-    audioRef.current = audio
-
-    const handleEnded = () => setIsPlaying(false)
-    const handleError = () => {
-      console.error(
-        `Walkthrough: Unable to load audio file "${configuredAudioSource}" from ${audio.src}.`
-      )
-      setIsPlaying(false)
-    }
-
-    audio.addEventListener('ended', handleEnded)
-    audio.addEventListener('error', handleError)
-
-    if (autoPlayAudio) {
-      audio.play()
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false))
-    }
-
+    let disposed = false
+    const play = () => player.play({
+      audioUrl: audioSource,
+      text: speechNarration,
+      onState: (state) => { if (!disposed) setAudioState(state) },
+    })
+    playbackRef.current = play
+    if (autoPlayAudio) play()
     return () => {
-      window.clearTimeout(resetPlayingTimer)
-      audio.pause()
-      audio.currentTime = 0
-      audio.removeEventListener('ended', handleEnded)
-      audio.removeEventListener('error', handleError)
+      disposed = true
+      player.stop()
+      playbackRef.current = null
     }
-  }, [activeStep.id, audioSource, autoPlayAudio, configuredAudioSource])
+  }, [activeStep.id, audioSource, autoPlayAudio, player, speechNarration])
 
   const popupPosition = useMemo(
     () => getPopupPosition(targetRect, popupSize, activeStep.placement),
@@ -178,21 +182,9 @@ const WalkthroughPopup = ({
   )
 
   const toggleAudio = () => {
-    const audio = audioRef.current
-
-    if (!audio) {
-      return
-    }
-
-    if (isPlaying) {
-      audio.pause()
-      setIsPlaying(false)
-      return
-    }
-
-    audio.play()
-      .then(() => setIsPlaying(true))
-      .catch(() => setIsPlaying(false))
+    if (isPlaying) player.pause()
+    else if (audioState === 'paused' || audioState === 'blocked') player.resume()
+    else playbackRef.current?.()
   }
 
   return (
@@ -224,9 +216,13 @@ const WalkthroughPopup = ({
         </div>
       </div>
 
-      <p className="walkthrough-popup__description" id={descriptionId}>
-        {activeStep.description}
-      </p>
+      <div className="walkthrough-popup__description" id={descriptionId}>
+        {activeStep.description.split(/\n\s*\n/).map((block, index) => (
+          <p key={`${activeStep.id}-description-${index}`}>
+            {renderDescriptionBlock(block, index)}
+          </p>
+        ))}
+      </div>
 
       <div className="walkthrough-popup__progress" aria-hidden="true">
         <span style={{ width: `${progressPercent}%` }} />
@@ -238,14 +234,14 @@ const WalkthroughPopup = ({
         </span>
 
         <button
-          aria-label={audioSource ? (isPlaying ? 'Pause audio narration' : 'Play audio narration') : 'Audio narration unavailable'}
-          aria-pressed={audioSource ? isPlaying : undefined}
+          aria-label={hasNarration ? (isPlaying ? 'Pause audio narration' : 'Play audio narration') : 'Audio narration unavailable'}
+          aria-pressed={hasNarration ? isPlaying : undefined}
           className="walkthrough-popup__audio"
-          disabled={!audioSource}
+          disabled={!hasNarration}
           onClick={toggleAudio}
           type="button"
         >
-          <span aria-hidden="true">{isPlaying ? 'Pause' : 'Audio'}</span>
+          <span aria-hidden="true">{isPlaying ? 'Pause' : audioState === 'blocked' ? 'Play audio' : 'Audio'}</span>
         </button>
       </div>
 

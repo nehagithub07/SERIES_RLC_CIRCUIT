@@ -2,6 +2,7 @@ import v1Img from '../assets/V1.png';
 import v2Img from '../assets/V2.png';
 import v3Img from '../assets/V3.png';
 import v4Img from '../assets/V4.png';
+import needleImg from '../assets/needle.png';
 import '../App.css';
 
 const voltmeterImages = {
@@ -105,7 +106,9 @@ const Voltmeter = ({ label = "V1", value = 0, angleDeg = null }) => {
           aria-hidden="true"
           className={`voltmeter__needle voltmeter__needle--${label}`}
           style={{ '--voltmeter-needle-rotation': `${angle}deg` }}
-        />
+        >
+          <img alt="" className="meter-needle-image" src={needleImg} />
+        </div>
       </article>
 
       {/* Production Walkthrough Target Container — Clean and invisible */}

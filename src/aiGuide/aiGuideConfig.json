@@ -1,7 +1,9 @@
 {
   "guideName": "AI Guide",
   "defaultLocale": "en",
-  "locales": ["en"],
+  "locales": [
+    "en"
+  ],
   "steps": [
     {
       "id": 1,
@@ -130,7 +132,7 @@
     },
     {
       "id": 26,
-      "text": "Autoconnect completed. All connections are correct and the Check button is now disabled. Turn ON the MCB.",
+      "text": "Autoconnect completed. Now turn ON the MCB by clicking the MCB lever.",
       "audio": "Autoconnect.wav"
     },
     {
@@ -190,12 +192,12 @@
     },
     {
       "id": 38,
-      "text": "All 12 readings have been recorded. Now select the reading you want to verify theoretically from the dropdown menu and click the Verify button.",
+      "text": "All 12 readings have been recorded. Select a recorded reading. Voltage and current are filled automatically. Calculate V R, V L, V C, power factor, and power, then click the Verify button.",
       "audio": "12th reading added All readings recorded.wav"
     },
     {
       "id": 39,
-      "text": "Theoretical calculations verified successfully.",
+      "text": "This theoretical calculation row has been verified successfully. Verify one more reading to enable report generation.",
       "audio": "After correct verification, verify button.wav"
     },
     {
@@ -205,12 +207,12 @@
     },
     {
       "id": 41,
-      "text": "The selected readings match the observation table. Verification is successful, and you may generate the report.",
+      "text": "Two theoretical calculation rows have been verified successfully. You may now generate the report.",
       "audio": "After correct verification, verify button.wav"
     },
     {
       "id": 42,
-      "text": "Please verify a minimum of two readings before generating the report.",
+      "text": "Select recorded readings, calculate the theoretical values, and verify two rows before generating the report.",
       "audio": "Generate button click, before verification.wav"
     },
     {

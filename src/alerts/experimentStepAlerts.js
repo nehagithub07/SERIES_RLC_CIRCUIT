@@ -5,7 +5,7 @@ export const EXPERIMENT_ALERTS = {
     icon: '⚠️',
     sound: 'autotransformerNotReady',
     target: '#autotransformer-panel',
-    title: 'Autotransformer Not Ready',
+    title: ' Autotransformer Only',
     type: 'warning',
   },
   connectionsVerified: {
@@ -79,6 +79,10 @@ export const EXPERIMENT_ALERTS = {
     target: '#add-reading-button',
     title: 'RLC Combination Already Recorded',
     type: 'warning',
+  
+    // Prevent the same duplicate warning from being queued multiple times
+    dedupeKey: 'duplicateRlcCombination',
+    dedupeWindow: 2000,
   },
   secondReadingAdded: {
     description: 'Reading 2 of 12 has been added. Repeat the same steps until all 12 readings have been recorded.',
@@ -115,10 +119,10 @@ export const EXPERIMENT_ALERTS = {
     type: 'info',
   },
   calculationsVerified: {
-    description: 'Theoretical calculations verified successfully.',
+    description: 'Theoretical calculation verified successfully. Verify a second reading to enable report generation.',
     duration: 13000,
     icon: '✅',
-    sound: 'calculationsVerified',
+    sound: 'verificationSuccessNarration',
     target: '#theoretical-calculations-panel',
     title: 'Theoretical Calculations Verified',
     type: 'success',

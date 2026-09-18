@@ -1,3 +1,5 @@
+import { OBSERVATION_COLUMNS, formatObservationValue, RLC_EQUATIONS, EQUATION_UNITS } from './reportContent.js'
+
 const escapeHtml = (value) => String(value)
   .replace(/&/g, '&amp;')
   .replace(/</g, '&lt;')
@@ -33,16 +35,57 @@ const getSessionDurationText = (sessionStart, sessionEnd) => {
 const createObservationRows = (observations) => (
   observations.map((row, index) => `
       <tr>
-        <td>${index + 1}</td>
-        <td>${formatNumber(row.voltage, 1)}</td>
-        <td>${formatNumber(row.current)}</td>
-        <td>${formatNumber(row.vR)}</td>
-        <td>${formatNumber(row.vL)}</td>
-        <td>${formatNumber(row.vC)}</td>
-        <td>${formatNumber(row.power, 4)}</td>
+        <td data-label="Reading">${index + 1}</td>
+        <td data-label="V (V)">${formatEntry(row.voltage)}</td>
+        ${OBSERVATION_COLUMNS.map((column) => `<td data-label="${escapeHtml(column.label.replace(/<[^>]*>/g, '') + (column.unit ? ` (${column.unit})` : ''))}">${escapeHtml(formatObservationValue(row, column))}</td>`).join('')}
       </tr>
     `).join('')
 )
+
+const createLineChart = (observations, series, yAxisLabel) => {
+  const width = 720
+  const height = 230
+  const plot = { left: 54, right: 18, top: 20, bottom: 42 }
+  const plotWidth = width - plot.left - plot.right
+  const plotHeight = height - plot.top - plot.bottom
+  const values = series.flatMap(({ key }) => observations.map((row) => toNumber(row[key])))
+  const maximumValue = Math.max(1, ...values)
+  const yMaximum = maximumValue * 1.1
+  const xForIndex = (index) => plot.left + (observations.length <= 1 ? plotWidth / 2 : (index / (observations.length - 1)) * plotWidth)
+  const yForValue = (value) => plot.top + plotHeight - (toNumber(value) / yMaximum) * plotHeight
+  const gridLines = Array.from({ length: 5 }, (_, index) => {
+    const ratio = index / 4
+    const y = plot.top + ratio * plotHeight
+    const label = yMaximum * (1 - ratio)
+    return `<line x1="${plot.left}" y1="${y.toFixed(2)}" x2="${width - plot.right}" y2="${y.toFixed(2)}" class="chart-grid-line"/><text x="${plot.left - 8}" y="${(y + 3).toFixed(2)}" text-anchor="end" class="chart-axis-label">${formatNumber(label, label >= 10 ? 0 : 1)}</text>`
+  }).join('')
+  const xLabels = observations.map((_, index) => (
+    `<text x="${xForIndex(index).toFixed(2)}" y="${height - 18}" text-anchor="middle" class="chart-axis-label">${index + 1}</text>`
+  )).join('')
+  const svgPaths = series.map(({ color, key }) => {
+    const points = observations.map((row, index) => `${xForIndex(index).toFixed(2)},${yForValue(row[key]).toFixed(2)}`).join(' ')
+    const markers = observations.map((row, index) => (
+      `<circle cx="${xForIndex(index).toFixed(2)}" cy="${yForValue(row[key]).toFixed(2)}" r="3" fill="${color}"/>`
+    )).join('')
+    return `<polyline points="${points}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${markers}`
+  }).join('')
+  const legend = series.map(({ color, label }) => (
+    `<span class="graph-legend-item"><i style="background:${color}"></i>${label}</span>`
+  )).join('')
+
+  return `
+    <svg class="report-graph" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(yAxisLabel)} by reading number">
+      ${gridLines}
+      <line x1="${plot.left}" y1="${plot.top}" x2="${plot.left}" y2="${height - plot.bottom}" class="chart-axis"/>
+      <line x1="${plot.left}" y1="${height - plot.bottom}" x2="${width - plot.right}" y2="${height - plot.bottom}" class="chart-axis"/>
+      ${xLabels}
+      ${svgPaths}
+      <text x="${width / 2}" y="${height - 2}" text-anchor="middle" class="chart-axis-title">Reading number</text>
+      <text x="14" y="${height / 2}" text-anchor="middle" class="chart-axis-title" transform="rotate(-90 14 ${height / 2})">${escapeHtml(yAxisLabel)}</text>
+    </svg>
+    <div class="graph-legend">${legend}</div>
+  `
+}
 
 // Columns for the verified-reading table, matching the
 // observation table's Excel-style headings (label on top, unit below).
@@ -52,11 +95,11 @@ const THEORETICAL_COLUMNS = [
   ['R', '(kΩ)', 'r'],
   ['L', '(H)', 'l'],
   ['C', '(µF)', 'c'],
-  ['VR', '(V)', 'vR'],
+  ['V<sub>R</sub>', '(V)', 'vR'],
   ['Error', '(%)', 'vRError'],
-  ['VL', '(V)', 'vL'],
+  ['V<sub>L</sub>', '(V)', 'vL'],
   ['Error', '(%)', 'vLError'],
-  ['VC', '(V)', 'vC'],
+  ['V<sub>C</sub>', '(V)', 'vC'],
   ['Error', '(%)', 'vCError'],
   ['cosφ', '(PF)', 'cosPhi'],
   ['Error', '(%)', 'cosPhiError'],
@@ -72,25 +115,28 @@ const createTheoreticalTableHeader = () => `
     `
 
 const createTheoreticalRows = (theoreticalCalculations) => {
-  const rows = Array.isArray(theoreticalCalculations) ? theoreticalCalculations : []
+  const rows = Array.isArray(theoreticalCalculations)
+    ? theoreticalCalculations.filter((row) => row && Number.isInteger(row.observationIndex) && row.observationIndex >= 0)
+    : []
 
-  return Array.from({ length: 5 }, (_, index) => {
-    const row = rows[index] ?? {}
+  return rows.map((row, index) => {
+    const readingNumber = Number.isInteger(row.observationIndex)
+      ? row.observationIndex + 1
+      : index + 1
 
     return `
       <tr>
-        <td>${index + 1}</td>
-        ${THEORETICAL_COLUMNS.map(([, , key]) => `<td>${formatEntry(row[key])}</td>`).join('')}
+        <td data-label="Reading">${readingNumber}</td>
+        ${THEORETICAL_COLUMNS.map(([label, unit, key]) => `<td data-label="${escapeHtml(label.replace(/<[^>]*>/g, '') + ' ' + unit)}">${key.endsWith('Error') && row[key] != null ? formatNumber(row[key], 2) : formatEntry(row[key])}</td>`).join('')}
       </tr>
     `
   }).join('')
 }
 
-const createReportHtml = ({
+export const createReportHtml = ({
   baseHref,
   iitLogoSrc,
   observations,
-  parameters,
   theoreticalCalculations,
   sessionStart,
   virtualLabsLogoSrc,
@@ -106,15 +152,35 @@ const createReportHtml = ({
   const endTimeText = reportDate.toLocaleTimeString()
   const durationText = getSessionDurationText(sessionStart, sessionEnd)
   const observationRows = createObservationRows(observations)
-  const theoreticalRows = createTheoreticalRows(theoreticalCalculations)
-
-  const resistanceOhms = toNumber(parameters?.r)
-  const inductanceHenries = toNumber(parameters?.l)
-  const capacitanceFarads = toNumber(parameters?.c)
-  const inductanceMh = inductanceHenries * 1000
-  const capacitanceUf = capacitanceFarads * 1e6
+  const theoreticalRows = createTheoreticalRows(theoreticalCalculations?.filter((row) => row?.observationIndex < observations.length))
+  const parameterList = [['R', 'r', 'kΩ'], ['L', 'l', 'H'], ['C', 'c', 'µF'], ['V', 'voltage', 'V']]
+    .map(([label, key, unit]) => `<li>${label} = ${[...new Set(observations.map((row) => row[key]).filter((value) => value != null && value !== ''))].map((value) => `${escapeHtml(value)} ${unit}`).join(', ') || '—'}</li>`).join('')
+  const voltageGraph = createLineChart(observations, [
+    { key: 'vR', label: 'V<sub>R</sub>', color: '#2563eb' },
+    { key: 'vL', label: 'V<sub>L</sub>', color: '#d97706' },
+    { key: 'vC', label: 'V<sub>C</sub>', color: '#7c3aed' },
+  ], 'Voltage (V)')
+  const currentGraph = createLineChart(observations, [
+    { key: 'current', label: 'Current', color: '#0f766e' },
+  ], 'Current (mA)')
+  const powerGraph = createLineChart(observations, [
+    { key: 'power', label: 'Power', color: '#b42318' },
+  ], 'Power (W)')
 
   const css = `
+.equation-fraction { display: inline-grid; vertical-align: middle; text-align: center; }
+.equation-fraction i { font-style: normal; padding: 0 4px; }
+.equation-fraction i:first-child { border-bottom: 1px solid currentColor; }
+.report-formula { font-family: "Cambria Math", "Times New Roman", serif; }
+@media screen and (max-width: 768px) {
+  .graph-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .compact-table, .compact-table tbody { display: block; width: 100%; }
+  .compact-table thead { display: none; }
+  .compact-table tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 12px 0; border: 1px solid #d3ddea; }
+  .compact-table td { display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
+  .compact-table td::before { content: attr(data-label); font-weight: 700; color: #50657c; }
+}
+
 body {
   font-family: 'Inter', 'Segoe UI', sans-serif;
   background: linear-gradient(180deg, #eef4fb 0%, #f7f9fc 100%);
@@ -340,6 +406,74 @@ tr:nth-child(even) {
   padding-bottom: 0;
   border-bottom: none;
 }
+.graph-section {
+  break-inside: avoid-page;
+  page-break-inside: avoid;
+}
+.graph-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.graph-card {
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid #d9e2ec;
+  border-radius: 12px;
+  background: #ffffff;
+  break-inside: avoid-page;
+  page-break-inside: avoid;
+}
+.graph-card--wide {
+  grid-column: 1 / -1;
+}
+.graph-card h3 {
+  margin-bottom: 7px;
+}
+.report-graph {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.chart-grid-line {
+  stroke: #dbe5ef;
+  stroke-width: 1;
+}
+.chart-axis {
+  stroke: #50657c;
+  stroke-width: 1.2;
+}
+.chart-axis-label,
+.chart-axis-title {
+  fill: #50657c;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 10px;
+}
+.chart-axis-title {
+  font-size: 11px;
+  font-weight: 700;
+}
+.graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px 14px;
+  margin-top: 4px;
+  color: #40566d;
+  font-size: 11px;
+  font-weight: 600;
+}
+.graph-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.graph-legend-item i {
+  width: 16px;
+  height: 3px;
+  border-radius: 99px;
+}
 .compact-table {
   margin-top: 0;
 }
@@ -347,6 +481,39 @@ tr:nth-child(even) {
 .compact-table td {
   padding: 8px 10px;
   font-size: 13px;
+}
+.report-equation-expression,
+.report-error-expression {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.report-equation-fraction,
+.report-error-fraction {
+  display: inline-grid;
+  grid-template-rows: auto auto;
+  align-items: center;
+  text-align: center;
+  vertical-align: middle;
+}
+.report-equation-fraction i,
+.report-error-fraction i {
+  padding: 0 4px;
+  font-style: normal;
+  line-height: 1.2;
+}
+.report-equation-fraction i:first-child,
+.report-error-fraction i:first-child {
+  border-bottom: 1px solid currentColor;
+}
+.report-error-note {
+  display: block;
+  margin-top: 4px;
+  color: #50657c;
+  font-size: 0.92em;
+}
+.error-analysis-title {
+  margin: 0 0 7px;
 }
 .header-row {
   display: grid;
@@ -429,20 +596,132 @@ tr:nth-child(even) {
   transform: translateY(-2px);
   box-shadow: 0 6px 14px rgba(31, 45, 61, 0.12);
 }
+body.pdf-exporting {
+  width: 210mm;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+  font-size: 9px;
+  line-height: 1.2;
+}
+.pdf-exporting .report-document,
 .pdf-exporting .report-page {
-  border-color: transparent !important;
-  box-shadow: none !important;
-  margin-bottom: 0 !important;
+  width: 210mm;
 }
-.pdf-exporting .section,
-.pdf-exporting .results-card,
-.pdf-exporting .table-shell {
-  overflow: visible !important;
+.pdf-exporting .report-page {
+  min-height: 297mm;
+  margin: 0;
+  padding: 7mm 8mm;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
-.pdf-exporting .report-page--overview,
+.pdf-exporting .report-page--overview {
+  break-after: auto;
+  page-break-after: auto;
+}
 .pdf-exporting .report-page--results {
-  break-after: page !important;
-  page-break-after: always !important;
+  break-before: page;
+  break-after: auto;
+  page-break-before: always;
+  page-break-after: auto;
+}
+.pdf-exporting .header-row {
+  grid-template-columns: 40mm minmax(0, 1fr) 19mm;
+  gap: 3mm;
+  margin-bottom: 3mm;
+}
+.pdf-exporting .report-logo,
+.pdf-exporting .report-logo--virtual-labs,
+.pdf-exporting .report-logo--iit {
+  max-height: 14mm;
+}
+.pdf-exporting .report-title-block {
+  padding-bottom: 4px;
+}
+.pdf-exporting .report-title-block h1 {
+  font-size: 17px;
+}
+.pdf-exporting .report-subtitle,
+.pdf-exporting .report-stamp,
+.pdf-exporting .badge {
+  font-size: 8px;
+}
+.pdf-exporting .section {
+  margin-bottom: 5px;
+  padding: 6px 8px;
+  border-radius: 5px;
+}
+.pdf-exporting .section > h2:first-child {
+  margin-bottom: 5px;
+  padding-bottom: 3px;
+}
+.pdf-exporting h2 {
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+.pdf-exporting h3 {
+  margin-bottom: 3px;
+  font-size: 10px;
+}
+.pdf-exporting p,
+.pdf-exporting li {
+  margin-bottom: 2px;
+  font-size: 8.5px;
+}
+.pdf-exporting .report-overview-top {
+  margin-bottom: 4px;
+}
+.pdf-exporting .report-experiment-label {
+  margin-bottom: 2px;
+  font-size: 7px;
+}
+.pdf-exporting .report-experiment-title {
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+.pdf-exporting .info-grid {
+  gap: 4px;
+  margin-top: 4px;
+}
+.pdf-exporting .info-card {
+  gap: 1px;
+  padding: 4px 6px;
+  font-size: 8px;
+}
+.pdf-exporting ul,
+.pdf-exporting .two-column-list {
+  margin-top: 3px;
+}
+.pdf-exporting .results-stack {
+  gap: 4px;
+}
+.pdf-exporting .results-card {
+  gap: 3px;
+  padding: 0;
+  overflow: visible;
+}
+.pdf-exporting .table-shell {
+  overflow: visible;
+}
+.pdf-exporting .compact-table th,
+.pdf-exporting .compact-table td {
+  padding: 2px 2.5px;
+  font-size: 8.2px;
+  line-height: 1.1;
+}
+.pdf-exporting .graph-grid {
+  gap: 7px;
+}
+.pdf-exporting .graph-card {
+  padding: 6px;
+  border-radius: 6px;
+}
+.pdf-exporting .graph-legend {
+  gap: 3px 8px;
+  margin-top: 1px;
+  font-size: 7.5px;
 }
 @media (max-width: 768px) {
   body {
@@ -483,7 +762,7 @@ tr:nth-child(even) {
 @media print {
   @page {
     size: A4;
-    margin: 12mm;
+    margin: 0;
   }
   .print-btn,
   .download-btn,
@@ -497,28 +776,79 @@ tr:nth-child(even) {
     print-color-adjust: exact !important;
   }
   body {
+    width: 210mm;
     margin: 0;
     padding: 0;
     background: #ffffff;
     overflow: visible;
+    font-size: 9px;
+    line-height: 1.2;
   }
   .report-page {
-    width: 100%;
+    width: 210mm;
+    min-height: 297mm;
     margin: 0;
-    padding: 16px 18px;
+    padding: 7mm 8mm;
     border: none;
     box-shadow: none;
     border-radius: 0;
+    overflow: visible;
     break-inside: avoid-page;
     page-break-inside: avoid;
   }
+  .report-page--overview {
+    break-after: auto;
+    page-break-after: auto;
+  }
+  .report-page--results {
+    break-before: page;
+    break-after: auto;
+    page-break-before: always;
+    page-break-after: auto;
+  }
   .header-row {
-    grid-template-columns: 150px minmax(0, 1fr) 86px;
-    gap: 16px;
+    grid-template-columns: 40mm minmax(0, 1fr) 19mm;
+    gap: 3mm;
+    margin-bottom: 3mm;
   }
+  .report-logo,
+  .report-logo--virtual-labs,
+  .report-logo--iit { max-height: 14mm; }
+  .report-title-block { padding-bottom: 4px; }
+  .report-title-block h1 { font-size: 17px; }
+  .report-subtitle,
+  .report-stamp,
+  .badge { font-size: 8px; }
+  .section {
+    margin-bottom: 5px;
+    padding: 6px 8px;
+    border-radius: 5px;
+  }
+  .section > h2:first-child {
+    margin-bottom: 5px;
+    padding-bottom: 3px;
+  }
+  h2 { margin-bottom: 5px; font-size: 13px; }
+  h3 { margin-bottom: 3px; font-size: 10px; }
+  p,
+  li { margin-bottom: 2px; font-size: 8.5px; }
+  .report-overview-top { margin-bottom: 4px; }
+  .report-experiment-label { margin-bottom: 2px; font-size: 7px; }
   .report-experiment-title {
-    font-size: 22px;
+    margin-bottom: 5px;
+    font-size: 13px;
   }
+  .info-grid { gap: 4px; margin-top: 4px; }
+  .info-card { gap: 1px; padding: 4px 6px; font-size: 8px; }
+  ul,
+  .two-column-list { margin-top: 3px; }
+  .results-stack { gap: 4px; }
+  .results-card { gap: 3px; padding: 0; }
+  .compact-table th,
+  .compact-table td { padding: 2px 2.5px; font-size: 8.2px; line-height: 1.1; }
+  .graph-grid { gap: 7px; }
+  .graph-card { padding: 6px; border-radius: 6px; }
+  .graph-legend { gap: 3px 8px; margin-top: 1px; font-size: 7.5px; }
   .section,
   .header-row,
   .info-grid,
@@ -555,7 +885,6 @@ tr:nth-child(even) {
       <img src="${escapeHtml(virtualLabsLogoSrc)}" class="report-logo report-logo--virtual-labs" alt="Virtual Labs logo">
       <div class="report-title-block">
         <h1>Virtual Labs Simulation Report</h1>
-        <p class="report-subtitle">AI-Enhanced Basic Electrical Science Lab</p>
       </div>
       <img src="${escapeHtml(iitLogoSrc)}" class="report-logo report-logo--iit" alt="Indian Institute of Technology Roorkee logo">
     </div>
@@ -576,39 +905,25 @@ tr:nth-child(even) {
 
     <div class="section">
       <h3>Simulation Summary</h3>
-      <p style="text-align: justify;">The simulation analyzed the characteristics of a series RLC circuit by applying an AC voltage across a resistor, inductor and capacitor connected in series. Key observations included measuring the supply voltage, circuit current, the voltage drop across each component, and the active power. These readings were used to validate AC circuit principles, and to theoretically calculate the circuit's overall impedance, reactances and power factor.</p>
-
-      <h3>Apparatus Used</h3>
+      <p>The guided walkthrough familiarised the user with the simulation's interface. The circuit was connected, and the connections were verified successfully. The MCB was switched ON, and the desired voltage was set using the autotransformer. The readings were measured using the voltmeters, ammeter, and wattmeter for different RLC combinations, and these measured values were used to calculate the error analysis. Finally, the calculated values were verified, and the performance of the series RLC circuit was analysed successfully. </p>
+      <p>${observations.length} observation readings were recorded. The tables below contain the recorded component selections and measurements, together with the theoretical values entered for the selected readings.</p>
+      <h3>Apparatus Used:</h3>
       <ul class="two-column-list">
-        <li>MCB : 6A, DP, 240 V AC</li>
-        <li>Autotransformer : 0-30V AC</li>
-        <li>AC Voltmeter (V1) for supply voltage : 0-50 V</li>
-        <li>AC Voltmeter (V2) for voltage across Resistor : 0-50 V</li>
-        <li>AC Voltmeter (V3) for voltage across Inductor : 0-50 V</li>
-        <li>AC Voltmeter (V4) for voltage across Capacitor : 0-50 V</li>
-        <li>AC Ammeter (A1) for circuit current : 0-2 A</li>
-        <li>AC Wattmeter : 0-50W AC</li>
-        <li>Resistor (R) : ${formatNumber(resistanceOhms, 0)} &Omega;</li>
-        <li>Inductor (L) : ${formatNumber(inductanceMh, 0)} mH</li>
-        <li>NonPolar Capacitor (C) : ${formatNumber(capacitanceUf, 0)} &micro;F</li>
-        <li>Connecting leads</li>
-      </ul>
-
-      <h3>Calculation Formulae</h3>
-      <ul>
-        <li><strong>Resistive Voltage:</strong> V<sub>R</sub> = I &times; R</li>
-        <li><strong>Inductive Voltage:</strong> V<sub>L</sub> = I &times; X<sub>L</sub></li>
-        <li><strong>Capacitive Voltage:</strong> V<sub>C</sub> = I &times; X<sub>C</sub></li>
-        <li><strong>Inductive Reactance:</strong> X<sub>L</sub> = 2&pi;fL</li>
-        <li><strong>Capacitive Reactance:</strong> X<sub>C</sub> = 1 / (2&pi;fC)</li>
-        <li><strong>Impedance:</strong> Z = &radic;(R&sup2; + (X<sub>L</sub> &minus; X<sub>C</sub>)&sup2;)</li>
-        <li><strong>Circuit Current:</strong> I = V / Z</li>
-        <li><strong>Active Power:</strong> P = VI cos(&phi;)</li>
-      </ul>
+        <li>MCB: 6A, DP, 240V AC, Input Supply: 230 V AC, 50 Hz </li>
+        <li>Autotransformer: 0 - 240 V AC. 4.05 kVA, 15 A</li>
+        <li>AC Voltmeter 1: 0 - 50 V</li>
+        <li>AC Voltmeter 2: 0 - 50 V</li>
+        <li>AC Voltmeter 3: 0 - 50 V</li>
+        <li>AC Voltmeter 4: 0 - 50 V</li>
+        <li>AC Ammeter: 0 -30 mA</li>
+        <li>AC Wattmeter: 0 - 1 W</li>
+        <li>Resistor: 1 kΩ, 2 kΩ, 3 kΩ</li>
+        <li>Inductor: 2 H, 5 H</li>
+        <li>Capacitor: 2.2 µF, 4.7 µF</li>
+        <li>Connecting Wires</li>
+      </ul>     
     </div>
-  </div>
 
-  <div class="report-page report-page--results">
     <div class="section results-section">
       <h2>Observation Table</h2>
       <div class="results-stack">
@@ -618,12 +933,8 @@ tr:nth-child(even) {
               <thead>
                 <tr>
                   <th>S.No.</th>
-                  <th>Voltage (V)</th>
-                  <th>Current (A)</th>
-                  <th>V<sub>R</sub> (V)</th>
-                  <th>V<sub>L</sub> (V)</th>
-                  <th>V<sub>C</sub> (V)</th>
-                  <th>Power (kW)</th>
+                  <th>V<br/>(V)</th>
+                  ${OBSERVATION_COLUMNS.map(({ label, unit }) => `<th>${label}${unit ? `<br/>(${unit})` : ''}</th>`).join('')}
                 </tr>
               </thead>
               <tbody>${observationRows}</tbody>
@@ -634,7 +945,7 @@ tr:nth-child(even) {
     </div>
 
     <div class="section results-section">
-      <h2>Verified Readings</h2>
+      <h2>Theoretical Verification and Error Analysis</h2>
       <div class="results-stack">
         <div class="results-card">
           <div class="table-shell">
@@ -646,6 +957,9 @@ tr:nth-child(even) {
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="report-page report-page--results">
 
     <div class="section">
       <h3>Conclusion</h3>
@@ -675,7 +989,7 @@ tr:nth-child(even) {
       ensureHtml2Pdf().then(function() {
         var element = document.getElementById('report-document') || document.body;
         var opts = {
-          margin: [0.18, 0.18, 0.18, 0.18],
+          margin: 0,
           filename: 'series-rlc-simulation-report.pdf',
           image: { type: 'jpeg', quality: 0.98 },
           html2canvas: {
@@ -691,7 +1005,7 @@ tr:nth-child(even) {
           pagebreak: {
             mode: ['css', 'legacy'],
             before: ['.report-page--results'],
-            avoid: ['.report-page', '.header-row', '.report-overview', '.info-grid', 'thead', 'tr']
+            avoid: ['.header-row', '.report-overview', '.info-grid', '.graph-card', 'thead', 'tr']
           }
         };
         return window.html2pdf().set(opts).from(element).save();
@@ -705,7 +1019,7 @@ tr:nth-child(even) {
   `
 }
 
-export const generateRlcReport = ({ observations, parameters, theoreticalCalculations, sessionStart }) => {
+export const generateRlcReport = ({ observations, theoreticalCalculations, sessionStart }) => {
   const baseHref = new URL(import.meta.env.BASE_URL, window.location.origin).href
   const iitLogoSrc = new URL('../assets/IIT Logo.png', import.meta.url).href
   const virtualLabsLogoSrc = new URL('../assets/image.png', import.meta.url).href
@@ -713,7 +1027,6 @@ export const generateRlcReport = ({ observations, parameters, theoreticalCalcula
     baseHref,
     iitLogoSrc,
     observations,
-    parameters,
     theoreticalCalculations,
     sessionStart,
     virtualLabsLogoSrc,

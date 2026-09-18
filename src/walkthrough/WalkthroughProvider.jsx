@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { stopNarration } from '../utils/narrationPlayback.js'
 
 import defaultWalkthroughConfig from './walkthroughConfig.json'
 import { WalkthroughContext } from './WalkthroughContext.js'
@@ -8,7 +9,6 @@ import WalkthroughOverlay from './components/WalkthroughOverlay.jsx'
 import './walkthrough.css'
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
-const TARGET_VIEWPORT_GAP = 24
 
 const getElementRect = (element) => {
   if (!element) {
@@ -21,6 +21,20 @@ const getElementRect = (element) => {
     return null
   }
 
+  // Images with object-fit: contain include unused vertical space in their
+  // element bounds. Spotlight only the displayed image, including transforms.
+  if (element.tagName === 'IMG' && element.naturalWidth && getComputedStyle(element).objectFit === 'contain') {
+    const ratio = Math.min(rect.width / element.naturalWidth, rect.height / element.naturalHeight)
+    const imageWidth = element.naturalWidth * ratio
+    const imageHeight = element.naturalHeight * ratio
+    const [x, y, w, h] = (element.dataset.spotlightBounds || '0,0,1,1').split(',').map(Number)
+    const width = imageWidth * w
+    const height = imageHeight * h
+    const left = rect.left + (rect.width - imageWidth) / 2 + imageWidth * x
+    const top = rect.top + (rect.height - imageHeight) / 2 + imageHeight * y
+    return { left, top, width, height, right: left + width, bottom: top + height }
+  }
+
   return {
     bottom: rect.bottom,
     height: rect.height,
@@ -29,37 +43,6 @@ const getElementRect = (element) => {
     top: rect.top,
     width: rect.width,
   }
-}
-
-const revealTargetIfNeeded = (element) => {
-  if (!element) {
-    return
-  }
-
-  const rect = element.getBoundingClientRect()
-  const viewportHeight = window.visualViewport?.height ?? window.innerHeight
-  const isAboveViewport = rect.top < TARGET_VIEWPORT_GAP
-  const isBelowViewport = rect.bottom > viewportHeight - TARGET_VIEWPORT_GAP
-
-  if (!isAboveViewport && !isBelowViewport) {
-    return
-  }
-
-  const absoluteTargetTop = window.scrollY + rect.top
-  const availableHeight = viewportHeight - TARGET_VIEWPORT_GAP * 2
-  const desiredScrollTop = rect.height > availableHeight
-    ? absoluteTargetTop - TARGET_VIEWPORT_GAP
-    : absoluteTargetTop - (viewportHeight - rect.height) / 2
-  const maximumScrollTop = Math.max(
-    0,
-    document.documentElement.scrollHeight - viewportHeight,
-  )
-
-  window.scrollTo({
-    behavior: 'auto',
-    left: window.scrollX,
-    top: clamp(desiredScrollTop, 0, maximumScrollTop),
-  })
 }
 
 const WalkthroughProvider = ({
@@ -79,6 +62,7 @@ const WalkthroughProvider = ({
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [isPositioningTarget, setIsPositioningTarget] = useState(false)
   const [targetRect, setTargetRect] = useState(null)
+  const closeTimerRef = useRef(null)
 
   const totalSteps = walkthroughConfig.steps.length
   const activeStep = isOpen ? walkthroughConfig.steps[currentStepIndex] : null
@@ -111,12 +95,14 @@ const WalkthroughProvider = ({
       return
     }
 
+    stopNarration('walkthrough')
     setTargetRect(null)
     setIsPositioningTarget(true)
     setCurrentStepIndex(clamp(stepIndex, 0, totalSteps - 1))
   }, [totalSteps])
 
   const start = useCallback((stepIndex = 0) => {
+    window.clearTimeout(closeTimerRef.current)
     onStart?.()
     moveToStep(stepIndex)
     setIsOpen(true)
@@ -125,13 +111,14 @@ const WalkthroughProvider = ({
   const close = useCallback(() => {
     const wasCompleted = currentStepIndex >= totalSteps - 1
 
+    stopNarration('walkthrough')
     setIsOpen(false)
     setIsPositioningTarget(false)
     setTargetRect(null)
 
     // Let the popup unmount (and stop its own audio) before starting any
     // post-walkthrough experiment narration.
-    window.setTimeout(() => {
+    closeTimerRef.current = window.setTimeout(() => {
       if (wasCompleted) {
         onComplete?.()
       } else {
@@ -139,6 +126,11 @@ const WalkthroughProvider = ({
       }
     }, 0)
   }, [currentStepIndex, totalSteps, onComplete, onExit])
+
+  useEffect(() => () => {
+    window.clearTimeout(closeTimerRef.current)
+    stopNarration('walkthrough')
+  }, [])
 
   const next = useCallback(() => {
     moveToStep(currentStepIndex + 1)
@@ -157,13 +149,9 @@ const WalkthroughProvider = ({
       return undefined
     }
 
-    const target = document.querySelector(activeTargetSelector)
-
-    // Keep in-view equipment stationary. Only reposition the page for later
-    // walkthrough targets that are genuinely outside the viewport.
-    revealTargetIfNeeded(target)
-
     let secondAnimationFrame = null
+    const target = document.querySelector(activeTargetSelector)
+    target?.scrollIntoView({ behavior: 'instant', block: 'center', inline: 'nearest' })
     const animationFrame = window.requestAnimationFrame(() => {
       secondAnimationFrame = window.requestAnimationFrame(() => {
         readActiveTarget()

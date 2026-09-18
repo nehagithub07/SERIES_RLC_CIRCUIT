@@ -51,7 +51,7 @@
         "en": "Check Button"
       },
       "description": {
-        "en": "The CHECK button verifies all the connections to ensure that they are correct."
+        "en": "The CHECK button verifies all the connections to ensure that they are correct.\n\n**Note:** If a wire is connected incorrectly, click the corresponding label number to remove the connection."
       },
       "audio": "Check Button.wav",
       "placement": "right"
@@ -104,22 +104,22 @@
       "audio": "Print Button.wav",
       "placement": "right"
     },
-
     {
       "id": 10,
-      "target": "#mcb-supply .mcb__image",
+      "target": "#mcb-supply",
       "title": {
         "en": "MCB "
       },
       "description": {
-        "en": "The MCB acts as the main power switch for the experiment. It also protects the circuit by automatically disconnecting the power supply in case of an overload or short circuit. When turned ON, it supplies electrical power to the circuit. Rating: 6A, SP, 240V AC  Input Supply: 230 V AC, 50 Hz  "
+        "en": "The MCB acts as the main power switch for the experiment. It also protects the circuit by automatically disconnecting the power supply in case of an overload or short circuit. When turned ON, it supplies electrical power to the circuit.\n\n**Rating: 6 A, SP, 240 V AC**\n\nInput supply: 230 V AC, 50 Hz."
       },
       "audio": "MCB.wav",
+      "narration": "The MCB acts as the main power switch for the experiment. It protects the circuit by disconnecting the power supply in case of an overload or short circuit. Rating: 6 ampere, single pole, 240 volt AC. Input supply: 230 volt AC, 50 hertz.",
       "placement": "right"
     },
     {
       "id": 11,
-      "target": "#autotransformer-panel .variac-bg",
+      "target": "#autotransformer-panel .variac-visual",
       "title": {
         "en": "Autotransformer"
       },
@@ -172,7 +172,7 @@
         "en": "AC Voltmeter 1"
       },
       "description": {
-        "en": "This voltmeter is used to measure the voltage applied to the series RLC circuit. It shows the output voltage received from the autotransformer, which is adjusted to 30 V for the experiment. Rating: 0–50 V AC."
+        "en": "This voltmeter is used to measure the voltage applied to the series RLC circuit. It shows the output voltage received from the autotransformer, which is adjusted to 30 V for the experiment.\n\n**Rating: 0–50 V AC**"
       },
       "audio": "AC Voltmeter 1.wav",
       "placement": "bottom"
@@ -184,9 +184,10 @@
         "en": "AC Ammeter"
       },
       "description": {
-        "en": "This ammeter measures the total current flowing through the series RLC circuit. Because all components are connected in series, the same current flows through the resistor, inductor, and capacitor. Rating: 0–30 mA AC."
+        "en": "This ammeter is used to measure the total current flowing through the series RLC circuit. Since all the components are connected in series, the same current flows through the resistor, inductor, and capacitor.\n\n**Rating: 0–30 mA AC**"
       },
       "audio": "AC Ammeter.wav",
+      "narration": "This ammeter is used to measure the total current flowing through the series RLC circuit. Since all the components are connected in series, the same current flows through the resistor, inductor, and capacitor.  Rating: zero to thirty milliampere AC.",
       "placement": "bottom"
     },
     {
@@ -196,9 +197,10 @@
         "en": "AC Wattmeter"
       },
       "description": {
-        "en": "The wattmeter measures the active power consumed by the series RLC circuit. The measured power (P) helps analyze the power dissipated by the resistor and its effect on circuit behavior and power factor. Rating: 0–1 W."
+        "en": "The wattmeter is used to measure the active power consumed by the series RLC circuit. The measured power (P) helps in analyzing the power dissipated by the resistor and studying its effect on the overall circuit behaviour and power factor.\n\n**Rating: 0–1 W AC**"
       },
       "audio": "AC Wattmeter.wav",
+      "narration": "The wattmeter is used to measure the active power consumed by the series RLC circuit. The measured power (P) helps in analyzing the power dissipated by the resistor and studying its effect on the overall circuit behaviour and power factor.",
       "placement": "bottom"
     },
     {
@@ -208,7 +210,7 @@
         "en": "AC Voltmeter V2"
       },
       "description": {
-        "en": "This voltmeter measures the voltage drop across the resistor in the series RLC circuit. Rating: 0–50 V AC."
+        "en": "This voltmeter measures the voltage drop across the resistor in the series RLC circuit.\n\n**Rating: 0–50 V AC**"
       },
       "audio": "AC Voltmeter 2.wav",
       "placement": "left"
@@ -220,7 +222,7 @@
         "en": "AC Voltmeter V3"
       },
       "description": {
-        "en": "This voltmeter measures the voltage drop across the inductor in the series RLC circuit. Rating: 0–50 V AC."
+        "en": "This voltmeter measures the voltage drop across the inductor in the series RLC circuit.\n\n**Rating: 0–50 V AC**"
       },
       "audio": "AC Voltmeter 3.wav",
       "placement": "left"
@@ -232,7 +234,7 @@
         "en": "AC Voltmeter V4"
       },
       "description": {
-        "en": "This voltmeter measures the voltage drop across the capacitor in the series RLC circuit. Rating: 0–50 V AC."
+        "en": "This voltmeter measures the voltage drop across the capacitor in the series RLC circuit.\n\n**Rating: 0–50 V AC**"
       },
       "audio": "AC Voltmeter 4.wav",
       "placement": "left"
@@ -244,9 +246,10 @@
         "en": "Observation Table"
       },
       "description": {
-        "en": "This table records the selected RLC values along with the measured readings of voltage, supply current, resistive voltage (VR), inductive voltage (VL), capacitive voltage (VC) and power during the experiment. These observations will be used to calculate the percentage error and analyse the behaviour of the series RLC circuit."
+        "en": "This table records the selected RLC values along with the measured readings of voltage, supply current, resistive voltage (V_R), inductive voltage (V_L), capacitive voltage (V_C), and power during the experiment. These observations are used for the Error Analysis and to analyse the behaviour of the series RLC circuit."
       },
       "audio": "Observation Table.wav",
+      "narration": "This table records the selected RLC values along with the measured readings of voltage, supply current, resistive voltage V R, inductive voltage V L, capacitive voltage V C, and power during the experiment. These observations are used for the Error Analysis and to analyse the behaviour of the series RLC circuit.",
       "placement": "right"
     },
     {
@@ -268,9 +271,10 @@
         "en": "Theoretical Verification"
       },
       "description": {
-        "en": "This section will be used to calculate the theoretical values for the selected RLC parameters using the provided equations. After verification, the percentage error will be calculated using the specified error formula and displayed in the Error Section."
+        "en": "Select a recorded reading; V and I are filled automatically. Calculate and enter V_R, V_L, V_C, cosφ, and Power using the provided equations, then click Verify. After a row is checked, its field-level errors are displayed in the Error Analysis section."
       },
       "audio": "Theoretical Verification.wav",
+      "narration": "Select a recorded reading. Voltage and current are filled automatically. Calculate and enter V R, V L, V C, power factor, and power using the provided equations, then click Verify. After a row is checked, its field-level errors are displayed in the Error Analysis section.",
       "placement": "top"
     },
     {
@@ -280,7 +284,7 @@
         "en": "Generate Report"
       },
       "description": {
-        "en": "The Report button generates a summarised report of the simulation. After completing the observation table and theoretical calculations, generate the report. The report will include the time taken to complete the simulation, simulation summary, the apparatus used, recorded readings, user-calculated results and conclusion."
+        "en": "The Report button generates a summarised report of the simulation. After completing the observation table and theoretical calculations, generate the report. The report includes the time taken to complete the simulation, simulation summary, parameters, recorded readings, verified results, graphs, and conclusion."
       },
       "audio": "Generate Report.wav",
       "placement": "top"

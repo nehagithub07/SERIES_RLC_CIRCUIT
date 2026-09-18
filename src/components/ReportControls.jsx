@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { RLC_EQUATIONS, EQUATION_UNITS } from '../utils/reportContent.js'
 import { EquationIcon } from './Icons.jsx'
 
 const STEPS = { GENERATE_REPORT: 10 }
@@ -78,32 +79,14 @@ const ReportControls = ({
               <button type="button" onClick={() => setShowEquations(false)} aria-label="Close equations">&times;</button>
             </div>
             <div className="equation-panel__list">
-              <div><span>Resistive voltage</span><strong>V<sub>R</sub> = I &times; R</strong></div>
-              <div><span>Inductive voltage</span><strong>V<sub>L</sub> = I &times; X<sub>L</sub></strong></div>
-              <div><span>Capacitive voltage</span><strong>V<sub>C</sub> = I &times; X<sub>C</sub></strong></div>
-              <div><span>Inductive reactance</span><strong>X<sub>L</sub> = 2&pi;fL</strong></div>
-              <div>
-                <span>Capacitive reactance</span>
-                <div className="equation-expression">
-                  <b>X<sub>C</sub> =</b>
-                  <strong className="equation-fraction"><i>1</i><i>2&pi;fC</i></strong>
+              {RLC_EQUATIONS.map(({ label, html, note }) => (
+                <div key={label}>
+                  <span>{label}</span>
+                  <strong dangerouslySetInnerHTML={{ __html: html }} />
+                  {note && <small>{note}</small>}
                 </div>
-              </div>
-              <div><span>Impedance</span><strong>Z = &radic;(R&sup2; + (X<sub>L</sub> &minus; X<sub>C</sub>)&sup2;)</strong></div>
-              <div><span>Circuit current</span><strong>I = V / Z</strong></div>
-              <div><span>Active power</span><strong>P = VI cos&phi;</strong></div>
-              <div className="equation-panel__error">
-                <span>Percentage error</span>
-                <div className="equation-error-expression">
-                  <strong>% Error =</strong>
-                  <span className="equation-error-fraction">
-                    <i>|Measured Value &minus; True Value|</i>
-                    <i>True Value</i>
-                  </span>
-                  <b>&times; 100</b>
-                  <small>True Value = Theoretical Value</small>
-                </div>
-              </div>
+              ))}
+              <p className="equation-unit-note">{EQUATION_UNITS}</p>
             </div>
           </aside>
         )}

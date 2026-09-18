@@ -25,9 +25,9 @@ const ammeter1Terminals = [
 
 const wattmeterTerminals = [
   { id: '7-endpoint', label: '7', polarity: 'minus', left: 492, top: 205, lLeft: 505, lTop: 240 },
-  { id: '8-endpoint', label: '8', polarity: 'plus', left: 530, top: 205, lLeft: 540, lTop: 240 },
-  { id: '9-endpoint', label: '9', polarity: 'plus', left: 568, top: 205, lLeft: 575, lTop: 240 },
-  { id: '10-endpoint', label: '10', polarity: 'plus', left: 605, top: 205, lLeft: 610, lTop: 240 },
+  { id: '8-endpoint', label: '8', polarity: 'plus', left: 530, top: 205, lLeft: 543, lTop: 240 },
+  { id: '9-endpoint', label: '9', polarity: 'plus', left: 568, top: 205, lLeft: 582, lTop: 240 },
+  { id: '10-endpoint', label: '10', polarity: 'plus', left: 605, top: 205, lLeft: 620, lTop: 240 },
 ];
 
 const voltmeter2Terminals = [
@@ -46,8 +46,8 @@ const voltmeter4Terminals = [
 ];
 
 const resistorTerminals = [
-  { id: '17-endpoint', label: '17', polarity: 'plus', left: 380, top: 380, lLeft: 404, lTop: 420 },
-  { id: '18-endpoint', label: '18', polarity: 'minus', left: 610, top: 380, lLeft: 640, lTop: 420 },
+  { id: '17-endpoint', label: '17', polarity: 'plus', left: 380, top: 380, lLeft: 394, lTop: 338 },
+  { id: '18-endpoint', label: '18', polarity: 'minus', left: 610, top: 380, lLeft: 625, lTop: 420 },
 ];
 
 const inductorTerminals = [
@@ -68,7 +68,7 @@ const variacTerminals = [
 ];
 
 const renderTerminals = (terminals) => (
-  terminals.map(({ id, label, polarity, left, top, lLeft, lTop }) => (
+  terminals.map(({ id, label, polarity, left, top, lLeft, lTop }, index) => (
     <Fragment key={id}>
       <span
         id={id}
@@ -81,6 +81,7 @@ const renderTerminals = (terminals) => (
           top: `${top}px`,
           zIndex: 50,
           cursor: 'crosshair'
+          , '--terminal-x': `${15 + (index / Math.max(1, terminals.length - 1)) * 70}%`
         }}
       />
       <span
@@ -90,7 +91,8 @@ const renderTerminals = (terminals) => (
           position: 'absolute',
           left: `${lLeft}px`,
           top: `${lTop}px`,
-          zIndex: 50
+          zIndex: 50,
+          '--terminal-x': `${15 + (index / Math.max(1, terminals.length - 1)) * 70}%`,
         }}
       >
         {label}

@@ -46,6 +46,7 @@ const getJsPlumbZoom = (scale) => (
 const ConnectionLab = ({
   aiGuide,
   aiGuideActiveStepId,
+  onPendingGuideStep,
   autoConnectRequest,
   checkRequest,
   onCheckConnections,
@@ -79,6 +80,7 @@ const ConnectionLab = ({
   const onConnectionReadinessChangeRef = useRef(onConnectionReadinessChange)
   const scaleRef = useRef(getJsPlumbZoom(scale))
   const aiGuideRef = useRef(aiGuide)
+  const onPendingGuideStepRef = useRef(onPendingGuideStep)
   const isAutoConnectingRef = useRef(false)
   const madeConnectionsRef = useRef(new Set())
 
@@ -96,6 +98,7 @@ const ConnectionLab = ({
   useEffect(() => {
     aiGuideRef.current = aiGuide
   }, [aiGuide])
+  useEffect(() => { onPendingGuideStepRef.current = onPendingGuideStep }, [onPendingGuideStep])
 
   useEffect(() => {
     const container = containerRef.current
@@ -152,8 +155,8 @@ const ConnectionLab = ({
         : ALL_CONNECTIONS_DONE_STEP_ID
 
       if (guide?.playStep) {
-        guide.playStep(WRONG_CONNECTION_STEP_ID).then(() => {
-          guide.playStep(repeatStepId)
+        guide.playStep(WRONG_CONNECTION_STEP_ID).then((completed) => {
+          if (completed) guide.playStep(repeatStepId)
         })
       }
       return
@@ -165,9 +168,11 @@ const ConnectionLab = ({
     const nextIndex = REQUIRED_PAIR_KEYS.findIndex((requiredKey) => !madeSet.has(requiredKey))
 
     if (nextIndex >= 0) {
+      onPendingGuideStepRef.current?.(nextIndex + FIRST_CONNECTION_STEP_ID)
       onConnectionReadinessChangeRef.current?.(false)
       guide?.playStep?.(nextIndex + FIRST_CONNECTION_STEP_ID)
     } else {
+      onPendingGuideStepRef.current?.(ALL_CONNECTIONS_DONE_STEP_ID)
       onConnectionReadinessChangeRef.current?.(true)
       guide?.playStep?.(ALL_CONNECTIONS_DONE_STEP_ID)
     }
@@ -257,10 +262,13 @@ const ConnectionLab = ({
       }, 100)
     }
 
+    const resizeObserver = new ResizeObserver(handleResize)
+    resizeObserver.observe(containerRef.current)
     window.addEventListener('resize', handleResize)
 
     return () => {
       cancelled = true
+      resizeObserver.disconnect()
       window.removeEventListener('resize', handleResize)
 
       instanceRef.current?.reset()
@@ -402,6 +410,9 @@ const ConnectionLab = ({
 
     if (removedRequiredConnection) {
       onConnectionReadinessChangeRef.current?.(false)
+      const nextIndex = REQUIRED_PAIR_KEYS.findIndex((key) => !madeConnectionsRef.current.has(key))
+      onPendingGuideStepRef.current?.(nextIndex + FIRST_CONNECTION_STEP_ID)
+      aiGuideRef.current?.playStep?.(nextIndex + FIRST_CONNECTION_STEP_ID)
     }
   }
 
@@ -424,7 +435,7 @@ const ConnectionLab = ({
       <section className="workspace grid">
         
         <aside className="left-panel">
-          <div className="panel-content-wrapper">
+          <div className="panel-content-wrapper panel-content-wrapper--equipment">
             <EquipmentPanel
               onTogglePower={onTogglePower}
               onVariacBlocked={onVariacBlocked}

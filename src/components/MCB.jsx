@@ -21,6 +21,7 @@ const MCB = ({ powerOn, onTogglePower }) => {
           aria-label={powerOn ? 'MCB is on for this laboratory run' : 'Switch MCB on'}
           aria-pressed={powerOn}
           className="mcb__button"
+          disabled={powerOn}
           onClick={() => {
             if (powerOn) {
               // If it's already ON, do nothing (prevent turning off during experiment)

@@ -49,11 +49,13 @@ const Variac = ({ onValueChange, maxVal = 30, powerOn, componentsSelected = true
     <div style={{ position: 'relative', display: 'inline-block' }}>
       
       <div className="variac-container" id="autotransformer-panel">
-        <img
-          src={isOn === true ? variacOnImg : variacOffImg}
-          alt={isOn ? "Variac Panel ON" : "Variac Panel OFF"}
-          className="variac-bg"
-        />
+        <div className="variac-visual">
+          <img
+            src={isOn === true ? variacOnImg : variacOffImg}
+            alt={isOn ? "Variac Panel ON" : "Variac Panel OFF"}
+            className="variac-bg"
+          />
+        </div>
 
         <button
           type="button"
@@ -75,6 +77,7 @@ const Variac = ({ onValueChange, maxVal = 30, powerOn, componentsSelected = true
         <button
           type="button"
           className={`variac-power-button-target ${isOn ? 'disabled' : ''}`}
+          disabled={isOn}
           onClick={(e) => {
             e.stopPropagation();
             if (!powerOn) {
@@ -94,33 +97,10 @@ const Variac = ({ onValueChange, maxVal = 30, powerOn, componentsSelected = true
           }}
           aria-label="Turn Power On"
           title={isOn ? "Power is ON" : "Turn Power ON"}
-          style={{ cursor: isOn ? 'default' : 'pointer' }}
+          style={{ cursor: isOn ? 'not-allowed' : 'pointer' }}
         />
 
       </div>
-
-      {/* TEMPORARY AUTOTRANSFORMER WALKTHROUGH BOX */}
-      <div
-        id="autotransformer-panel-walkthrough-target"
-        style={{
-          position: 'absolute',
-          
-          // 1. POSITIONING & BOUNDS 
-          // Tweak left and top to line up directly over the device casing layout
-          left: '35px',       
-          top: '10px',        
-          width: '80%',    
-          height: '65%',   
-
-          pointerEvents: 'none',
-          zIndex: 1000,
-
-          // 2. TEMPORARY DEBUG STYLES (Delete these two lines once aligned)
-          // backgroundColor: 'rgba(255, 0, 0, 0.3)', 
-          // border: '2px dashed red'                 
-        }}
-      />
-
     </div>
   );
 };

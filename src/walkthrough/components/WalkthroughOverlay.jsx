@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 import { useWalkthrough } from '../useWalkthrough.js'
 import Spotlight from './Spotlight.jsx'
@@ -26,7 +26,7 @@ const WalkthroughOverlay = () => {
   }
 
   return (
-    <AnimatePresence>
+    <>
       {isOpen && activeStep ? (
         <motion.div
           aria-live="polite"
@@ -38,8 +38,7 @@ const WalkthroughOverlay = () => {
         >
           <div aria-hidden="true" className="walkthrough-interaction-shield" />
           <Spotlight rect={isPositioningTarget ? null : targetRect} />
-          <AnimatePresence mode="wait">
-            {!isPositioningTarget && targetRect ? (
+            {!isPositioningTarget ? (
               <WalkthroughPopup
                 activeStep={activeStep}
                 autoPlayAudio={autoPlayAudioForStep}
@@ -56,13 +55,12 @@ const WalkthroughOverlay = () => {
                 totalSteps={totalSteps}
               />
             ) : null}
-          </AnimatePresence>
           <span className="sr-only">
             Step {currentStep} of {totalSteps}: {activeStep.title}
           </span>
         </motion.div>
       ) : null}
-    </AnimatePresence>
+    </>
   )
 }
 

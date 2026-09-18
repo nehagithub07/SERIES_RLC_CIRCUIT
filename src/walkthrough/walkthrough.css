@@ -209,6 +209,14 @@
   text-justify: inter-word;
 }
 
+.walkthrough-popup__description p {
+  margin: 0;
+}
+
+.walkthrough-popup__description p + p {
+  margin-top: 0.85em;
+}
+
 .walkthrough-popup__progress {
   height: 7px;
   overflow: hidden;

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import './ConnectionEndpoints.css'
+import './responsive.css'
 import ActionButtons from './components/ActionButtons.jsx'
 import ConnectionLab from './components/ConnectionLab.jsx'
 import ControlPanel from './components/ControlPanel.jsx'
@@ -15,6 +16,7 @@ import WalkthroughStartButton from './walkthrough/components/WalkthroughStartBut
 import { useAiGuideNarration } from './aiGuide/useAiGuideNarration.js'
 import { stopAlertSound } from './utils/alertAudioManager.js'
 import { getRlcMeterCase, getNeedleAngle, getRlcCaseKey } from './utils/rlcMeterCalibration.js'
+import { useFocusTrap } from './walkthrough/hooks/useFocusTrap.js'
 
 // Base Layout Canvas Dimension Constants
 const BASE_WIDTH = 1440
@@ -54,23 +56,32 @@ const getScale = () => {
   const viewportWidth = window.visualViewport?.width
     ?? document.documentElement.clientWidth
     ?? window.innerWidth
+  if (viewportWidth <= 1024) return 1
   const widthScale = (viewportWidth - PANEL_VIEWPORT_MARGIN) / BASE_WIDTH
-  return Math.max(Math.min(widthScale, PANEL_MAX_SCALE), 0.1)
+  // Preserve legible controls on narrow screens. The scaled laboratory stage
+  // remains horizontally scrollable instead of shrinking labels below a
+  // usable size.
+  return Math.max(Math.min(widthScale, PANEL_MAX_SCALE), 0.62)
 }
 
 // Keep at least two physical source pixels behind every visual CSS pixel.
 // Standard-density screens get a 2x backing layer; high-DPR displays already
 // provide that density natively. The final visual scale remains unchanged.
 const getRenderScale = () => {
-  if (typeof window === 'undefined') return 1
+  if (typeof window === 'undefined' || window.innerWidth <= 1024) return 1
   const dpr = Math.max(Number(window.devicePixelRatio) || 1, 0.5)
   return Math.min(3, Math.max(1, Math.ceil(2 / dpr)))
 }
 
 const App = () => {
-  const { confirmAlert, showAlert, showStepAlert } = useLabAlerts()
+  const { clearAlerts, confirmAlert, showAlert, showStepAlert } = useLabAlerts()
+  const contentRef = useRef(null)
+  const [contentHeight, setContentHeight] = useState(CONTENT_HEIGHT)
   const [scale, setScale] = useState(getScale)
   const [renderScale, setRenderScale] = useState(getRenderScale)
+  const [viewportHeight, setViewportHeight] = useState(() => (
+    typeof window === 'undefined' ? 900 : (window.visualViewport?.height ?? window.innerHeight)
+  ))
   
   const [r, setR] = useState(10)
   const [l, setL] = useState(0.1)
@@ -81,7 +92,6 @@ const App = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [reportGenerated, setReportGenerated] = useState(false) 
   
-  const [theoreticalCalculations, setTheoreticalCalculations] = useState(null)
   const [calculationRows, setCalculationRows] = useState({})
   const [verifiedRows, setVerifiedRows] = useState({})
   const [isResistorCorrect, setIsResistorCorrect] = useState(false) 
@@ -108,12 +118,42 @@ const App = () => {
   const [connectionsVerified, setConnectionsVerified] = useState(false)
   const [sessionStart, setSessionStart] = useState(() => Date.now()) 
   const voltageLimitWarningShownRef = useRef(false)
+  const instructionsDialogRef = useRef(null)
+
+  useFocusTrap(instructionsDialogRef, isModalOpen)
 
   // 🎯 STEP TRACKING STATE
   const [currentStep, setCurrentStep] = useState(STEPS.WALKTHROUGH);
   const lastPlayedStepRef = useRef(null);
   const [aiGuideEnabled, setAiGuideEnabled] = useState(false)
   const aiGuideEnabledRef = useRef(false)
+  const walkthroughActiveRef = useRef(false)
+  const [pendingGuideStep, setPendingGuideStep] = useState(3)
+  const pendingTimersRef = useRef(new Set())
+  const clearPendingTimers = useCallback(() => {
+    pendingTimersRef.current.forEach(window.clearTimeout)
+    pendingTimersRef.current.clear()
+  }, [])
+  const scheduleAlert = useCallback((callback, delay) => {
+    const timer = window.setTimeout(() => {
+      pendingTimersRef.current.delete(timer)
+      callback()
+    }, delay)
+    pendingTimersRef.current.add(timer)
+  }, [])
+  useEffect(() => clearPendingTimers, [clearPendingTimers])
+  const handleDraftChange = useCallback((rowId, values) => {
+    setCalculationRows((current) => ({ ...current, [rowId]: values }))
+    setReportGenerated(false)
+  }, [])
+
+  useEffect(() => {
+    const element = contentRef.current
+    if (!element) return undefined
+    const observer = new ResizeObserver(() => setContentHeight(element.offsetHeight))
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
 
   // 🎙️ AI GUIDE NARRATION
   const {
@@ -127,7 +167,7 @@ const App = () => {
   // Experiment narration runs only after the learner enables AI Guide. Alert
   // audio is managed separately by LabAlertProvider.
   const playGuideStep = useCallback((stepId) => {
-    if (!aiGuideEnabledRef.current) {
+    if (!aiGuideEnabledRef.current || walkthroughActiveRef.current) {
       return Promise.resolve(false)
     }
 
@@ -140,6 +180,7 @@ const App = () => {
     const handleResize = () => {
       setScale(getScale())
       setRenderScale(getRenderScale())
+      setViewportHeight(window.visualViewport?.height ?? window.innerHeight)
     }
     handleResize()
     window.addEventListener('resize', handleResize)
@@ -179,7 +220,7 @@ const App = () => {
 
     const stepByPhase = {
       [STEPS.WALKTHROUGH]: 1,
-      [STEPS.CONNECT]: 3,
+      [STEPS.CONNECT]: pendingGuideStep,
       [STEPS.CHECK]: 22,
       [STEPS.POWER_ON]: 29,
       [STEPS.SELECT_COMPONENTS]: 30,
@@ -195,14 +236,17 @@ const App = () => {
     stopAlertSound()
     setStatus('AI Guide is ON and will narrate the current experiment steps. Click AI Guide again to turn it OFF.')
     playAiGuideStep(stepByPhase[derivedStep] ?? 1)
-  }, [derivedStep, observations.length, playAiGuideStep, stopAiGuideStep])
+  }, [derivedStep, observations.length, pendingGuideStep, playAiGuideStep, stopAiGuideStep])
 
   const handleWalkthroughStart = useCallback(() => {
+    walkthroughActiveRef.current = true
+    clearPendingTimers()
+    clearAlerts()
     // The walkthrough owns its popup narration and must not share playback
     // state with either the AI Guide or lab-alert audio.
     stopAiGuideStep()
     stopAlertSound()
-  }, [stopAiGuideStep])
+  }, [clearAlerts, clearPendingTimers, stopAiGuideStep])
 
   useEffect(() => {
     const yieldNarrationToAlert = () => stopAiGuideStep()
@@ -256,15 +300,17 @@ const App = () => {
 
   // 🎯 STEP PROGRESSION HANDLERS
   const handleWalkthroughComplete = useCallback(() => {
-    setCurrentStep(STEPS.CONNECT);
+    walkthroughActiveRef.current = false
+    setCurrentStep((step) => step === STEPS.WALKTHROUGH ? STEPS.CONNECT : step);
     setStatus('Interface walkthrough completed. Make the connections as per instructions.');
     // 🎙️ "The interface walkthrough is now complete..." then the first
     // connection instruction ("Click and drag the wire from terminal 1...").
-    playGuideStep(2).then(() => playGuideStep(3));
-  }, [playGuideStep]);
+    if (!connectionsVerified) playGuideStep(2).then((completed) => { if (completed) playGuideStep(pendingGuideStep) });
+  }, [connectionsVerified, pendingGuideStep, playGuideStep]);
 
   const handleWalkthroughExit = useCallback(() => {
-    setCurrentStep(STEPS.CONNECT);
+    walkthroughActiveRef.current = false
+    setCurrentStep((step) => step === STEPS.WALKTHROUGH ? STEPS.CONNECT : step);
     setStatus('Interface walkthrough exited. Make the connections as per instructions.');
   }, []);
 
@@ -322,7 +368,7 @@ const App = () => {
     if (isLastReading) {
       setStatus(`Reading added. All ${MAX_OBSERVATIONS} R-L-C combinations have been recorded.`)
       setCurrentStep(STEPS.CALCULATE);
-      window.setTimeout(() => {
+      scheduleAlert(() => {
         showStepAlert(EXPERIMENT_ALERTS.allReadingsRecorded)
       }, 50)
     } else {
@@ -330,7 +376,7 @@ const App = () => {
         ? `Reading added. Verification is now available; you may also continue up to ${MAX_OBSERVATIONS} readings.`
         : 'Reading added. Select a different R-L-C combination for the next reading; the MCB and autotransformer remain ON.')
       setCurrentStep(verificationJustUnlocked ? STEPS.CALCULATE : STEPS.ADD_READING);
-      window.setTimeout(() => {
+      scheduleAlert(() => {
         const nextReadingNumber = readingCount + 1
 
         if (nextReadingNumber === 1) {
@@ -343,24 +389,22 @@ const App = () => {
           return
         }
 
-        showStepAlert(EXPERIMENT_ALERTS.readingAdded, {
-          description: verificationJustUnlocked
-            ? `Reading ${nextReadingNumber} of ${MAX_OBSERVATIONS} has been added. Reading verification is now available, and you may continue recording the remaining combinations.`
-            : `Reading ${nextReadingNumber} of ${MAX_OBSERVATIONS} has been added. Select a different RLC combination and click the Add button again.`,
-          sound: 'readingAdded',
-        })
+        stopAlertSound()
       }, 50)
     }
   }
 
   const resetSimulation = useCallback(() => {
+    clearPendingTimers()
+    clearAlerts()
+    setPendingGuideStep(3)
+    walkthroughActiveRef.current = false
     setPowerOn(false)
     setVoltage(0)
     setR(10)
     setL(0.1)
     setC(0.0001)
     setObservations([])
-    setTheoreticalCalculations(null)
     setCalculationRows({})
     setVerifiedRows({})
     setIsResistorCorrect(false) 
@@ -391,7 +435,7 @@ const App = () => {
       duration: 5000,
       sound: 'reset',
     })
-  }, [showAlert, stopAiGuideStep])
+  }, [clearAlerts, clearPendingTimers, showAlert, stopAiGuideStep])
 
   const handleReset = async () => {
     const confirmed = await confirmAlert({
@@ -412,6 +456,19 @@ const App = () => {
     // every cell in that row. Don't touch report-gate state - nothing was
     // actually submitted for verification yet.
     if (isRowOk === null) {
+      if (verificationMeta.validationMessage) {
+        setStatus(verificationMeta.validationMessage)
+        showAlert({
+          title: 'Invalid Verification Value',
+          description: verificationMeta.validationMessage,
+          type: 'warning',
+          icon: '⚠️',
+          placement: 'center',
+          duration: 6500,
+        })
+        return
+      }
+
       const calculatedKeys = ['vR', 'vL', 'vC', 'cosPhi', 'power']
       const missingCount = calculatedKeys.filter((key) => rowValues[key] === '').length
       const hasMultipleMissingValues = missingCount > 1
@@ -434,9 +491,6 @@ const App = () => {
     const nextVerifiedRows = { ...verifiedRows, [observationIndex]: isRowOk === true }
     setVerifiedRows(nextVerifiedRows)
 
-    setTheoreticalCalculations(
-      Array.from({ length: 5 }, (_, i) => nextCalculationRows[i] || null)
-    )
     setStatus(`Reading ${observationIndex + 1} has been submitted for verification.`)
 
     const verifiedCount = Object.values(nextVerifiedRows).filter(Boolean).length
@@ -449,7 +503,12 @@ const App = () => {
       setStatus(requiredRowsVerified
         ? 'Two readings have been verified successfully. You may now generate the report.'
         : 'Theoretical calculations verified successfully. Verify one more reading to enable report generation.')
-      showStepAlert(EXPERIMENT_ALERTS.calculationsVerified)
+      showStepAlert(EXPERIMENT_ALERTS.calculationsVerified, {
+        description: requiredRowsVerified
+          ? 'Two theoretical calculation rows have been verified successfully. You may now generate the report.'
+          : 'This theoretical calculation row has been verified successfully. Verify one more reading to enable report generation.',
+        sound: 'verificationSuccessNarration',
+      })
     } else if (isRowOk === false) {
       const hasMultipleIncorrectValues = verificationMeta.incorrectCount > 1
       showAlert({
@@ -483,7 +542,7 @@ const App = () => {
     const reportWindow = generateRlcReport({
       observations,
       parameters: { r, l, c },
-      theoreticalCalculations,
+      theoreticalCalculations: Object.values(calculationRows),
       sessionStart,
     })
 
@@ -503,7 +562,7 @@ const App = () => {
     window.focus()
     setReportGenerated(true)
     setStatus('RLC Experiment report generated successfully from metrics and observations.')
-    window.setTimeout(() => {
+    scheduleAlert(() => {
       showAlert({
         title: 'Report Generated',
         description: 'Your report has been generated successfully. Click OK to view your report.',
@@ -518,7 +577,7 @@ const App = () => {
   }
 
   const scaledWidth = Math.ceil(BASE_WIDTH * scale)
-  const scaledHeight = Math.ceil(CONTENT_HEIGHT * scale)
+  const scaledHeight = Math.ceil(contentHeight * scale)
   
   const handleCheckConnections = useCallback((result, options = {}) => {
     const { silent = false } = options
@@ -600,7 +659,7 @@ const App = () => {
     setPowerOn(true)
     setCurrentStep(STEPS.SELECT_COMPONENTS);
     setStatus('MCB switched ON. Select the resistor, inductor, and capacitor values, then turn ON the autotransformer.')
-    window.setTimeout(() => {
+    scheduleAlert(() => {
       showStepAlert(EXPERIMENT_ALERTS.mcbOn)
     }, 50)
   }
@@ -628,7 +687,13 @@ const App = () => {
           ? 'Component values selected. Click the Variac knob to set it to 30 V.'
           : 'Component values selected. Now switch ON the autotransformer.')
       if (readingIsReady) {
-        showStepAlert(EXPERIMENT_ALERTS.newRlcValueSelected)
+         const nextReadingNumber = observations.length + 1
+
+        // Show "New RLC Value Selected" only before readings 1 and 2.
+        // After 2 readings, no normal RLC-selection alerts should appear.
+        if (nextReadingNumber <= 2) {
+          showStepAlert(EXPERIMENT_ALERTS.newRlcValueSelected)
+        }
       } else if (variacPowered) {
         showStepAlert(EXPERIMENT_ALERTS.autotransformerOn)
       } else {
@@ -685,16 +750,16 @@ const App = () => {
 
   const handleAutoConnect = () => {
     setAutoConnectRequest((current) => current + 1)
-    setStatus('Autoconnect completed. All connections are correct and the Check button is now disabled. Turn ON the MCB.')
-    window.setTimeout(() => {
+    setStatus('Autoconnect completed. Now turn ON the MCB by clicking the MCB lever.')
+    scheduleAlert(() => {
       showAlert({
         title: 'Autoconnect Completed',
-        description: 'Autoconnect completed. All connections are correct and the Check button is now disabled. Turn ON the MCB.',
+        description: 'Autoconnect completed. Now turn ON the MCB by clicking the MCB lever.',
         type: 'info',
         icon: '🔌',
         placement: 'center',
         duration: 5000,
-        sound: 'autoConnect',
+        sound: 'autoConnectNarration',
       })
     }, 150)
   }
@@ -722,11 +787,11 @@ const App = () => {
       voltageLimitWarningShownRef.current = true
       setCurrentStep(STEPS.ADD_READING);
 
-      window.setTimeout(() => {
+      scheduleAlert(() => {
         showStepAlert(EXPERIMENT_ALERTS.voltageSet)
       }, 50)
     }
-  }, [powerOn, currentStep, showStepAlert])
+  }, [powerOn, currentStep, scheduleAlert, showStepAlert])
 
   // 🎯 STEP HIGHLIGHTING HELPERS
   const isStepActive = (stepNumber) => derivedStep === stepNumber;
@@ -748,9 +813,11 @@ const App = () => {
       >
         <div
           id="app-scale"
+          ref={contentRef}
           style={{
             '--app-render-scale': renderScale,
             '--app-composite-scale': scale / renderScale,
+            '--instructions-available-height': `${Math.max(400, (viewportHeight / scale) - 390)}px`,
           }}
         >
           <main className="simulation-shell" id="walkthrough-demo-experiment">
@@ -794,6 +861,7 @@ const App = () => {
                   {isModalOpen && (
                     <div
                       className="instructions-overlay-panel"
+                      ref={instructionsDialogRef}
                       role="dialog"
                       aria-modal="true"
                       aria-labelledby="instructions-dialog-title"
@@ -801,9 +869,11 @@ const App = () => {
                       <div className="instructions-header">
                         <span id="instructions-dialog-title">INSTRUCTIONS</span>
                         <button 
+                          type="button"
                           onClick={() => setIsModalOpen(false)}
                           className="instructions-close"
                           aria-label="Close instructions"
+                          data-autofocus
                         >
                           &times;
                         </button>
@@ -818,7 +888,7 @@ const App = () => {
                           {`1-23, 2-24\n3-25, 4-26\n5-25, 6-9, 6-10, 8-17\n11-17, 12-18\n13-19, 14-20\n15-21, 16-22\n18-19, 20-21\n22-26, 26-7`}
                         </div>
 
-                        <p className="instructions-note"><strong>Note:</strong> Click on the label to delete connection for the corresponding node.</p>
+                        <p className="instructions-note"><strong>Note:</strong> If a wire is connected incorrectly, click the corresponding label number to remove the connection.</p>
                         
                         <p className={isStepActive(STEPS.CHECK) ? 'instruction-step-active' : (isStepCompleted(STEPS.CHECK) ? 'instruction-step-completed' : '')}>
                           <strong>Step 2:</strong> Now, Check the connections by clicking on <strong>'CHECK'</strong> button.
@@ -847,7 +917,7 @@ const App = () => {
                         </p>
                         
                         <p className={isStepActive(STEPS.CALCULATE) ? 'instruction-step-active' : (isStepCompleted(STEPS.CALCULATE) ? 'instruction-step-completed' : '')}>
-                          <strong>Step 8:</strong> After five readings, select a recorded reading, enter its table values, and click <strong>Verify</strong>. V and I (mA) are prefilled.
+                          <strong>Step 8:</strong> After five readings, select a recorded reading, calculate the theoretical values, and click <strong>Verify</strong>. V and I (mA) are prefilled.
                         </p>
 
                         <p className={isStepActive(STEPS.GENERATE_REPORT) ? 'instruction-step-active' : ''}>
@@ -856,7 +926,7 @@ const App = () => {
                       </div>
                       
                       <div className="instructions-footer">
-                        <button onClick={() => setIsModalOpen(false)}>Close</button>
+                        <button type="button" onClick={() => setIsModalOpen(false)}>Close</button>
                       </div>
                     </div>
                   )}
@@ -866,6 +936,7 @@ const App = () => {
               <section className="right-panel">
                 <ConnectionLab
                   aiGuide={{ playStep: playGuideStep, stop: stopAiGuideStep }}
+                  onPendingGuideStep={setPendingGuideStep}
                   aiGuideActiveStepId={aiGuideEnabled ? activeAiGuideStepId : null}
                   autoConnectRequest={autoConnectRequest}
                   checkRequest={checkRequest}
@@ -912,6 +983,7 @@ const App = () => {
             className="graph-panel--separate"
             id="graph-panel"
             onVerify={handleVerifyCalculations}
+            onDraftChange={handleDraftChange}
             currentStep={derivedStep}
             resetRequest={resetRequest}
             observations={observations}

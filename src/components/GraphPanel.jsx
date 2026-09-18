@@ -14,11 +14,11 @@ const KNOWN_FIELDS = [
 ]
 
 const CALCULATED_FIELDS = [
-  { key: 'vR', label: <>V<sub>R</sub><br />(V)</>, dataLabel: 'VR', errorLabel: 'VR error' },
-  { key: 'vL', label: <>V<sub>L</sub><br />(V)</>, dataLabel: 'VL', errorLabel: 'VL error' },
-  { key: 'vC', label: <>V<sub>C</sub><br />(V)</>, dataLabel: 'VC', errorLabel: 'VC error' },
-  { key: 'cosPhi', label: <>cosφ<br />(PF)</>, dataLabel: 'Power factor', errorLabel: 'cosφ error' },
-  { key: 'power', label: <>Power<br />(W)</>, dataLabel: 'Power', errorLabel: 'Power error' },
+  { key: 'vR', label: <>V<sub>R</sub><br />(V)</>, dataLabel: 'V R', errorLabel: <>V<sub>R</sub> error</>, min: 1, max: 50 },
+  { key: 'vL', label: <>V<sub>L</sub><br />(V)</>, dataLabel: 'V L', errorLabel: <>V<sub>L</sub> error</>, min: 1, max: 50 },
+  { key: 'vC', label: <>V<sub>C</sub><br />(V)</>, dataLabel: 'V C', errorLabel: <>V<sub>C</sub> error</>, min: 1, max: 50 },
+  { key: 'cosPhi', label: <>cosφ<br />(PF)</>, dataLabel: 'Power factor', errorLabel: <>cosφ error</>, min: 0, max: 1 },
+  { key: 'power', label: <>Power<br />(W)</>, dataLabel: 'Power', errorLabel: <>Power error</>, min: 0, max: 1 },
 ]
 
 const ALL_FIELDS = [...KNOWN_FIELDS, ...CALCULATED_FIELDS]
@@ -63,8 +63,22 @@ const getPercentError = (measuredValue, trueValue) => {
 
 const createRow = (id) => ({ id, values: { ...EMPTY_ROW }, observationIndex: '' })
 const stopWheelValueChange = (event) => event.currentTarget.blur()
+const getRangeError = (field, rawValue) => {
+  const trimmedValue = String(rawValue ?? '').trim()
+  const numericValue = Number(trimmedValue)
 
-const CalculationPanel = ({ className = '', currentStep = 1, observations = [], onVerify, resetRequest, minReadings = 5 }) => {
+  if (!trimmedValue || !Number.isFinite(numericValue)) {
+    return `${field.dataLabel} must be a valid number.`
+  }
+
+  if (numericValue < field.min || numericValue > field.max) {
+    return `${field.dataLabel} must be between ${field.min} and ${field.max}.`
+  }
+
+  return null
+}
+
+const CalculationPanel = ({ className = '', currentStep = 1, observations = [], onVerify, onDraftChange, resetRequest, minReadings = 5 }) => {
   const isCalculatePhase = currentStep === STEPS.CALCULATE
   const verificationLocked = observations.length < minReadings
   const readingsRemaining = Math.max(0, minReadings - observations.length)
@@ -72,6 +86,7 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
   const isFirstResetRef = useRef(true)
   const [rows, setRows] = useState(() => [createRow(0)])
   const [fieldStatus, setFieldStatus] = useState({})
+  const [validationErrors, setValidationErrors] = useState({})
   const [verifiedRows, setVerifiedRows] = useState({})
 
   useEffect(() => {
@@ -82,6 +97,7 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
     nextRowIdRef.current = 1
     setRows([createRow(0)])
     setFieldStatus({})
+    setValidationErrors({})
     setVerifiedRows({})
   }, [resetRequest])
 
@@ -101,6 +117,8 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
   ].filter(Boolean).join(' ')
 
   const handleFieldChange = (rowId, key, value) => {
+    const row = rows.find((entry) => entry.id === rowId)
+    onDraftChange?.(rowId, { ...row.values, [key]: value, observationIndex: Number(row.observationIndex) })
     setRows((current) => current.map((row) => (
       row.id === rowId ? { ...row, values: { ...row.values, [key]: value } } : row
     )))
@@ -109,12 +127,24 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
       if (next[rowId]) next[rowId] = { ...next[rowId], [key]: undefined }
       return next
     })
+    setValidationErrors((current) => {
+      const next = { ...current }
+      if (next[rowId]) {
+        const rowErrors = { ...next[rowId] }
+        delete rowErrors[key]
+        if (Object.keys(rowErrors).length) next[rowId] = rowErrors
+        else delete next[rowId]
+      }
+      return next
+    })
   }
 
   const handleObservationSelect = (rowId, value) => {
     if (verificationLocked) return
     const observation = value === '' ? null : observations[Number(value)]
-    const verificationValues = getTheoreticalValues(observation)
+    if (observation) {
+      onDraftChange?.(rowId, { ...EMPTY_ROW, voltage: observation.voltage, current: observation.current, r: observation.r, l: observation.l, c: observation.c, observationIndex: Number(value) })
+    }
     setRows((current) => current.map((row) => row.id === rowId
       ? {
           ...row,
@@ -123,7 +153,7 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
             ? {
                 ...EMPTY_ROW,
                 voltage: observation.voltage,
-                current: verificationValues?.current ?? observation.current,
+                current: observation.current,
                 r: observation.r,
                 l: observation.l,
                 c: observation.c,
@@ -132,6 +162,11 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
         }
       : row))
     setFieldStatus((current) => {
+      const next = { ...current }
+      delete next[rowId]
+      return next
+    })
+    setValidationErrors((current) => {
       const next = { ...current }
       delete next[rowId]
       return next
@@ -154,6 +189,30 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
       onVerify?.(row.id, row.values, null, row.observationIndex)
       return
     }
+
+    const rangeErrors = Object.fromEntries(
+      CALCULATED_FIELDS
+        .map((field) => [field.key, getRangeError(field, row.values[field.key])])
+        .filter(([, error]) => error),
+    )
+
+    if (Object.keys(rangeErrors).length > 0) {
+      setValidationErrors((current) => ({ ...current, [row.id]: rangeErrors }))
+      setFieldStatus((current) => ({
+        ...current,
+        [row.id]: Object.fromEntries(CALCULATED_FIELDS.map(({ key }) => [key, rangeErrors[key] ? false : undefined])),
+      }))
+      onVerify?.(row.id, row.values, null, row.observationIndex, {
+        validationMessage: Object.values(rangeErrors).join(' '),
+      })
+      return
+    }
+
+    setValidationErrors((current) => {
+      const next = { ...current }
+      delete next[row.id]
+      return next
+    })
 
     const verificationValues = getTheoreticalValues(observation)
     const statuses = Object.fromEntries(CALCULATED_FIELDS.map(({ key }) => [
@@ -201,7 +260,7 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
           <p className="calculation-panel__instruction">
             {verificationLocked
               ? `Add ${readingsRemaining} more reading${readingsRemaining === 1 ? '' : 's'} to unlock verification.`
-              : 'Choose any two readings and enter the values exactly as recorded in the observation table.'}
+              : 'Select recorded readings, calculate the theoretical values, and verify two rows to enable report generation.'}
           </p>
         </div>
         <div
@@ -248,7 +307,7 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
                 title={rows.length >= MAX_VERIFICATION_ROWS ? 'Five verification rows have been added.' : 'Add another verification row.'}
               >
                 <span className="calculation-button-icon" aria-hidden="true">+</span>
-                <span>{rows.length >= MAX_VERIFICATION_ROWS ? 'Rows added' : 'Add row'}</span>
+                <span>{rows.length >= MAX_VERIFICATION_ROWS ? 'Rows added' : 'Add Rows'}</span>
               </button>
             </div>
           </div>
@@ -327,9 +386,10 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
                           })}
                         </select>
                       </td>
-                      {ALL_FIELDS.map(({ key, dataLabel }) => {
+                      {ALL_FIELDS.map(({ key, dataLabel, min, max }) => {
                         const isKnown = KNOWN_FIELDS.some((field) => field.key === key)
                         const status = rowStatuses[key]
+                        const validationError = validationErrors[row.id]?.[key]
                         return (
                           <td className={isKnown ? 'is-known-value' : 'is-entry-value'} data-label={dataLabel} key={key}>
                             <div className="calculation-input-shell">
@@ -338,12 +398,16 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
                                 step="any"
                                 className={`calculation-table-input ${status === true ? 'is-correct' : status === false ? 'is-incorrect' : ''}`}
                                 aria-label={`${dataLabel} for verification row ${row.id}`}
+                                aria-invalid={Boolean(validationError)}
+                                min={min}
+                                max={max}
                                 value={row.values[key]}
                                 placeholder={!isKnown && hasObservation ? 'Enter' : ''}
                                 disabled={verificationLocked || !hasObservation || isKnown || isVerified}
                                 onChange={(event) => handleFieldChange(row.id, key, event.target.value)}
                                 onWheel={stopWheelValueChange}
                                 inputMode="decimal"
+                                title={validationError || undefined}
                               />
                               {typeof status === 'boolean' && (
                                 <span
@@ -377,6 +441,11 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
               </tbody>
             </table>
           </div>
+          {Object.entries(validationErrors).map(([rowId, errors]) => (
+            <p className="calculation-validation-message" key={rowId} role="alert">
+              <strong>Check row {Number(rowId) + 1}:</strong> {Object.values(errors).join(' ')}
+            </p>
+          ))}
           <div className="calculation-card__footer">
             <span className="verification-status-badge verification-status-badge--known"><i aria-hidden="true">↗</i>Auto-filled</span>
             <span className="verification-status-badge verification-status-badge--correct"><i aria-hidden="true">✓</i>Correct</span>
@@ -389,7 +458,7 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
           <div className="calculation-card__heading">
             <span className="calculation-card__step">02</span>
             <div>
-              <h3>Percentage error</h3>
+              <h3>Error Analysis</h3>
               <p>Measured values are compared with theoretical (true) values.</p>
             </div>
             <span className="calculation-card__result-count">
