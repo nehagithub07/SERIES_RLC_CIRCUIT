@@ -492,7 +492,6 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
               <div className="calculation-errors__empty">
                 <span aria-hidden="true">%</span>
                 <strong>No results yet</strong>
-                <p>Select a reading and verify its table values to see field-level errors.</p>
               </div>
             )}
           </div>
