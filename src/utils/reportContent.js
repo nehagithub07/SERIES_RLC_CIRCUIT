@@ -30,4 +30,4 @@ export const RLC_EQUATIONS = [
   { label: 'Error Analysis', html: '% Error = <span class="equation-fraction"><i>|Measured Value − True Value|</i><i>True Value</i></span> × 100', note: 'True Value = Theoretical Value' },
 ]
 
-export const EQUATION_UNITS = 'Use I in A, R in Ω, L in H, C in F, and f = 50 Hz. Convert mA ÷ 1000, kΩ × 1000, and µF ÷ 1,000,000 before calculating.'
+ 

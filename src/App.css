@@ -4643,32 +4643,80 @@ Base modal container
 }
 
 /* ===== FIXED SINGLE-PAGE SIMULATION PRINT ===== */
+/* ============================================================
+   PRINT CSS
+   Goal:
+   - Exactly ONE physical printer page
+   - A4 Landscape
+   - Preserve normal screen UI
+   - Preserve Theoretical Verification design
+   - Preserve Error Analysis design
+   - No internal print-specific shrinking
+   ============================================================ */
+/* ============================================================
+   PHYSICAL PRINT — ONE PAGE A4 LANDSCAPE
+   ============================================================ */
+/* ============================================================
+   COMPLETE PRINT CSS
+   ------------------------------------------------------------
+   - Physical printer
+   - A4 Landscape
+   - Exactly one page
+   - Keep normal simulation UI
+   - Keep Theoretical Verification UI
+   - Keep Error Analysis UI
+   - Do not compress individual components
+   ============================================================ */
+/* ============================================================
+   PRINT CSS — EXACTLY 2 PAGES
+   ------------------------------------------------------------
+   PAGE 1:
+   - Action Buttons
+   - Observation Table
+   - Equipment / Simulation Panel
+
+   PAGE 2:
+   - Theoretical Verification
+   - Error Analysis
+   - Footer
+   ============================================================ */
+/* ============================================================
+   PRINT — EXACTLY TWO A4 LANDSCAPE PAGES
+
+   PAGE 1 = SIMULATION
+   PAGE 2 = THEORETICAL VERIFICATION + ERROR ANALYSIS
+   ============================================================ */
+
 @page {
-  size: 15in 14.770833in;
-  margin: 0;
+  size: A4 landscape;
+  margin: 5mm;
 }
 
 @media print {
-  html,
-  body,
-  #root,
-  #app-wrapper,
-  #app-viewport,
-  #app-scale {
-    width: 1440px !important;
-    min-width: 1440px !important;
-    max-width: 1440px !important;
-    height: 1418px !important;
-    min-height: 1418px !important;
-    max-height: 1418px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-  }
+
+  /* ==========================================================
+     GLOBAL
+     ========================================================== */
 
   html,
   body,
-  body * {
+  #root {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    width: 100% !important;
+    height: auto !important;
+
+    min-width: 0 !important;
+    min-height: 0 !important;
+
+    max-width: none !important;
+    max-height: none !important;
+
+    overflow: visible !important;
+
+    background: #2b170d !important;
+
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -4677,353 +4725,357 @@ Base modal container
     scrollbar-gutter: auto !important;
   }
 
-  body {
+
+  /* ==========================================================
+     REMOVE NORMAL APP SCALING
+
+     IMPORTANT:
+     There must be NO global scale/zoom around both pages.
+     Each print page is scaled independently below.
+     ========================================================== */
+
+  #app-wrapper,
+  #app-viewport,
+  #app-scale {
+    position: relative !important;
+
+    display: block !important;
+
+    width: 100% !important;
+    height: auto !important;
+
+    min-width: 0 !important;
+    min-height: 0 !important;
+
+    max-width: none !important;
+    max-height: none !important;
+
+    top: auto !important;
+    left: auto !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: visible !important;
+
+    zoom: 1 !important;
+
+    transform: none !important;
+    transform-origin: top left !important;
+
+    contain: none !important;
+
     background: #2b170d !important;
   }
 
-  #app-wrapper,
-  #app-viewport {
-    position: relative !important;
-    display: block !important;
-    inset: auto !important;
-    transform: none !important;
-  }
 
-  #app-scale {
-    position: relative !important;
-    top: 0 !important;
-    left: 0 !important;
-    display: block !important;
-    contain: none !important;
-    transform: none !important;
-    transform-origin: top left !important;
-    zoom: 1 !important;
-  }
+  /* ==========================================================
+     EACH PRINT PAGE
 
-  .simulation-shell {
-    width: 1440px !important;
-    min-width: 1440px !important;
-    max-width: 1440px !important;
-    height: 960px !important;
-    min-height: 960px !important;
-    max-height: 960px !important;
+     A4 landscape minus 5 mm margin:
+     width  ≈ 287 mm
+     height ≈ 200 mm
+     ========================================================== */
+
+  .print-page {
+    position: relative !important;
+
+    display: block !important;
+
+    width: 287mm !important;
+    height: 200mm !important;
+
+    min-width: 287mm !important;
+    min-height: 200mm !important;
+
+    max-width: 287mm !important;
+    max-height: 200mm !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
     overflow: hidden !important;
+
+    background: #2b170d !important;
+
     break-inside: avoid !important;
     page-break-inside: avoid !important;
   }
 
-  .workspace-grid {
+
+  /* ==========================================================
+     PAGE 1 MUST END HERE
+     ========================================================== */
+
+  .print-page--simulation {
+    break-after: page !important;
+    page-break-after: always !important;
+  }
+
+
+  /* ==========================================================
+     PAGE 2 — NO PAGE AFTER IT
+     ========================================================== */
+
+  .print-page--verification {
+    break-after: auto !important;
+    page-break-after: auto !important;
+  }
+
+
+  /* ==========================================================
+     INNER 1440px APPLICATION
+
+     Original application width = 1440px.
+
+     0.735 keeps the full 1440px screen UI inside
+     A4 landscape width while preserving proportions.
+     ========================================================== */
+
+  .print-page__inner {
+    position: absolute !important;
+
+    display: block !important;
+
+    top: 0 !important;
+    left: 50% !important;
+
+    width: 1440px !important;
+    height: auto !important;
+
+    min-width: 1440px !important;
+
+    /*
+      Center 1440px layout first,
+      then scale the complete layout.
+    */
+    margin-left: -720px !important;
+
+    transform: scale(0.735) !important;
+    transform-origin: top center !important;
+
     overflow: visible !important;
   }
 
-  #graph-panel.calculation-panel.graph-panel--separate {
-    display: grid !important;
+
+  /* ==========================================================
+     PAGE 1
+     COMPLETE SIMULATION
+     ========================================================== */
+
+  .print-page--simulation .simulation-shell {
+    position: relative !important;
+
     width: 1440px !important;
     min-width: 1440px !important;
     max-width: 1440px !important;
-    height: 390px !important;
-    min-height: 390px !important;
-    max-height: 390px !important;
-    grid-template-rows: 58px minmax(0, 1fr) !important;
-    margin: 10px 0 0 !important;
-    overflow: hidden !important;
+
+    height: 960px !important;
+    min-height: 960px !important;
+    max-height: 960px !important;
+
+    margin: 0 !important;
+
+    overflow: visible !important;
+
     break-inside: avoid !important;
     page-break-inside: avoid !important;
   }
 
-  #graph-panel > .graph-panel__heading {
-    min-height: 0 !important;
-    padding: 6px 20px !important;
+
+  /* Do not clip equipment */
+
+  .print-page--simulation .workspace-grid,
+  .print-page--simulation .connection-lab,
+  .print-page--simulation .equipment-panel,
+  .print-page--simulation .left-panel,
+  .print-page--simulation .right-panel,
+  .print-page--simulation .panel-content-wrapper,
+  .print-page--simulation .panel-content-wrapper--equipment {
+    overflow: visible !important;
   }
 
-  #graph-panel .calculation-panel__eyebrow {
-    display: none !important;
+
+  /* ==========================================================
+     PAGE 2
+     THEORETICAL VERIFICATION
+
+     Keep normal screen UI.
+     ========================================================== */
+
+  .print-page--verification
+  #graph-panel.calculation-panel.graph-panel--separate {
+    position: relative !important;
+
+    display: grid !important;
+
+    width: 1440px !important;
+    min-width: 1440px !important;
+    max-width: 1440px !important;
+
+    height: 510px !important;
+    min-height: 510px !important;
+    max-height: 510px !important;
+
+    grid-template-rows: 74px minmax(0, 1fr) !important;
+
+    /*
+      Start near top of page 2.
+    */
+    margin: 20px 0 0 !important;
+
+    overflow: hidden !important;
+
+    break-before: auto !important;
+    page-break-before: auto !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
-  #graph-panel > .graph-panel__heading h2 {
-    font-size: 16px !important;
-  }
 
-  #graph-panel .calculation-panel__instruction {
-    margin-top: 3px !important;
-    font-size: 8px !important;
-  }
+  /* ==========================================================
+     VERIFICATION BODY
 
-  #graph-panel .calculation-panel__progress {
-    min-width: 190px !important;
-    gap: 6px !important;
-    padding: 4px 8px !important;
-  }
+     Keep normal two-column screen design:
+     LEFT  = verification
+     RIGHT = Error Analysis
+     ========================================================== */
 
-  #graph-panel .calculation-panel__progress-ring {
-    width: 30px !important;
-    height: 30px !important;
-  }
-
-  #graph-panel .calculation-panel__progress-ring::before {
-    width: 22px !important;
-    height: 22px !important;
-  }
-
-  #graph-panel .calculation-panel__progress-copy small {
-    font-size: 7px !important;
-  }
-
-  #graph-panel .calculation-panel__progress-copy strong {
-    font-size: 9px !important;
-  }
-
+  .print-page--verification
   #graph-panel .calculation-panel__body {
-    grid-template-columns: minmax(0, 3fr) minmax(310px, 0.82fr) !important;
-    gap: 8px !important;
-    margin: 4px 10px 10px !important;
-    padding: 6px !important;
-    overflow: hidden !important;
-  }
-
-  #graph-panel .calculation-card {
-    height: 100% !important;
-    min-height: 0 !important;
-    padding: 7px !important;
-    overflow: hidden !important;
-    border-radius: 9px !important;
-    box-shadow: none !important;
-  }
-
-  #graph-panel .calculation-card::after {
-    height: 2px !important;
-  }
-
-  #graph-panel .calculation-card__heading {
-    min-height: 27px !important;
-    gap: 7px !important;
-    margin-bottom: 5px !important;
-  }
-
-  #graph-panel .calculation-card__step {
-    width: 25px !important;
-    height: 25px !important;
-    border-radius: 7px !important;
-    font-size: 8px !important;
-  }
-
-  #graph-panel .calculation-card__heading h3 {
-    font-size: 11px !important;
-  }
-
-  #graph-panel .calculation-card__heading p {
-    margin-top: 1px !important;
-    font-size: 7px !important;
-    line-height: 1.2 !important;
-  }
-
-  #graph-panel .calculation-card__heading-actions {
-    gap: 4px !important;
-  }
-
-  #graph-panel .calculation-row-capacity,
-  #graph-panel .calculation-row-add {
-    min-height: 24px !important;
-    padding: 0 7px !important;
-    font-size: 8px !important;
-  }
-
-  #graph-panel .calculation-row-capacity strong {
-    font-size: 9px !important;
-  }
-
-  #graph-panel .verification-workflow {
-    gap: 5px !important;
-    margin: 0 0 5px !important;
-    padding: 4px 8px !important;
-    border-radius: 7px !important;
-  }
-
-  #graph-panel .verification-workflow__step {
-    gap: 4px !important;
-    font-size: 7px !important;
-  }
-
-  #graph-panel .verification-workflow__step > b {
-    width: 18px !important;
-    height: 18px !important;
-    font-size: 7px !important;
-  }
-
-  #graph-panel .verification-workflow small {
-    font-size: 6px !important;
-  }
-
-  #graph-panel .calculation-table-wrap {
-    max-height: 194px !important;
-    overflow: hidden !important;
-    border-radius: 7px !important;
-    box-shadow: none !important;
-  }
-
-  #graph-panel .calculation-table {
-    width: 100% !important;
     min-width: 0 !important;
-    table-layout: fixed !important;
-    font-size: 7px !important;
+    min-height: 0 !important;
+
+    overflow: hidden !important;
   }
 
-  #graph-panel .calculation-table th {
-    height: 22px !important;
-    padding: 2px !important;
-    font-size: 7px !important;
-    line-height: 1.05 !important;
+
+  /* ==========================================================
+     VERIFICATION CARDS
+     ========================================================== */
+
+  .print-page--verification
+  #graph-panel .calculation-card {
+    min-width: 0 !important;
+    min-height: 0 !important;
+
+    overflow: hidden !important;
   }
 
-  #graph-panel .calculation-table__group-row th {
-    top: 0 !important;
-    height: 22px !important;
+
+  /* ==========================================================
+     LEFT VERIFICATION TABLE
+     ========================================================== */
+
+  .print-page--verification
+  #graph-panel .calculation-table-wrap {
+    overflow: auto !important;
   }
 
-  #graph-panel .calculation-table__group-row th small {
-    margin-top: 1px !important;
-    font-size: 5.5px !important;
+
+  /* ==========================================================
+     ERROR ANALYSIS
+
+     Keep complete normal design.
+     ========================================================== */
+
+  .print-page--verification
+  #graph-panel .calculation-card--errors {
+    min-width: 0 !important;
+    min-height: 0 !important;
+
+    overflow: hidden !important;
   }
 
-  #graph-panel .calculation-table__field-row th {
-    top: 22px !important;
-    height: 25px !important;
+
+  .print-page--verification
+  #graph-panel .calculation-errors {
+    max-height: 390px !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
   }
 
-  #graph-panel .calculation-table td {
-    height: 28px !important;
-    padding: 2px !important;
+
+  .print-page--verification
+  #graph-panel .calculation-errors__empty {
+    min-height: 342px !important;
+
+    box-sizing: border-box !important;
   }
 
-  #graph-panel .calculation-table__group-row th:first-child,
-  #graph-panel .calculation-table td:first-child {
-    width: 112px !important;
+
+  /* ==========================================================
+     PAGE 2 FOOTER
+     ========================================================== */
+
+  .print-page--verification .experiment-footer {
+    display: flex !important;
+
+    width: 1440px !important;
+    min-width: 1440px !important;
+    max-width: 1440px !important;
+
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+
+    margin: 18px 0 0 !important;
+
+    overflow: hidden !important;
   }
 
-  #graph-panel .calculation-table th:last-child,
-  #graph-panel .calculation-table td:last-child {
-    width: 78px !important;
-  }
 
+  /* ==========================================================
+     KEEP FORM CONTROLS VISIBLE
+     ========================================================== */
+
+  #graph-panel input,
+  #graph-panel select,
+  #graph-panel button,
   #graph-panel .calculation-table-input,
   #graph-panel .calculation-reading-select,
-  #graph-panel .calculation-row-verify {
-    min-height: 0 !important;
-    height: 22px !important;
-    padding: 2px 4px !important;
-    border-radius: 5px !important;
-    font-size: 7px !important;
-    box-shadow: none !important;
+  #graph-panel .calculation-row-verify,
+  #graph-panel .calculation-row-add {
+    opacity: 1 !important;
+
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  #graph-panel .calculation-row-verify {
-    min-width: 0 !important;
-    gap: 2px !important;
+
+  /* ==========================================================
+     PRINT COLORS
+     ========================================================== */
+
+  .simulation-shell,
+  .equipment-panel,
+  .section-card,
+  .graph-panel,
+  .calculation-panel,
+  .calculation-card,
+  .calculation-table,
+  .calculation-table th,
+  .calculation-table td,
+  .calculation-errors,
+  .calculation-errors__empty,
+  .calculation-error-row,
+  .experiment-footer,
+  input,
+  select,
+  button,
+  img,
+  svg,
+  canvas {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  #graph-panel .calculation-button-icon {
-    width: 12px !important;
-    height: 12px !important;
-    border-radius: 3px !important;
-    font-size: 8px !important;
-  }
 
-  #graph-panel .calculation-input-feedback {
-    right: 3px !important;
-    width: 11px !important;
-    height: 11px !important;
-    font-size: 7px !important;
-  }
-
-  #graph-panel .calculation-card__footer {
-    gap: 4px !important;
-    margin-top: 4px !important;
-  }
-
-  #graph-panel .verification-status-badge {
-    min-height: 17px !important;
-    gap: 3px !important;
-    padding: 1px 5px !important;
-    font-size: 6.5px !important;
-  }
-
-  #graph-panel .verification-status-badge i {
-    width: 10px !important;
-    height: 10px !important;
-    font-size: 6px !important;
-  }
-
-  #graph-panel .calculation-card__footer p {
-    display: none !important;
-  }
-
-  #graph-panel .calculation-card__result-count {
-    padding: 3px 5px !important;
-    font-size: 6.5px !important;
-  }
-
-  #graph-panel .calculation-errors {
-    gap: 3px !important;
-    max-height: 256px !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-  }
-
-  #graph-panel .calculation-error-row {
-    padding: 3px 4px !important;
-    border-radius: 5px !important;
-    font-size: 7px !important;
-    box-shadow: none !important;
-  }
-
-  #graph-panel .calculation-error-row__heading strong {
-    gap: 4px !important;
-    font-size: 7px !important;
-  }
-
-  #graph-panel .calculation-error-row__heading strong span {
-    width: 16px !important;
-    height: 16px !important;
-    border-radius: 4px !important;
-    font-size: 6px !important;
-  }
-
-  #graph-panel .calculation-error-row__heading small {
-    font-size: 6px !important;
-  }
-
-  #graph-panel .calculation-error-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-    gap: 2px !important;
-    margin-top: 2px !important;
-  }
-
-  #graph-panel .calculation-error-grid span {
-    display: grid !important;
-    gap: 1px !important;
-    padding: 2px !important;
-    border-radius: 3px !important;
-    font-size: 5.5px !important;
-    line-height: 1.05 !important;
-  }
-
-  #graph-panel .calculation-errors__empty {
-    min-height: 248px !important;
-    padding: 10px !important;
-  }
-
-  .experiment-footer {
-    width: 1440px !important;
-    min-width: 1440px !important;
-    max-width: 1440px !important;
-    height: 40px !important;
-    min-height: 40px !important;
-    max-height: 40px !important;
-    margin: 8px 0 0 !important;
-    overflow: hidden !important;
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-  }
+  /* ==========================================================
+     HIDE NON-PRINT OVERLAYS
+     ========================================================== */
 
   .walkthrough-layer,
   .walkthrough-start-button,
@@ -5031,19 +5083,30 @@ Base modal container
   .walkthrough-interaction-shield,
   .walkthrough-spotlight-ring,
   .walkthrough-popup,
+
   .lab-alert-region,
   .lab-alert-interaction-shield,
   .lab-alert-spotlight,
+
   .instructions-overlay-panel,
+
   .equation-panel,
+
   .tooltip,
   .tooltip-layer,
+
   .guide-layer,
   .ai-guide-overlay,
+
   [role="tooltip"],
   .sr-only {
     display: none !important;
   }
+
+
+  /* ==========================================================
+     DISABLE ANIMATIONS / TRANSITIONS
+     ========================================================== */
 
   .ai-guide-label-highlight,
   .lab-alert-active-target,
@@ -5054,8 +5117,20 @@ Base modal container
     animation: none !important;
   }
 
+
   .calculation-panel--active-phase::before,
   .action-button--highlighted::before {
     display: none !important;
   }
+
+
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
+}
+.print-page,
+.print-page__inner {
+  display: contents;
 }

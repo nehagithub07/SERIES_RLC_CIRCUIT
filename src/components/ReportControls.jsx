@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { RLC_EQUATIONS, EQUATION_UNITS } from '../utils/reportContent.js'
+import { RLC_EQUATIONS } from '../utils/reportContent.js'
 import { EquationIcon } from './Icons.jsx'
 
 const STEPS = { GENERATE_REPORT: 10 }
@@ -86,7 +86,7 @@ const ReportControls = ({
                   {note && <small>{note}</small>}
                 </div>
               ))}
-              <p className="equation-unit-note">{EQUATION_UNITS}</p>
+  
             </div>
           </aside>
         )}
