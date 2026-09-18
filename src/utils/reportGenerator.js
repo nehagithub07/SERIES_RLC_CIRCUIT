@@ -1,4 +1,4 @@
-import { OBSERVATION_COLUMNS, formatObservationValue, RLC_EQUATIONS, EQUATION_UNITS } from './reportContent.js'
+import { OBSERVATION_COLUMNS, formatObservationValue, RLC_EQUATIONS } from './reportContent.js'
 
 const escapeHtml = (value) => String(value)
   .replace(/&/g, '&amp;')

@@ -390,6 +390,7 @@ const App = () => {
         }
 
         stopAlertSound()
+     
       }, 50)
     }
   }
@@ -821,7 +822,6 @@ const App = () => {
           }}
         >
           <main className="simulation-shell" id="walkthrough-demo-experiment">
-            
             <HeaderBoard />
             <WalkthroughStartButton
               highlighted={aiGuideEnabled && activeAiGuideStepId === 1}
