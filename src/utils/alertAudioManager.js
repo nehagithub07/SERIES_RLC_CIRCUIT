@@ -64,7 +64,7 @@ const ALERT_AUDIO_SOURCES = {
   incorrCalcMulti: 'Incorrect calculation more than one value.wav',
   incorrCalcOne: 'Incorrect calculation one value.wav',
   incorrCalc: 'Incorrect calculations, more than one.wav',
-  incorrCalCR: 'Incorrect calculation, one only',
+  incorrCalCR: 'Incorrect calculation, one only.wav',
   genRepBtnClick: 'Generate Report button click.wav',
   reset: 'Reset.wav',
   print: 'Print.wav', 

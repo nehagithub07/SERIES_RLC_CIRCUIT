@@ -76,7 +76,7 @@ const WalkthroughProvider = ({
   onStart,
 }) => {
   const walkthroughConfig = useMemo(
-    () => loadWalkthroughConfig(config, locale ?? config?.defaultLocale),
+    () => loadWalkthroughConfig(config, locale || config?.defaultLocale),
     [config, locale],
   )
   const [isOpen, setIsOpen] = useState(false)

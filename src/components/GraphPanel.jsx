@@ -17,7 +17,7 @@ const CALCULATED_FIELDS = [
   { key: 'vR', label: <>V<sub>R</sub><br />(V)</>, dataLabel: 'V R', errorLabel: <>V<sub>R</sub> error</>, min: 1, max: 50 },
   { key: 'vL', label: <>V<sub>L</sub><br />(V)</>, dataLabel: 'V L', errorLabel: <>V<sub>L</sub> error</>, min: 1, max: 50 },
   { key: 'vC', label: <>V<sub>C</sub><br />(V)</>, dataLabel: 'V C', errorLabel: <>V<sub>C</sub> error</>, min: 1, max: 50 },
-  { key: 'cosPhi', label: <>cosφ<br />(PF)</>, dataLabel: 'Power factor', errorLabel: <>cosφ error</>, min: 0, max: 1 },
+  { key: 'cosPhi', label: <>cosφ<br /></>, dataLabel: 'Power factor', errorLabel: <>cosφ error</>, min: 0, max: 1 },
   // The reference answers are 0.27–0.89 W, so fractional watts must be allowed.
   { key: 'power', label: <>Power<br />(W)</>, dataLabel: 'Power', errorLabel: <>P error</>, min: 0, max: 50 },
 ]
@@ -117,28 +117,45 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
     step < activeWorkflowStep ? 'is-complete' : '',
   ].filter(Boolean).join(' ')
 
-  const handleFieldChange = (rowId, key, value) => {
-    const row = rows.find((entry) => entry.id === rowId)
-    onDraftChange?.(rowId, { ...row.values, [key]: value, observationIndex: Number(row.observationIndex) })
-    setRows((current) => current.map((row) => (
-      row.id === rowId ? { ...row, values: { ...row.values, [key]: value } } : row
-    )))
-    setFieldStatus((current) => {
-      const next = { ...current }
-      if (next[rowId]) next[rowId] = { ...next[rowId], [key]: undefined }
-      return next
-    })
-    setValidationErrors((current) => {
-      const next = { ...current }
-      if (next[rowId]) {
-        const rowErrors = { ...next[rowId] }
-        delete rowErrors[key]
-        if (Object.keys(rowErrors).length) next[rowId] = rowErrors
-        else delete next[rowId]
-      }
-      return next
-    })
+const updateState = (rowId, key, value) => {
+  const row = rows.find((entry) => entry.id === rowId)
+
+  onDraftChange?.(rowId, {
+    ...row.values,
+    [key]: value,
+    observationIndex: Number(row.observationIndex),
+  })
+
+  setRows((current) =>
+    current.map((row) =>
+      row.id === rowId
+        ? { ...row, values: { ...row.values, [key]: value } }
+        : row
+    )
+  )
+}
+const handleFieldChange = (rowId, key, value) => {
+  const field = CALCULATED_FIELDS.find(f => f.key === key)
+
+  // If it's a calculated field, apply min-max restriction
+  if (field) {
+    const num = Number(value)
+
+    // Allow empty (so user can delete)
+    if (value === '') {
+      updateState(rowId, key, value)
+      return
+    }
+
+    // Block invalid number
+    if (!Number.isFinite(num)) return
+
+    // Clamp value between min and max
+    if (num < field.min || num > field.max) return
   }
+
+  updateState(rowId, key, value)
+}
 
   const handleObservationSelect = (rowId, value) => {
     if (verificationLocked) return
@@ -284,7 +301,7 @@ const CalculationPanel = ({ className = '', currentStep = 1, observations = [], 
             <span className="calculation-card__step">01</span>
             <div>
               <h3>Select and Verify Readings</h3>
-              <p>V and the reference I (mA) are prefilled. Calculate V<sub>R</sub>, V<sub>L</sub>, V<sub>C</sub>, cos⁡ϕ, and Power using the provided Equations.</p>
+              <p>V and I (mA) are prefilled with the correct values. Calculate  V<sub>R</sub>, V<sub>L</sub>, V<sub>C</sub>, cos⁡ϕ, and Power using the provided Equations.</p>
             </div>
             <div className="calculation-card__heading-actions">
               <span className="calculation-row-capacity" aria-live="polite">

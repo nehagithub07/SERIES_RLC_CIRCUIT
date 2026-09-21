@@ -1,4 +1,4 @@
-import { OBSERVATION_COLUMNS, formatObservationValue, RLC_EQUATIONS } from './reportContent.js'
+import { OBSERVATION_COLUMNS, formatObservationValue } from './reportContent.js'
 
 const escapeHtml = (value) => String(value)
   .replace(/&/g, '&amp;')
@@ -41,51 +41,6 @@ const createObservationRows = (observations) => (
       </tr>
     `).join('')
 )
-
-const createLineChart = (observations, series, yAxisLabel) => {
-  const width = 720
-  const height = 230
-  const plot = { left: 54, right: 18, top: 20, bottom: 42 }
-  const plotWidth = width - plot.left - plot.right
-  const plotHeight = height - plot.top - plot.bottom
-  const values = series.flatMap(({ key }) => observations.map((row) => toNumber(row[key])))
-  const maximumValue = Math.max(1, ...values)
-  const yMaximum = maximumValue * 1.1
-  const xForIndex = (index) => plot.left + (observations.length <= 1 ? plotWidth / 2 : (index / (observations.length - 1)) * plotWidth)
-  const yForValue = (value) => plot.top + plotHeight - (toNumber(value) / yMaximum) * plotHeight
-  const gridLines = Array.from({ length: 5 }, (_, index) => {
-    const ratio = index / 4
-    const y = plot.top + ratio * plotHeight
-    const label = yMaximum * (1 - ratio)
-    return `<line x1="${plot.left}" y1="${y.toFixed(2)}" x2="${width - plot.right}" y2="${y.toFixed(2)}" class="chart-grid-line"/><text x="${plot.left - 8}" y="${(y + 3).toFixed(2)}" text-anchor="end" class="chart-axis-label">${formatNumber(label, label >= 10 ? 0 : 1)}</text>`
-  }).join('')
-  const xLabels = observations.map((_, index) => (
-    `<text x="${xForIndex(index).toFixed(2)}" y="${height - 18}" text-anchor="middle" class="chart-axis-label">${index + 1}</text>`
-  )).join('')
-  const svgPaths = series.map(({ color, key }) => {
-    const points = observations.map((row, index) => `${xForIndex(index).toFixed(2)},${yForValue(row[key]).toFixed(2)}`).join(' ')
-    const markers = observations.map((row, index) => (
-      `<circle cx="${xForIndex(index).toFixed(2)}" cy="${yForValue(row[key]).toFixed(2)}" r="3" fill="${color}"/>`
-    )).join('')
-    return `<polyline points="${points}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>${markers}`
-  }).join('')
-  const legend = series.map(({ color, label }) => (
-    `<span class="graph-legend-item"><i style="background:${color}"></i>${label}</span>`
-  )).join('')
-
-  return `
-    <svg class="report-graph" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(yAxisLabel)} by reading number">
-      ${gridLines}
-      <line x1="${plot.left}" y1="${plot.top}" x2="${plot.left}" y2="${height - plot.bottom}" class="chart-axis"/>
-      <line x1="${plot.left}" y1="${height - plot.bottom}" x2="${width - plot.right}" y2="${height - plot.bottom}" class="chart-axis"/>
-      ${xLabels}
-      ${svgPaths}
-      <text x="${width / 2}" y="${height - 2}" text-anchor="middle" class="chart-axis-title">Reading number</text>
-      <text x="14" y="${height / 2}" text-anchor="middle" class="chart-axis-title" transform="rotate(-90 14 ${height / 2})">${escapeHtml(yAxisLabel)}</text>
-    </svg>
-    <div class="graph-legend">${legend}</div>
-  `
-}
 
 // Columns for the verified-reading table, matching the
 // observation table's Excel-style headings (label on top, unit below).
@@ -152,33 +107,25 @@ export const createReportHtml = ({
   const endTimeText = reportDate.toLocaleTimeString()
   const durationText = getSessionDurationText(sessionStart, sessionEnd)
   const observationRows = createObservationRows(observations)
-  const theoreticalRows = createTheoreticalRows(theoreticalCalculations?.filter((row) => row?.observationIndex < observations.length))
-  const parameterList = [['R', 'r', 'kΩ'], ['L', 'l', 'H'], ['C', 'c', 'µF'], ['V', 'voltage', 'V']]
-    .map(([label, key, unit]) => `<li>${label} = ${[...new Set(observations.map((row) => row[key]).filter((value) => value != null && value !== ''))].map((value) => `${escapeHtml(value)} ${unit}`).join(', ') || '—'}</li>`).join('')
-  const voltageGraph = createLineChart(observations, [
-    { key: 'vR', label: 'V<sub>R</sub>', color: '#2563eb' },
-    { key: 'vL', label: 'V<sub>L</sub>', color: '#d97706' },
-    { key: 'vC', label: 'V<sub>C</sub>', color: '#7c3aed' },
-  ], 'Voltage (V)')
-  const currentGraph = createLineChart(observations, [
-    { key: 'current', label: 'Current', color: '#0f766e' },
-  ], 'Current (mA)')
-  const powerGraph = createLineChart(observations, [
-    { key: 'power', label: 'Power', color: '#b42318' },
-  ], 'Power (W)')
-
+  const theoreticalRows = createTheoreticalRows(
+  theoreticalCalculations?.filter(
+    (row) =>
+      row?.observationIndex < observations.length &&
+      row?.isVerified === true
+  )
+)
   const css = `
 .equation-fraction { display: inline-grid; vertical-align: middle; text-align: center; }
 .equation-fraction i { font-style: normal; padding: 0 4px; }
 .equation-fraction i:first-child { border-bottom: 1px solid currentColor; }
 .report-formula { font-family: "Cambria Math", "Times New Roman", serif; }
 @media screen and (max-width: 768px) {
-  .graph-grid { grid-template-columns: minmax(0, 1fr) !important; }
-  .compact-table, .compact-table tbody { display: block; width: 100%; }
-  .compact-table thead { display: none; }
-  .compact-table tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 12px 0; border: 1px solid #d3ddea; }
-  .compact-table td { display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
-  .compact-table td::before { content: attr(data-label); font-weight: 700; color: #50657c; }
+  .report-document:not(.report-exporting) .graph-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .report-document:not(.report-exporting) .compact-table, .report-document:not(.report-exporting) .compact-table tbody { display: block; width: 100%; }
+  .report-document:not(.report-exporting) .compact-table thead { display: none; }
+  .report-document:not(.report-exporting) .compact-table tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 12px 0; border: 1px solid #d3ddea; }
+  .report-document:not(.report-exporting) .compact-table td { display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
+  .report-document:not(.report-exporting) .compact-table td::before { content: attr(data-label); font-weight: 700; color: #50657c; }
 }
 
 body {
@@ -211,6 +158,11 @@ body {
 }
 .report-page:last-of-type {
   margin-bottom: 0;
+}
+.report-print-grid,
+.report-print-sidebar,
+.report-print-results {
+  display: contents;
 }
 .report-page--results {
   break-before: page;
@@ -596,162 +548,35 @@ tr:nth-child(even) {
   transform: translateY(-2px);
   box-shadow: 0 6px 14px rgba(31, 45, 61, 0.12);
 }
-body.pdf-exporting {
-  width: 210mm;
-  margin: 0;
-  padding: 0;
-  background: #fff;
-  font-size: 9px;
-  line-height: 1.2;
-}
-.pdf-exporting .report-document,
-.pdf-exporting .report-page {
-  width: 210mm;
-}
-.pdf-exporting .report-page {
-  min-height: 297mm;
-  margin: 0;
-  padding: 7mm 8mm;
-  overflow: visible;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-.pdf-exporting .report-page--overview {
-  break-after: auto;
-  page-break-after: auto;
-}
-.pdf-exporting .report-page--results {
-  break-before: page;
-  break-after: auto;
-  page-break-before: always;
-  page-break-after: auto;
-}
-.pdf-exporting .header-row {
-  grid-template-columns: 40mm minmax(0, 1fr) 19mm;
-  gap: 3mm;
-  margin-bottom: 3mm;
-}
-.pdf-exporting .report-logo,
-.pdf-exporting .report-logo--virtual-labs,
-.pdf-exporting .report-logo--iit {
-  max-height: 14mm;
-}
-.pdf-exporting .report-title-block {
-  padding-bottom: 4px;
-}
-.pdf-exporting .report-title-block h1 {
-  font-size: 17px;
-}
-.pdf-exporting .report-subtitle,
-.pdf-exporting .report-stamp,
-.pdf-exporting .badge {
-  font-size: 8px;
-}
-.pdf-exporting .section {
-  margin-bottom: 5px;
-  padding: 6px 8px;
-  border-radius: 5px;
-}
-.pdf-exporting .section > h2:first-child {
-  margin-bottom: 5px;
-  padding-bottom: 3px;
-}
-.pdf-exporting h2 {
-  margin-bottom: 5px;
-  font-size: 13px;
-}
-.pdf-exporting h3 {
-  margin-bottom: 3px;
-  font-size: 10px;
-}
-.pdf-exporting p,
-.pdf-exporting li {
-  margin-bottom: 2px;
-  font-size: 8.5px;
-}
-.pdf-exporting .report-overview-top {
-  margin-bottom: 4px;
-}
-.pdf-exporting .report-experiment-label {
-  margin-bottom: 2px;
-  font-size: 7px;
-}
-.pdf-exporting .report-experiment-title {
-  margin-bottom: 5px;
-  font-size: 13px;
-}
-.pdf-exporting .info-grid {
-  gap: 4px;
-  margin-top: 4px;
-}
-.pdf-exporting .info-card {
-  gap: 1px;
-  padding: 4px 6px;
-  font-size: 8px;
-}
-.pdf-exporting ul,
-.pdf-exporting .two-column-list {
-  margin-top: 3px;
-}
-.pdf-exporting .results-stack {
-  gap: 4px;
-}
-.pdf-exporting .results-card {
-  gap: 3px;
-  padding: 0;
-  overflow: visible;
-}
-.pdf-exporting .table-shell {
-  overflow: visible;
-}
-.pdf-exporting .compact-table th,
-.pdf-exporting .compact-table td {
-  padding: 2px 2.5px;
-  font-size: 8.2px;
-  line-height: 1.1;
-}
-.pdf-exporting .graph-grid {
-  gap: 7px;
-}
-.pdf-exporting .graph-card {
-  padding: 6px;
-  border-radius: 6px;
-}
-.pdf-exporting .graph-legend {
-  gap: 3px 8px;
-  margin-top: 1px;
-  font-size: 7.5px;
-}
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
   body {
     padding: 20px 14px 30px;
   }
-  .report-page {
+  .report-document:not(.report-exporting) .report-page {
     margin-bottom: 18px;
     padding: 20px 18px;
     border-radius: 16px;
   }
-  .header-row {
+  .report-document:not(.report-exporting) .header-row {
     grid-template-columns: 1fr;
     gap: 14px;
     text-align: center;
   }
-  .report-title-block {
+  .report-document:not(.report-exporting) .report-title-block {
     padding-bottom: 12px;
   }
-  .report-logo,
-  .report-logo--virtual-labs,
-  .report-logo--iit {
+  .report-document:not(.report-exporting) .report-logo,
+  .report-document:not(.report-exporting) .report-logo--virtual-labs,
+  .report-document:not(.report-exporting) .report-logo--iit {
     max-height: 72px;
     justify-self: center;
   }
-  .two-column-list {
+  .report-document:not(.report-exporting) .two-column-list {
     column-count: 1;
     column-gap: 0;
   }
-  .compact-table th,
-  .compact-table td {
+  .report-document:not(.report-exporting) .compact-table th,
+  .report-document:not(.report-exporting) .compact-table td {
     padding: 9px 8px;
     font-size: 13px;
   }
@@ -759,113 +584,56 @@ body.pdf-exporting {
     justify-content: center;
   }
 }
+
+.report-document.report-exporting {
+  width: 960px;
+  margin: 0;
+}
 @media print {
   @page {
-    size: A4;
+    size: A4 portrait;
     margin: 0;
   }
-  .print-btn,
-  .download-btn,
-  .report-actions {
-    display: none !important;
-  }
   html,
-  body,
-  body * {
+  body {
+    width: 210mm;
+    height: 297mm;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+  }
+  body {
+    padding: 5mm;
+  }
+  *,
+  *::before,
+  *::after {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  body {
-    width: 210mm;
-    margin: 0;
-    padding: 0;
-    background: #ffffff;
-    overflow: visible;
-    font-size: 9px;
-    line-height: 1.2;
+  .report-actions {
+    display: none !important;
+  }
+  .report-document,
+  .report-document.report-exporting {
+    width: 960px;
+    margin: 0 auto;
+    zoom: var(--report-print-scale, 1);
   }
   .report-page {
-    width: 210mm;
-    min-height: 297mm;
     margin: 0;
-    padding: 7mm 8mm;
-    border: none;
-    box-shadow: none;
-    border-radius: 0;
-    overflow: visible;
-    break-inside: avoid-page;
-    page-break-inside: avoid;
   }
-  .report-page--overview {
+  .report-document,
+  .report-document * {
+    break-before: auto;
     break-after: auto;
+    break-inside: auto;
+    page-break-before: auto;
     page-break-after: auto;
-  }
-  .report-page--results {
-    break-before: page;
-    break-after: auto;
-    page-break-before: always;
-    page-break-after: auto;
-  }
-  .header-row {
-    grid-template-columns: 40mm minmax(0, 1fr) 19mm;
-    gap: 3mm;
-    margin-bottom: 3mm;
-  }
-  .report-logo,
-  .report-logo--virtual-labs,
-  .report-logo--iit { max-height: 14mm; }
-  .report-title-block { padding-bottom: 4px; }
-  .report-title-block h1 { font-size: 17px; }
-  .report-subtitle,
-  .report-stamp,
-  .badge { font-size: 8px; }
-  .section {
-    margin-bottom: 5px;
-    padding: 6px 8px;
-    border-radius: 5px;
-  }
-  .section > h2:first-child {
-    margin-bottom: 5px;
-    padding-bottom: 3px;
-  }
-  h2 { margin-bottom: 5px; font-size: 13px; }
-  h3 { margin-bottom: 3px; font-size: 10px; }
-  p,
-  li { margin-bottom: 2px; font-size: 8.5px; }
-  .report-overview-top { margin-bottom: 4px; }
-  .report-experiment-label { margin-bottom: 2px; font-size: 7px; }
-  .report-experiment-title {
-    margin-bottom: 5px;
-    font-size: 13px;
-  }
-  .info-grid { gap: 4px; margin-top: 4px; }
-  .info-card { gap: 1px; padding: 4px 6px; font-size: 8px; }
-  ul,
-  .two-column-list { margin-top: 3px; }
-  .results-stack { gap: 4px; }
-  .results-card { gap: 3px; padding: 0; }
-  .compact-table th,
-  .compact-table td { padding: 2px 2.5px; font-size: 8.2px; line-height: 1.1; }
-  .graph-grid { gap: 7px; }
-  .graph-card { padding: 6px; border-radius: 6px; }
-  .graph-legend { gap: 3px 8px; margin-top: 1px; font-size: 7.5px; }
-  .section,
-  .header-row,
-  .info-grid,
-  .results-section,
-  .results-card,
-  .table-shell,
-  .graph-card,
-  .report-graph,
-  thead,
-  tr {
-    break-inside: avoid-page;
-    page-break-inside: avoid;
-  }
-  .table-shell {
-    overflow: visible;
+    page-break-inside: auto;
   }
 }
+
   `
 
   return `
@@ -889,6 +657,8 @@ body.pdf-exporting {
       <img src="${escapeHtml(iitLogoSrc)}" class="report-logo report-logo--iit" alt="Indian Institute of Technology Roorkee logo">
     </div>
 
+    <div class="report-print-grid">
+      <div class="report-print-sidebar">
     <div class="section report-overview">
       <div class="report-overview-top">
         <p class="badge">AI-Enhanced Basic Electrical Science Lab</p>
@@ -903,10 +673,9 @@ body.pdf-exporting {
       </div>
     </div>
 
-    <div class="section">
+    <div class="section report-summary">
       <h3>Simulation Summary</h3>
       <p>The guided walkthrough familiarised the user with the simulation's interface. The circuit was connected, and the connections were verified successfully. The MCB was switched ON, and the desired voltage was set using the autotransformer. The readings were measured using the voltmeters, ammeter, and wattmeter for different RLC combinations, and these measured values were used to calculate the error analysis. Finally, the calculated values were verified, and the performance of the series RLC circuit was analysed successfully. </p>
-      <p>${observations.length} observation readings were recorded. The tables below contain the recorded component selections and measurements, together with the theoretical values entered for the selected readings.</p>
       <h3>Apparatus Used:</h3>
       <ul class="two-column-list">
         <li>MCB: 6A, DP, 240V AC, Input Supply: 230 V AC, 50 Hz </li>
@@ -924,7 +693,11 @@ body.pdf-exporting {
       </ul>     
     </div>
 
-    <div class="section results-section">
+   
+      </div>
+
+      <div class="report-print-results">
+    <div class="section results-section report-observations">
       <h2>Observation Table</h2>
       <div class="results-stack">
         <div class="results-card">
@@ -944,7 +717,7 @@ body.pdf-exporting {
       </div>
     </div>
 
-    <div class="section results-section">
+    <div class="section results-section report-verification">
       <h2>Theoretical Verification and Error Analysis</h2>
       <div class="results-stack">
         <div class="results-card">
@@ -957,60 +730,149 @@ body.pdf-exporting {
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="report-page report-page--results">
-
-    <div class="section">
+     <div class="section report-conclusion">
       <h3>Conclusion</h3>
       <p style="text-align: justify;">The voltage, current, power, and power factor of the series RLC circuit were successfully measured and analyzed.</p>
     </div>
+      </div>
+    </div>
+    
   </div>
+  
   </main>
 
   <div class="report-actions" data-html2canvas-ignore="true">
-    <button class="print-btn" type="button" onclick="window.print()">PRINT</button>
+    <button class="print-btn" type="button" onclick="printReport()">PRINT</button>
     <button class="download-btn" type="button" onclick="downloadReport()">DOWNLOAD REPORT</button>
   </div>
 
   <script>
-    function ensureHtml2Pdf() {
-      return new Promise(function(resolve, reject) {
-        if (window.html2pdf) return resolve();
-        var script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
+    var reportDocument = document.getElementById('report-document');
+    var pdfLibraryPromise;
+    var downloadInProgress = false;
+    var reportWidth = 960;
+    var pageMargin = 5;
+    var pageWidth = 210;
+    var pageHeight = 297;
+
+    function waitForReportAssets() {
+      var images = Array.from(reportDocument.querySelectorAll('img'));
+      return Promise.all([
+        document.fonts ? document.fonts.ready : Promise.resolve(),
+        ...images.map(function(img) {
+          if (img.complete) return Promise.resolve();
+          return new Promise(function(resolve) {
+            img.addEventListener('load', resolve, { once: true });
+            img.addEventListener('error', resolve, { once: true });
+          });
+        })
+      ]);
+    }
+
+    function fitReport(width, height, sheetWidth, sheetHeight, margin) {
+      var scale = Math.min(
+        (sheetWidth - margin * 2) / width,
+        (sheetHeight - margin * 2) / height
+      );
+      return {
+        width: width * scale,
+        height: height * scale,
+        left: (sheetWidth - width * scale) / 2,
+        top: margin,
+        scale: scale
+      };
+    }
+
+    function preparePrint() {
+      reportDocument.classList.add('report-exporting');
+      var pixelsPerMm = 96 / 25.4;
+      var height = Math.max(reportDocument.offsetHeight, reportDocument.scrollHeight);
+      var fit = fitReport(
+        reportWidth, height,
+        pageWidth * pixelsPerMm, pageHeight * pixelsPerMm,
+        pageMargin * pixelsPerMm
+      );
+      document.documentElement.style.setProperty('--report-print-scale', fit.scale);
+    }
+
+    function finishPrint() {
+      reportDocument.classList.remove('report-exporting');
+    }
+
+    function printReport() {
+      return waitForReportAssets().then(function() {
+        preparePrint();
+        window.print();
       });
     }
 
-    function downloadReport() {
-      ensureHtml2Pdf().then(function() {
-        var element = document.getElementById('report-document') || document.body;
-        var opts = {
-          margin: 0,
-          filename: 'series-rlc-simulation-report.pdf',
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-            scrollX: 0,
-            scrollY: 0,
-            onclone: function(clonedDoc) {
-              clonedDoc.body.classList.add('pdf-exporting');
-            }
-          },
-          jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-          pagebreak: {
-            mode: ['css', 'legacy'],
-            before: ['.report-page--results'],
-            avoid: ['.header-row', '.report-overview', '.info-grid', '.graph-card', 'thead', 'tr']
-          }
+    window.addEventListener('beforeprint', preparePrint);
+    window.addEventListener('afterprint', finishPrint);
+
+    function ensureHtml2Pdf() {
+      if (window.html2pdf) return Promise.resolve();
+      if (pdfLibraryPromise) return pdfLibraryPromise;
+      pdfLibraryPromise = new Promise(function(resolve, reject) {
+        var script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+        script.onload = resolve;
+        script.onerror = function(error) {
+          script.remove();
+          pdfLibraryPromise = null;
+          reject(error);
         };
-        return window.html2pdf().set(opts).from(element).save();
+        document.head.appendChild(script);
+      });
+      return pdfLibraryPromise;
+    }
+
+    function downloadReport() {
+      if (downloadInProgress) return;
+      downloadInProgress = true;
+      var button = document.querySelector('.download-btn');
+      var captureWorker;
+      button.disabled = true;
+      return Promise.all([ensureHtml2Pdf(), waitForReportAssets()]).then(function() {
+        // Capture the existing web layout at its full width. The PDF worker's
+        // narrower A4 container must not reflow the report before capture.
+        captureWorker = window.html2pdf();
+        return captureWorker.set({
+          margin: 0,
+          html2canvas: {
+            scale: 4,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            windowWidth: Math.max(1024, window.innerWidth),
+            scrollX: 0,
+            scrollY: 0
+          },
+          pagebreak: { mode: [] }
+        }).from(reportDocument).toContainer().then(function() {
+          this.prop.container.style.width = reportWidth + 'px';
+          this.prop.container.style.margin = '0';
+          this.prop.container.style.right = 'auto';
+          this.prop.container.querySelector('.report-document').classList.add('report-exporting');
+        }).toCanvas().get('canvas');
+      }).then(function(canvas) {
+        // Fit the original capture using PDF margins, without resampling its pixels.
+        // Reserve one source pixel so html2pdf's page-height rounding cannot add a page.
+        var fit = fitReport(
+          canvas.width, canvas.height + 1, pageWidth, pageHeight, pageMargin
+        );
+        return window.html2pdf().set({
+          margin: [pageMargin, fit.left, pageMargin, fit.left],
+          filename: 'Series RLC Simulation Report.pdf',
+          // Keep the full-resolution capture and avoid PNG predictor/alpha decoding.
+          image: { type: 'jpeg', quality: 1 },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: false },
+          pagebreak: { mode: [] }
+        }).from(canvas, 'canvas').save();
       }).catch(function() {
         alert('Unable to download the report automatically. Please use your browser\\'s Save as PDF option.');
+      }).finally(function() {
+        if (captureWorker && captureWorker.prop.overlay) captureWorker.prop.overlay.remove();
+        downloadInProgress = false;
+        button.disabled = false;
       });
     }
   </script>

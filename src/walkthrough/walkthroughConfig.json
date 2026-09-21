@@ -104,6 +104,18 @@
       "audio": "Print Button.wav",
       "placement": "right"
     },
+     {
+      "id": 9,
+      "target": "#correct-values-button",
+      "title": {
+        "en": "Correct Values"
+      },
+      "description": {
+        "en": "The Correct Values button shows a reference table containing the correct values for different R-L-C combinations, including supply voltage, current, frequency and circuit nature. Use these values to verify your calculated results."
+      },
+      "audio": "Correct Values.wav",
+      "placement": "right"
+    },
     {
       "id": 10,
       "target": "#mcb-supply",
@@ -210,7 +222,7 @@
         "en": "AC Voltmeter V2"
       },
       "description": {
-        "en": "This voltmeter measures the voltage drop across the resistor in the series RLC circuit.\n\n**Rating**: 0–50 V AC"
+        "en": "This voltmeter is used to measure the voltage drop across the resistor in the series RLC circuit. \n\n**Rating**: 0–50 V AC"
       },
       "audio": "AC Voltmeter 2.wav",
       "placement": "left"
@@ -222,7 +234,7 @@
         "en": "AC Voltmeter V3"
       },
       "description": {
-        "en": "This voltmeter measures the voltage drop across the inductor in the series RLC circuit.\n\n**Rating**: 0–50 V AC"
+        "en": "This voltmeter is used to measure the voltage drop across the inductor in the series RLC circuit. \n\n**Rating**: 0–50 V AC"
       },
       "audio": "AC Voltmeter 3.wav",
       "placement": "left"
@@ -234,7 +246,7 @@
         "en": "AC Voltmeter V4"
       },
       "description": {
-        "en": "This voltmeter measures the voltage drop across the capacitor in the series RLC circuit.\n\n**Rating**: 0–50 V AC"
+        "en": "This voltmeter is used to measure the voltage drop across the capacitor in the series RLC circuit. \n\n**Rating**: 0–50 V AC"
       },
       "audio": "AC Voltmeter 4.wav",
       "placement": "left"
@@ -284,7 +296,7 @@
         "en": "Generate Report"
       },
       "description": {
-        "en": "The Report button generates a summarised report of the simulation. After completing the observation table and theoretical calculations, generate the report. The report includes the time taken to complete the simulation, simulation summary, parameters, recorded readings, verified results, graphs, and conclusion."
+        "en": "The Report button generates a summarised report of the simulation. After completing the observation table and theoretical calculations, generate the report. The report will include the time taken to complete the simulation, simulation summary, the apparatus used, recorded readings, user-calculated results and conclusion."
       },
       "audio": "Generate Report.wav",
       "placement": "top"

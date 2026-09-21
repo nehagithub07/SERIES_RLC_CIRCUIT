@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import './ConnectionEndpoints.css'
 import './responsive.css'
+import { playAlertSound } from './utils/alertAudioManager.js'
 import ActionButtons from './components/ActionButtons.jsx'
 import ConnectionLab from './components/ConnectionLab.jsx'
 import ControlPanel from './components/ControlPanel.jsx'
@@ -453,85 +454,131 @@ const App = () => {
 
   // The learner may create up to five verification rows, but only needs to
   // correctly verify any two distinct observation readings.
-  const handleVerifyCalculations = (rowIndex, rowValues, isRowOk, observationIndex, verificationMeta = {}) => {
-    // 🚧 INCOMPLETE ROW: the learner tried to verify before filling in
-    // every cell in that row. Don't touch report-gate state - nothing was
-    // actually submitted for verification yet.
-    if (isRowOk === null) {
-      if (verificationMeta.validationMessage) {
-        setStatus(verificationMeta.validationMessage)
-        showAlert({
-          title: 'Invalid Verification Value',
-          description: verificationMeta.validationMessage,
-          type: 'warning',
-          icon: '⚠️',
-          placement: 'center',
-          duration: 6500,
-        })
-        return
-      }
-
-      const calculatedKeys = ['vR', 'vL', 'vC', 'cosPhi', 'power']
-      const missingCount = calculatedKeys.filter((key) => rowValues[key] === '').length
-      const hasMultipleMissingValues = missingCount > 1
+const handleVerifyCalculations = (
+  rowIndex,
+  rowValues,
+  isRowOk,
+  observationIndex,
+  verificationMeta = {}
+) => {
+  // 🚧 INCOMPLETE ROW:
+  // The learner tried to verify before filling in every required cell.
+  // Do not change verification/report state because nothing valid
+  // was actually submitted yet.
+  if (isRowOk === null) {
+    if (verificationMeta.validationMessage) {
+      setStatus(verificationMeta.validationMessage)
 
       showAlert({
-        title: 'Incomplete Row',
-        description: hasMultipleMissingValues
-          ? 'Please enter all the calculated values and verify them.'
-          : 'Please enter the required calculated value and verify it.',
+        title: 'Invalid Verification Value',
+        description: verificationMeta.validationMessage,
         type: 'warning',
         icon: '⚠️',
         placement: 'center',
-        duration: 4500,
-        sound: hasMultipleMissingValues ? 'incompltMultiVal' : 'incompltOneVal',
+        duration: 6500,
       })
+
       return
     }
 
-    const nextCalculationRows = { ...calculationRows, [rowIndex]: rowValues }
-    setCalculationRows(nextCalculationRows)
+    const calculatedKeys = ['vR', 'vL', 'vC', 'cosPhi', 'power']
 
-    const nextVerifiedRows = { ...verifiedRows, [observationIndex]: isRowOk === true }
-    setVerifiedRows(nextVerifiedRows)
+    const missingCount = calculatedKeys.filter(
+      (key) => rowValues[key] === ''
+    ).length
 
-    setStatus(`Reading ${observationIndex + 1} has been submitted for verification.`)
+    const hasMultipleMissingValues = missingCount > 1
 
-    const verifiedCount = Object.values(nextVerifiedRows).filter(Boolean).length
-    const requiredRowsVerified = verifiedCount >= 2
-    setIsResistorCorrect(requiredRowsVerified)
-    setCalculationsVerified(requiredRowsVerified)
-    if (isRowOk === true) {
+    showAlert({
+      title: 'Incomplete Row',
+      description: hasMultipleMissingValues
+        ? 'Please enter all the calculated values and verify them.'
+        : 'Please enter the required calculated value and verify it.',
+      type: 'warning',
+      icon: '⚠️',
+      placement: 'center',
+      duration: 4500,
+      sound: hasMultipleMissingValues
+        ? 'incompltMultiVal'
+        : 'incompltOneVal',
+    })
 
-  setCurrentStep(
-    requiredRowsVerified ? STEPS.GENERATE_REPORT : STEPS.CALCULATE
-  );
+    return
+  }
 
-  setStatus('Verified');
+  // Save calculation row together with the reading it belongs to
+  // and whether it was successfully verified.
+  const nextCalculationRows = {
+    ...calculationRows,
+    [rowIndex]: {
+      ...rowValues,
+      observationIndex,
+      isVerified: isRowOk === true,
+    },
+  }
 
-  showStepAlert(EXPERIMENT_ALERTS.calculationsVerified);
+  setCalculationRows(nextCalculationRows)
+
+  // Store verification status by observation/reading index.
+  const nextVerifiedRows = {
+    ...verifiedRows,
+    [observationIndex]: isRowOk === true,
+  }
+
+  setVerifiedRows(nextVerifiedRows)
+
+  // At least two different readings must be verified successfully
+  // before report generation is enabled.
+  const verifiedCount = Object.values(nextVerifiedRows).filter(Boolean).length
+  const requiredRowsVerified = verifiedCount >= 2
+
+  setIsResistorCorrect(requiredRowsVerified)
+  setCalculationsVerified(requiredRowsVerified)
+
+  // ✅ SUCCESSFUL VERIFICATION
+  if (isRowOk === true) {
+    setCurrentStep(
+      requiredRowsVerified
+        ? STEPS.GENERATE_REPORT
+        : STEPS.CALCULATE
+    )
+
+    setStatus('Verified')
+
+    showStepAlert(EXPERIMENT_ALERTS.calculationsVerified)
+
+    return
+  }
+
+  // ❌ FAILED VERIFICATION
+  if (isRowOk === false) {
+    setHasFailedVerification(true)
+
+    const hasMultipleIncorrectValues =
+      verificationMeta.incorrectCount > 1
+
+    showAlert({
+      title: 'Verification Failed',
+      description: hasMultipleIncorrectValues
+        ? 'Verification failed. The highlighted values are incorrect. Please recheck your calculations and verify again.'
+        : 'Verification failed. The highlighted value is incorrect. Please review your calculation and verify again.',
+      type: 'error',
+      icon: '❌',
+      placement: 'center',
+      duration: 8000,
+      sound: hasMultipleIncorrectValues
+        ? 'incorrCalc'
+        : 'incorrCalCR',
+    })
+  }
 }
-    else if (isRowOk === false) {
-      setHasFailedVerification(true)
-      const hasMultipleIncorrectValues = verificationMeta.incorrectCount > 1
-      showAlert({
-        title: 'Verification Failed',
-        description: hasMultipleIncorrectValues
-          ? 'Verification failed. The highlighted values are incorrect. Please recheck your calculations and verify again.'
-          : 'Verification failed. The highlighted value is incorrect. Please review your calculation and verify again.',
-        type: 'error',
-        icon: '❌',
-        placement: 'center',
-        duration: 8000,
-        sound: hasMultipleIncorrectValues ? 'incorrCalc' : 'incorrCalCR',
-      })
-    }
-  }
- 
-  const handlePrint = () => {
-    window.print()
-  }
+const handlePrint = () => {
+  playAlertSound('print') // 🔊 play sound only
 
+  setTimeout(() => {
+    window.print()
+  }, 200) // ⚠️ required (browser blocks audio otherwise)
+}
   // const handleGenerateReport = () => {
   //   if (readingCount < MIN_REPORT_READINGS) {
   //     const remainingReadings = MIN_REPORT_READINGS - readingCount

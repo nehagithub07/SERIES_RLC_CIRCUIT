@@ -2697,33 +2697,7 @@ Base modal container
   opacity: 0.6;
   cursor: not-allowed;
 }
-/* .operation-btn {
-  width: 100%;
-  padding: 12px 16px;
-  background: linear-gradient(180deg, #faf0e6 0%, #e8d5b7 100%);
-  border: 2px solid #a0826d;
-  border-radius: 8px;
-  font-family: 'Times New Roman', Times, serif;
-  font-size: 13px;
-  font-weight: bold;
-  color: #5c4033;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-}
 
-.operation-btn:hover:not(:disabled) {
-  background: linear-gradient(180deg, #fff5e6 0%, #f0d5a0 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.operation-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-} */
 
 /* ========== DIALOG BOX ========== */
 .dialog-header {
@@ -5133,4 +5107,194 @@ Base modal container
 .print-page,
 .print-page__inner {
   display: contents;
+}
+
+/*
+ * Single-sheet print layout.
+ *
+ * The application is drawn on a fixed 1440px canvas.  Scaling that complete
+ * canvas as one unit keeps the simulation, verification panel, and footer in
+ * their normal proportions and prevents print rules from changing the screen
+ * UI.  The print-only zoom participates in Chromium's page layout, unlike a
+ * visual transform, so the browser keeps every section on the same sheet.
+ */
+@page {
+  size: A4 landscape;
+  margin: 5mm;
+}
+
+@media print {
+  html,
+  body,
+  #root {
+    width: 287mm !important;
+    height: 200mm !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #app-wrapper {
+    position: relative !important;
+    display: block !important;
+    width: 287mm !important;
+    height: 200mm !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+  }
+
+  #app-viewport {
+    position: relative !important;
+    display: block !important;
+    width: 287mm !important;
+    height: 200mm !important;
+    overflow: hidden !important;
+  }
+
+  #app-scale {
+    position: absolute !important;
+    top: 0 !important;
+    left: 50% !important;
+    width: 1440px !important;
+    height: auto !important;
+    min-width: 1440px !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    zoom: 0.45 !important;
+    transform: translateX(-50%) !important;
+    transform-origin: top center !important;
+  }
+
+  #theoretical-calculations-panel.graph-panel--separate {
+    display: grid !important;
+    width: 1440px !important;
+    height: 510px !important;
+    min-height: 510px !important;
+    max-height: 510px !important;
+    grid-template-rows: 74px minmax(0, 1fr) !important;
+    margin-top: 28px !important;
+    overflow: hidden !important;
+  }
+
+  /* Print must always use the desktop verification layout.  The unqualified
+     narrow-screen rules in this file can otherwise stack the cards according
+     to the browser-window width used to open the print dialog. */
+  #theoretical-calculations-panel .graph-panel__heading {
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 0 !important;
+    padding: 13px 28px 0 30px !important;
+  }
+
+  #theoretical-calculations-panel .calculation-panel__progress {
+    width: auto !important;
+    border-radius: 999px !important;
+  }
+
+  #theoretical-calculations-panel .calculation-panel__body {
+    grid-template-columns: minmax(0, 2.25fr) minmax(310px, 0.9fr) !important;
+    gap: 16px !important;
+    padding: 16px !important;
+    overflow: hidden !important;
+  }
+
+  #theoretical-calculations-panel .calculation-card {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #theoretical-calculations-panel .calculation-card__heading {
+    flex-wrap: nowrap !important;
+  }
+
+  #theoretical-calculations-panel .calculation-card__heading-actions {
+    width: auto !important;
+  }
+
+  #theoretical-calculations-panel .verification-workflow {
+    grid-template-columns: auto minmax(22px, 1fr) auto minmax(22px, 1fr) auto !important;
+    gap: 9px !important;
+  }
+
+  #theoretical-calculations-panel .verification-workflow > i {
+    width: auto !important;
+    height: 3px !important;
+    margin-left: 0 !important;
+  }
+
+  #theoretical-calculations-panel .verification-workflow__step {
+    white-space: nowrap !important;
+  }
+
+  #theoretical-calculations-panel .calculation-table-wrap {
+    max-height: 340px !important;
+    overflow: auto !important;
+    border: 1px solid rgba(15, 118, 110, 0.18) !important;
+    border-radius: 10px !important;
+    background: #fff !important;
+  }
+
+  #theoretical-calculations-panel .calculation-table {
+    display: table !important;
+    width: 100% !important;
+    min-width: 840px !important;
+  }
+
+  #theoretical-calculations-panel .calculation-table thead {
+    display: table-header-group !important;
+  }
+
+  #theoretical-calculations-panel .calculation-table tbody {
+    display: table-row-group !important;
+  }
+
+  #theoretical-calculations-panel .calculation-table tr {
+    display: table-row !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  #theoretical-calculations-panel .calculation-table td {
+    display: table-cell !important;
+    width: auto !important;
+    min-height: 0 !important;
+    padding: 5px 4px !important;
+    border: 0 !important;
+    border-right: 1px solid rgba(15, 118, 110, 0.12) !important;
+    border-bottom: 1px solid rgba(15, 118, 110, 0.12) !important;
+    background: transparent !important;
+  }
+
+  #theoretical-calculations-panel .calculation-table td:first-child {
+    width: 168px !important;
+  }
+
+  #theoretical-calculations-panel .calculation-table td:last-child {
+    width: 102px !important;
+  }
+
+  #theoretical-calculations-panel .calculation-table td::before {
+    display: none !important;
+    content: none !important;
+  }
+
+  #theoretical-calculations-panel .calculation-card__footer p {
+    width: auto !important;
+    margin-left: auto !important;
+    text-align: right !important;
+  }
+
+  #theoretical-calculations-panel .calculation-errors__empty {
+    min-height: 214px !important;
+  }
+
+  .experiment-footer {
+    display: flex !important;
+    width: 1440px !important;
+    min-height: 52px !important;
+    margin-top: 18px !important;
+  }
 }

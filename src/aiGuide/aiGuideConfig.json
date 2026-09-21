@@ -142,7 +142,7 @@
     },
     {
       "id": 28,
-      "text": "Ensure that the MCB is switched ON and the RLC values are selected before switching ON the autotransformer.",
+      "text": "Ensure that the MCB is switched ON or the RLC values are selected before switching ON the autotransformer.",
       "audio": "1st time autotransformer click or after check disabled (1).wav"
     },
     {
@@ -187,7 +187,7 @@
     },
     {
       "id": 37,
-      "text": "Reading 2 of 12 has been added. Repeat the same steps until all 12 readings have been recorded.",
+      "text": "Reading 2 of 12 has been added. Repeat the same steps until at least 5 readings have been added.",
       "audio": "2nd reading added.wav"
     },
     {
